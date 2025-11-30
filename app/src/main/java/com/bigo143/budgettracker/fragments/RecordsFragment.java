@@ -1,5 +1,8 @@
 package com.bigo143.budgettracker.fragments;
 
+import static android.content.Context.MODE_PRIVATE;
+
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -32,7 +35,7 @@ public class RecordsFragment extends Fragment {
 
     private TextView tvIncome, tvExpense, tvTotal; // move TextViews here
     private DatabaseHelper db;
-    private String currentUser = "userOne";
+    private String currentUser ;
 
     public RecordsFragment() {
         setHasOptionsMenu(true); // enables toolbar menu
@@ -43,6 +46,8 @@ public class RecordsFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_records, container, false);
+        SharedPreferences prefs = requireContext().getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
+        currentUser = prefs.getString("logged_in_user", null);
 
         // RecyclerView
         recyclerView = view.findViewById(R.id.recyclerRecords);

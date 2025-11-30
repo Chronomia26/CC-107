@@ -1,5 +1,8 @@
 package com.bigo143.budgettracker.fragments;
 
+import static android.content.Context.MODE_PRIVATE;
+
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -32,7 +35,7 @@ public class BudgetFragment extends Fragment {
     private ArrayList<CategoryModel> budgetedList = new ArrayList<>();
     private ArrayList<CategoryModel> notBudgetedList = new ArrayList<>();
     private DatabaseHelper dbHelper;
-    private String currentUser = "john_doe"; // TODO: replace with actual logged-in username
+    private String currentUser ; // TODO: replace with actual logged-in username
 
     public BudgetFragment() {
         // Required empty public constructor
@@ -44,6 +47,8 @@ public class BudgetFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
+        SharedPreferences prefs = requireContext().getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
+        currentUser = prefs.getString("logged_in_user", null);
 
         binding = FragmentBudgetBinding.inflate(inflater, container, false);
         dbHelper = new DatabaseHelper(requireContext());
@@ -131,11 +136,31 @@ public class BudgetFragment extends Fragment {
         binding.rvBudgeted.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.rvBudgeted.setAdapter(budgetedAdapter);
 
-        // Not Budgeted List
-        notBudgetedAdapter = new NotBudgetedAdapter(notBudgetedList, requireContext());
+        // Not Budgeted List with OnBudgetSetListener
+        notBudgetedAdapter = new NotBudgetedAdapter(notBudgetedList, requireContext(),
+                new NotBudgetedAdapter.OnBudgetSetListener() {
+                    @Override
+                    public void onBudgetSet(String categoryName, double amount) {
+                        // Insert budget for this category in the database
+                        boolean success = dbHelper.insertBudget(currentUser,
+                                dbHelper.getCategoryIdByName(currentUser, categoryName, "expense"),
+                                amount);
+
+                        if (success) {
+                            // Reload data
+                            loadBudgetedData();
+                            loadNotBudgetedData();
+
+                            // Notify adapters
+                            budgetedAdapter.notifyDataSetChanged();
+                            notBudgetedAdapter.notifyDataSetChanged();
+                        }
+                    }
+                });
         binding.rvNotBudgeted.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.rvNotBudgeted.setAdapter(notBudgetedAdapter);
     }
+
 
     private int getIconForCategory(String name) {
         switch (name.toLowerCase()) {

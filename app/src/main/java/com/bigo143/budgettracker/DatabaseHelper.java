@@ -10,14 +10,16 @@ import android.util.Log;
 import com.bigo143.budgettracker.models.Record;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String TAG = "DatabaseHelper";
 
     private static final String DATABASE_NAME = "budget_tracker.db";
-    private static final int DATABASE_VERSION = 6; // Increment to force upgrade
+    private static final int DATABASE_VERSION = 8; // Increment to force upgrade
 
     // --- Users table ---
     private static final String TABLE_USERS = "users";
@@ -90,7 +92,43 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 COL_RECORD_NOTE + " TEXT)");
 
 
+
+
     }
+    public void insertTestData(SQLiteDatabase db) {
+
+        // 2024 November
+        db.execSQL("INSERT INTO records (username, category_id, type, amount, date, note) " +
+                "VALUES ('userOne', 17, 'income', 1000.0, '2024-11-10 10:12:24', '')");
+        db.execSQL("INSERT INTO records (username, category_id, type, amount, date, note) " +
+                "VALUES ('userOne', 16, 'expense', 500.0, '2024-11-12 15:20:52', '')");
+
+        // 2024 December
+        db.execSQL("INSERT INTO records (username, category_id, type, amount, date, note) " +
+                "VALUES ('userOne', 17, 'income', 1200.0, '2024-12-05 09:30:11', '')");
+        db.execSQL("INSERT INTO records (username, category_id, type, amount, date, note) " +
+                "VALUES ('userOne', 16, 'expense', 300.0, '2024-12-06 11:45:25', '')");
+
+        // 2025 January
+        db.execSQL("INSERT INTO records (username, category_id, type, amount, date, note) " +
+                "VALUES ('userOne', 17, 'income', 1500.0, '2025-01-10 08:50:51', '')");
+        db.execSQL("INSERT INTO records (username, category_id, type, amount, date, note) " +
+                "VALUES ('userOne', 16, 'expense', 700.0, '2025-01-12 10:00:12', '')");
+
+        // 2025 November
+        db.execSQL("INSERT INTO records (username, category_id, type, amount, date, note) " +
+                "VALUES ('userOne', 17, 'income', 2000.0, '2025-11-20 16:32:11', '')");
+        db.execSQL("INSERT INTO records (username, category_id, type, amount, date, note) " +
+                "VALUES ('userOne', 16, 'expense', 400.0, '2025-11-21 17:01:02', '')");
+        db.execSQL("INSERT INTO records (username, category_id, type, amount, date, note) " +
+                "VALUES ('userOne', 2, 'income', 5000.0, '2025-11-25 17:05:26', '')");
+        db.execSQL("INSERT INTO records (username, category_id, type, amount, date, note) " +
+                "VALUES ('userOne', 1, 'expense', 2500.0, '2025-11-25 17:06:41', '')");
+
+        // No need to close db here if called from onCreate/onUpgrade
+        // db.close();
+    }
+
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
@@ -134,6 +172,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 COL_RECORD_AMOUNT + " REAL, " +
                 COL_RECORD_DATE + " TEXT, " +
                 COL_RECORD_NOTE + " TEXT)");
+        //insertTestData(db); FOR TESTING ONLY
     }
 
     // ---------------- User management ----------------
@@ -274,7 +313,7 @@ public boolean updateCategory(int id, String newName) {
         SQLiteDatabase db = this.getReadableDatabase();
 
         return db.rawQuery(
-                "SELECT c." + COL_CATEGORY_NAME + ", b." + COL_BUDGET_AMOUNT +
+                "SELECT c." + COL_CATEGORY_NAME + ", b." + COL_BUDGET_AMOUNT + ", c." + COL_CATEGORY_TYPE +
                         " FROM " + TABLE_BUDGETS + " b " +
                         "JOIN " + TABLE_CATEGORIES + " c " +
                         "ON b." + COL_BUDGET_CATEGORY + " = c." + COL_CATEGORY_ID + " " +
@@ -282,6 +321,7 @@ public boolean updateCategory(int id, String newName) {
                 new String[]{username}
         );
     }
+
 
 
     public Cursor getUnbudgetedCategories(String username) {
@@ -568,6 +608,210 @@ public boolean updateCategory(int id, String newName) {
         cursor.close();
         return list;
     }
+
+    public double getIncomeForLastDays(String username, int days) {
+        SQLiteDatabase db = getReadableDatabase();
+        String query = "SELECT SUM(amount) FROM records WHERE username=? AND type='income' AND date >= datetime('now', ?)";
+        Cursor cursor = db.rawQuery(query, new String[]{username, "-" + days + " days"});
+        double sum = 0;
+        if(cursor.moveToFirst()) sum = cursor.getDouble(0);
+        cursor.close();
+        return sum;
+    }
+
+    public double getExpenseForLastDays(String username, int days) {
+        SQLiteDatabase db = getReadableDatabase();
+        String query = "SELECT SUM(amount) FROM records WHERE username=? AND type='expense' AND date >= datetime('now', ?)";
+        Cursor cursor = db.rawQuery(query, new String[]{username, "-" + days + " days"});
+        double sum = 0;
+        if(cursor.moveToFirst()) sum = cursor.getDouble(0);
+        cursor.close();
+        return sum;
+    }
+
+// Similarly implement getIncomeForLastMonth, getExpenseForLastMonth
+// and getIncomeForLastYear, getExpenseForLastYear using strftime('%Y-%m', date) or '%Y'
+
+
+    // --- Monthly ---
+    public double getIncomeForLastMonth(String username) {
+        SQLiteDatabase db = getReadableDatabase();
+        String query = "SELECT SUM(amount) FROM records " +
+                "WHERE username=? AND type='income' AND strftime('%Y-%m', date) = strftime('%Y-%m', 'now')";
+        Cursor cursor = db.rawQuery(query, new String[]{username});
+        double sum = 0;
+        if (cursor.moveToFirst()) sum = cursor.getDouble(0);
+        cursor.close();
+        return sum;
+    }
+
+    public double getExpenseForLastMonth(String username) {
+        SQLiteDatabase db = getReadableDatabase();
+        String query = "SELECT SUM(amount) FROM records " +
+                "WHERE username=? AND type='expense' AND strftime('%Y-%m', date) = strftime('%Y-%m', 'now')";
+        Cursor cursor = db.rawQuery(query, new String[]{username});
+        double sum = 0;
+        if (cursor.moveToFirst()) sum = cursor.getDouble(0);
+        cursor.close();
+        return sum;
+    }
+
+    // --- Yearly ---
+    public double getIncomeForLastYear(String username) {
+        SQLiteDatabase db = getReadableDatabase();
+        String query = "SELECT SUM(amount) FROM records " +
+                "WHERE username=? AND type='income' AND strftime('%Y', date) = strftime('%Y', 'now')";
+        Cursor cursor = db.rawQuery(query, new String[]{username});
+        double sum = 0;
+        if (cursor.moveToFirst()) sum = cursor.getDouble(0);
+        cursor.close();
+        return sum;
+    }
+
+    public double getExpenseForLastYear(String username) {
+        SQLiteDatabase db = getReadableDatabase();
+        String query = "SELECT SUM(amount) FROM records " +
+                "WHERE username=? AND type='expense' AND strftime('%Y', date) = strftime('%Y', 'now')";
+        Cursor cursor = db.rawQuery(query, new String[]{username});
+        double sum = 0;
+        if (cursor.moveToFirst()) sum = cursor.getDouble(0);
+        cursor.close();
+        return sum;
+    }
+
+    public Map<String, Double> getExpensePercentageByCategory(String username) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Map<String, Double> result = new HashMap<>();
+
+        // 1. Total expenses
+        double totalExpense = getTotalExpense(username);
+        if (totalExpense == 0) return result;
+
+        // 2. Get sum per category
+        String query =
+                "SELECT c.name, SUM(r.amount) AS total " +
+                        "FROM records r " +
+                        "LEFT JOIN categories c ON r.category_id = c.id " +
+                        "WHERE r.username = ? AND r.type = 'expense' " +
+                        "GROUP BY r.category_id";
+
+        Cursor cursor = db.rawQuery(query, new String[]{username});
+
+        if (cursor.moveToFirst()) {
+            do {
+                String categoryName = cursor.getString(cursor.getColumnIndexOrThrow("name"));
+                double totalInCategory = cursor.getDouble(cursor.getColumnIndexOrThrow("total"));
+
+                // compute percentage
+                double percent = (totalInCategory / totalExpense) * 100;
+
+                result.put(categoryName, percent);
+
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        return result;
+    }
+    public Map<String, Double> getExpensePercentageByCategoryLastDays(String username, int days) {
+        Map<String, Double> percentages = new HashMap<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        // Total expense in last X days
+        String totalQuery = "SELECT SUM(" + COL_RECORD_AMOUNT + ") FROM " + TABLE_RECORDS +
+                " WHERE " + COL_RECORD_USER + " = ? AND " + COL_RECORD_TYPE + " = 'expense' AND " +
+                COL_RECORD_DATE + " >= date('now', ? || ' days')";
+        Cursor totalCursor = db.rawQuery(totalQuery, new String[]{username, "-" + days});
+        double total = 0;
+        if (totalCursor.moveToFirst()) total = totalCursor.getDouble(0);
+        totalCursor.close();
+        if (total == 0) return percentages;
+
+        // Sum per category
+        String query = "SELECT c." + COL_CATEGORY_NAME + ", SUM(r." + COL_RECORD_AMOUNT + ") AS total " +
+                "FROM " + TABLE_RECORDS + " r " +
+                "LEFT JOIN " + TABLE_CATEGORIES + " c ON r." + COL_RECORD_CATEGORY + " = c." + COL_CATEGORY_ID + " " +
+                "WHERE r." + COL_RECORD_USER + " = ? AND r." + COL_RECORD_TYPE + " = 'expense' AND r." + COL_RECORD_DATE + " >= date('now', ? || ' days') " +
+                "GROUP BY r." + COL_RECORD_CATEGORY;
+
+        Cursor cursor = db.rawQuery(query, new String[]{username, "-" + days});
+        while (cursor.moveToNext()) {
+            String categoryName = cursor.getString(cursor.getColumnIndexOrThrow(COL_CATEGORY_NAME));
+            double amount = cursor.getDouble(cursor.getColumnIndexOrThrow("total"));
+            percentages.put(categoryName, (amount / total) * 100);
+        }
+        cursor.close();
+
+        return percentages;
+    }
+
+    public Map<String, Double> getExpensePercentageByCategoryLastMonth(String username) {
+        Map<String, Double> percentages = new HashMap<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String totalQuery = "SELECT SUM(" + COL_RECORD_AMOUNT + ") FROM " + TABLE_RECORDS +
+                " WHERE " + COL_RECORD_USER + " = ? AND " + COL_RECORD_TYPE + " = 'expense' AND strftime('%Y-%m', " + COL_RECORD_DATE + ") = strftime('%Y-%m', 'now')";
+        Cursor totalCursor = db.rawQuery(totalQuery, new String[]{username});
+        double total = 0;
+        if (totalCursor.moveToFirst()) total = totalCursor.getDouble(0);
+        totalCursor.close();
+        if (total == 0) return percentages;
+
+        String query = "SELECT c." + COL_CATEGORY_NAME + ", SUM(r." + COL_RECORD_AMOUNT + ") AS total " +
+                "FROM " + TABLE_RECORDS + " r " +
+                "LEFT JOIN " + TABLE_CATEGORIES + " c ON r." + COL_RECORD_CATEGORY + " = c." + COL_CATEGORY_ID + " " +
+                "WHERE r." + COL_RECORD_USER + " = ? AND r." + COL_RECORD_TYPE + " = 'expense' AND strftime('%Y-%m', r." + COL_RECORD_DATE + ") = strftime('%Y-%m', 'now') " +
+                "GROUP BY r." + COL_RECORD_CATEGORY;
+
+        Cursor cursor = db.rawQuery(query, new String[]{username});
+        while (cursor.moveToNext()) {
+            String categoryName = cursor.getString(cursor.getColumnIndexOrThrow(COL_CATEGORY_NAME));
+            double amount = cursor.getDouble(cursor.getColumnIndexOrThrow("total"));
+            percentages.put(categoryName, (amount / total) * 100);
+        }
+        cursor.close();
+
+        return percentages;
+    }
+
+    public Map<String, Double> getExpensePercentageByCategoryLastYear(String username) {
+        Map<String, Double> percentages = new HashMap<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String totalQuery = "SELECT SUM(" + COL_RECORD_AMOUNT + ") FROM " + TABLE_RECORDS +
+                " WHERE " + COL_RECORD_USER + " = ? AND " + COL_RECORD_TYPE + " = 'expense' AND strftime('%Y', " + COL_RECORD_DATE + ") = strftime('%Y', 'now')";
+        Cursor totalCursor = db.rawQuery(totalQuery, new String[]{username});
+        double total = 0;
+        if (totalCursor.moveToFirst()) total = totalCursor.getDouble(0);
+        totalCursor.close();
+        if (total == 0) return percentages;
+
+        String query = "SELECT c." + COL_CATEGORY_NAME + ", SUM(r." + COL_RECORD_AMOUNT + ") AS total " +
+                "FROM " + TABLE_RECORDS + " r " +
+                "LEFT JOIN " + TABLE_CATEGORIES + " c ON r." + COL_RECORD_CATEGORY + " = c." + COL_CATEGORY_ID + " " +
+                "WHERE r." + COL_RECORD_USER + " = ? AND r." + COL_RECORD_TYPE + " = 'expense' AND strftime('%Y', r." + COL_RECORD_DATE + ") = strftime('%Y', 'now') " +
+                "GROUP BY r." + COL_RECORD_CATEGORY;
+
+        Cursor cursor = db.rawQuery(query, new String[]{username});
+        while (cursor.moveToNext()) {
+            String categoryName = cursor.getString(cursor.getColumnIndexOrThrow(COL_CATEGORY_NAME));
+            double amount = cursor.getDouble(cursor.getColumnIndexOrThrow("total"));
+            percentages.put(categoryName, (amount / total) * 100);
+        }
+        cursor.close();
+
+        return percentages;
+    }
+
+
+
+
+
+
+
+
+
+
 
 
 
