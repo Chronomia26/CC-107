@@ -3,27 +3,27 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="navigation_view">
 
-    <group android:checkableBehavior="single">
-        <item
-            android:id="@+id/nav_home"
-            android:icon="@drawable/ic_records"
-            android:title="Records" />
+<!--    <group android:checkableBehavior="single">-->
+<!--        <item-->
+<!--            android:id="@+id/nav_home"-->
+<!--            android:icon="@drawable/ic_records"-->
+<!--            android:title="Records" />-->
 
-        <item
-            android:id="@+id/nav_charts"
-            android:icon="@drawable/ic_chart"
-            android:title="Charts" />
+<!--        <item-->
+<!--            android:id="@+id/nav_charts"-->
+<!--            android:icon="@drawable/ic_chart"-->
+<!--            android:title="Charts" />-->
 
-        <item
-            android:id="@+id/nav_budget"
-            android:icon="@drawable/ic_budget"
-            android:title="Budget" />
+<!--        <item-->
+<!--            android:id="@+id/nav_budget"-->
+<!--            android:icon="@drawable/ic_budget"-->
+<!--            android:title="Budget" />-->
 
-        <item
-            android:id="@+id/nav_categories"
-            android:icon="@drawable/ic_categories"
-            android:title="Categories" />
-    </group>
+<!--        <item-->
+<!--            android:id="@+id/nav_categories"-->
+<!--            android:icon="@drawable/ic_categories"-->
+<!--            android:title="Categories" />-->
+<!--    </group>-->
 
     <item android:title="Preferences">
         <menu>

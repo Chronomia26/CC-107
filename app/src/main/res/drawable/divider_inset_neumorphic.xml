@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  This drawable creates a horizontal "inset" or "groove" divider.
+  It uses the Neumorphic dual-shadow technique to look like it's
+  pressed into the background.
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Layer 1: The Dark Top Shadow of the Groove -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/neumorphic_shadow_dark" />
+        </shape>
+    </item>
+
+    <!-- Layer 2: The Light Bottom Highlight of the Groove -->
+    <!-- This is placed 1dp from the top, creating a 1dp highlight line -->
+    <item android:top="1dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/neumorphic_highlight_light" />
+        </shape>
+    </item>
+
+</layer-list>

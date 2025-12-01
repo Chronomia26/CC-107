@@ -1,118 +1,131 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
-    android:background="@drawable/gradient_background"
-    android:padding="16dp">
+    android:fillViewport="true">
 
-    <!-- SUMMARY CARD -->
     <LinearLayout
+        android:orientation="vertical"
+        android:background="@drawable/bg_card_neumorphic"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/bg_input"
-        android:orientation="horizontal"
         android:padding="16dp"
-        android:elevation="3dp"
-        android:gravity="center_vertical">
+        tools:context=".fragments.BudgetFragment">
 
-        <!-- Total Budget -->
+        <!-- SUMMARY CARD -->
         <LinearLayout
-            android:layout_width="0dp"
-            android:layout_weight="1"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center_horizontal">
+            android:background="@drawable/bg_input"
+            android:orientation="horizontal"
+            android:padding="16dp"
+            android:elevation="3dp"
+            android:layout_marginTop="12dp"
+            android:gravity="center_vertical">
 
-            <TextView
-                android:text="@string/total_budget"
-                android:textStyle="bold"
-                android:textSize="14sp"
-                android:textColor="@color/textPrimary"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-
-            <EditText
-                android:id="@+id/editTotalBudget"
-                android:layout_width="wrap_content"
+            <!-- Total Budget -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:hint="@string/hint_enter_amount"
-                android:inputType="numberDecimal"
-                android:textColor="@color/incomeValue"
-                android:textSize="16sp"
-                android:background="@null"
-                android:paddingTop="4dp"/>
+                android:orientation="vertical"
+                android:gravity="center_horizontal">
+
+                <TextView
+                    android:text="@string/total_budget"
+                    android:textStyle="bold"
+                    android:textSize="14sp"
+                    android:textColor="@color/textPrimary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <TextView
+                    android:id="@+id/editTotalBudget"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@null"
+                    android:text="₱ 0"
+                    android:inputType="numberDecimal"
+                    android:paddingTop="4dp"
+                    android:textColor="@color/incomeValue"
+                    android:textSize="16sp" />
+                <!--                    android:hint="@string/hint_enter_amount"-->
+
+            </LinearLayout>
+
+            <!-- Total Spent -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center_horizontal">
+
+                <TextView
+                    android:text="@string/total_spent"
+                    android:textStyle="bold"
+                    android:textSize="14sp"
+                    android:textColor="@color/textPrimary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <TextView
+                    android:id="@+id/editTotalSpent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="₱ 0"
+                    android:inputType="numberDecimal"
+                    android:textColor="@color/expenseValue"
+                    android:textSize="16sp"
+                    android:background="@null"
+                    android:paddingTop="4dp"/>
+            </LinearLayout>
+
         </LinearLayout>
 
-        <!-- Total Spent -->
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_weight="1"
+        <!-- BUDGETED LABEL -->
+        <TextView
+            android:id="@+id/tvBudgetedLabel"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center_horizontal">
+            android:text="@string/budgeted_categories"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:layout_marginTop="18dp"
+            android:textColor="@color/textPrimary"/>
 
-            <TextView
-                android:text="@string/total_spent"
-                android:textStyle="bold"
-                android:textSize="14sp"
-                android:textColor="@color/textPrimary"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+        <!-- Budgeted RecyclerView -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvBudgeted"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:nestedScrollingEnabled="false"
+            android:padding="8dp"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
-            <EditText
-                android:id="@+id/editTotalSpent"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:hint="@string/hint_enter_amount"
-                android:inputType="numberDecimal"
-                android:textColor="@color/expenseValue"
-                android:textSize="16sp"
-                android:background="@null"
-                android:paddingTop="4dp"/>
-        </LinearLayout>
+
+        <!-- NOT BUDGETED LABEL -->
+        <TextView
+            android:id="@+id/tvNotBudgetedLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/not_budgeted"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:layout_marginTop="20dp"
+            android:textColor="@color/textPrimary"/>
+
+        <!-- Not Budgeted RecyclerView -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvNotBudgeted"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:nestedScrollingEnabled="false"
+            tools:listitem="@layout/item_not_budgeted_category" />
+
     </LinearLayout>
 
-    <!-- BUDGETED LABEL -->
-    <TextView
-        android:id="@+id/tvBudgetedLabel"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/budgeted_categories"
-        android:textStyle="bold"
-        android:textSize="16sp"
-        android:layout_marginTop="18dp"
-        android:textColor="@color/textPrimary"/>
-
-    <!-- Budgeted RecyclerView -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvBudgeted"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:padding="8dp"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
-
-    <!-- NOT BUDGETED LABEL -->
-    <TextView
-        android:id="@+id/tvNotBudgetedLabel"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/not_budgeted"
-        android:textStyle="bold"
-        android:textSize="16sp"
-        android:layout_marginTop="20dp"
-        android:textColor="@color/textPrimary"/>
-
-    <!-- Not Budgeted RecyclerView -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvNotBudgeted"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:padding="8dp"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        tools:listitem="@layout/item_not_budgeted_category"/>
-</LinearLayout>
+</androidx.core.widget.NestedScrollView>

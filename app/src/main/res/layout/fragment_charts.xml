@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:padding="12dp"
-    android:background="@drawable/gradient_background">
+    android:background="@drawable/bg_card_neumorphic">
 
     <LinearLayout
         android:orientation="vertical"
@@ -146,9 +146,9 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:background="@drawable/segment_selected"
+                android:background="@drawable/segment_unselected"
                 android:text="Monthly"
-                android:textColor="@color/primaryBlue"/>
+                android:textColor="@color/text_main"/>
 
             <TextView
                 android:id="@+id/segYearly"
@@ -177,13 +177,14 @@
             android:textStyle="bold"
             android:layout_height="wrap_content"
             android:layout_marginTop="18dp"
+            android:background="@drawable/edittext_with_stroke"
             android:textColor="@color/textPrimary"/>
 
         <!-- PIE CHART -->
         <com.github.mikephil.charting.charts.PieChart
             android:id="@+id/pieChart"
             android:layout_width="match_parent"
-            android:layout_height="320dp"
+            android:layout_height="300dp"
             android:layout_marginTop="8dp" />
     </LinearLayout>
 </ScrollView>

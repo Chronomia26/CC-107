@@ -20,7 +20,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/gradient_background"
+        android:background="@drawable/bg_shape_bordered"
         android:padding="12dp"
         android:orientation="horizontal">
 
