@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
         // Load default fragment on first launch
         if (savedInstanceState == null) {
             replaceFragment(new RecordsFragment()); // Default fragment
-            navigationView.setCheckedItem(R.id.nav_home);
+//            navigationView.setCheckedItem(R.id.nav_home);
         }
 
         // Set up bottom navigation view

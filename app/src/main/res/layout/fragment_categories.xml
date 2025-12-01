@@ -15,18 +15,20 @@
         android:layout_height="wrap_content">
 
         <!-- ====== ALL ACCOUNTS (Top Summary Line) ====== -->
+
+        <!-- ====== INCOME / EXPENSE SUMMARY ====== -->
         <TextView
             android:id="@+id/tvAllAccounts"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="[ All Accounts ₱151.00 ]"
             android:layout_gravity="center"
-            android:textSize="13sp"
-            android:textColor="@color/textSecondary"
             android:paddingTop="4dp"
-            android:paddingBottom="6dp"/>
+            android:paddingBottom="6dp"
+            android:text="[ All Accounts ₱ 0.00 ]"
+            android:textColor="@color/textSecondary"
+            android:textStyle="bold"
+            android:textSize="16sp" />
 
-        <!-- ====== INCOME / EXPENSE SUMMARY ====== -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -48,8 +50,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="INCOME SO FAR"
-                    android:textSize="12sp"
-                    android:textColor="@color/textSecondary"/>
+                    android:textColor="@color/textSecondary"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/tvIncomeValue"
@@ -80,7 +83,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="EXPENSE SO FAR"
-                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:textSize="14sp"
                     android:textColor="@color/textSecondary"/>
 
                 <TextView
@@ -112,7 +116,7 @@
                 android:layout_height="44dp"
                 android:text="INCOME"
                 android:background="@drawable/bg_button_outline"
-                android:textStyle="bold"
+                android:textSize="14sp"
                 android:textColor="@color/textPrimary"/>
 
             <Button
@@ -124,8 +128,8 @@
                 android:layout_marginEnd="8dp"
                 android:text="ACCOUNT"
                 android:background="@drawable/bg_button_outline"
-                android:textStyle="bold"
-                android:textColor="@color/material_dynamic_primary30"/>
+                android:textSize="14sp"
+                android:textColor="@color/textPrimary"/>
 
             <Button
                 android:id="@+id/btnExpense"
@@ -134,7 +138,7 @@
                 android:layout_height="44dp"
                 android:text="EXPENSE"
                 android:background="@drawable/bg_button_outline"
-                android:textStyle="bold"
+                android:textSize="14sp"
                 android:textColor="@color/textPrimary"/>
 
         </LinearLayout>
