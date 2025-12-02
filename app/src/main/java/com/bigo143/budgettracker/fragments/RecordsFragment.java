@@ -92,26 +92,26 @@ public class RecordsFragment extends Fragment {
         inflater.inflate(R.menu.menu_records, menu);
     }
 
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-
-        int id = item.getItemId();  // GOOD — Java allows this
-
-        if (id == R.id.action_calendar) {
-            // open calendar modal
-            return true;
-
-        } else if (id == R.id.action_filter) {
-            // open filter modal
-            return true;
-
-        } else if (id == R.id.action_search) {
-            // open search UI
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
+//    @Override
+//    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+//
+//        int id = item.getItemId();  // GOOD — Java allows this
+//
+//        if (id == R.id.action_calendar) {
+//            // open calendar modal
+//            return true;
+//
+//        } else if (id == R.id.action_filter) {
+//            // open filter modal
+//            return true;
+//
+//        } else if (id == R.id.action_search) {
+//            // open search UI
+//            return true;
+//        }
+//
+//        return super.onOptionsItemSelected(item);
+//    }
 
 
 

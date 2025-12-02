@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="24dp"
-    android:background="@color/white">
+    android:background="@color/background_secondary">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -12,22 +12,23 @@
         android:gravity="center_horizontal">
 
         <!-- App Title -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Budget Buddy"
-            android:textSize="32sp"
-            android:textStyle="bold"
-            android:textColor="@color/black"
-            android:layout_marginBottom="12dp" />
 
         <!-- Page Title -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:text="Budget Buddy"
+            android:textColor="@color/primary_variant"
+            android:textSize="32sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:text="Sign Up"
             android:textSize="20sp"
-            android:textColor="@color/black"
+            android:textColor="@color/textPrimary"
             android:layout_marginBottom="20dp" />
 
         <!-- Name -->
@@ -39,7 +40,7 @@
             android:inputType="textPersonName"
 
             android:padding="12dp"
-            android:textColor="@color/black"
+            android:textColor="@color/textPrimary"
             android:layout_marginBottom="10dp" />
 
         <!-- Email -->
@@ -51,7 +52,7 @@
             android:inputType="textEmailAddress"
 
             android:padding="12dp"
-            android:textColor="@color/black"
+            android:textColor="@color/textPrimary"
             android:layout_marginBottom="10dp" />
 
         <!-- Password -->
@@ -63,7 +64,7 @@
             android:inputType="textPassword"
 
             android:padding="12dp"
-            android:textColor="@color/black"
+            android:textColor="@color/textPrimary"
             android:layout_marginBottom="10dp" />
 
         <!-- Confirm Password -->
@@ -75,7 +76,7 @@
             android:inputType="textPassword"
 
             android:padding="12dp"
-            android:textColor="@color/black"
+            android:textColor="@color/textPrimary"
             android:layout_marginBottom="20dp" />
 
         <!-- Sign Up Button -->

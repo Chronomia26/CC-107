@@ -5,7 +5,7 @@
     android:gravity="center"
     android:orientation="vertical"
     android:padding="24dp"
-    android:background="@color/white">
+    android:background="@color/background_secondary">
 
     <TextView
         android:id="@+id/tvTitle"
@@ -22,6 +22,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Personal expense tracker with charts"
+        android:textColor="@color/textPrimary"
         android:textSize="16sp"
         android:layout_marginBottom="48dp"/>
 
