@@ -925,7 +925,69 @@ public boolean updateCategory(int id, String newName) {
         }
         return name;
     }
+    // Get total balance across all accounts for a user
+    public double getTotalAccountsBalance(String username) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        double totalIncome = 0, totalExpense = 0;
 
+        // Get all income and transfer_in for all accounts
+        Cursor cursorIncome = db.rawQuery(
+                "SELECT SUM(r." + COL_RECORD_AMOUNT + ") FROM " + TABLE_RECORDS + " r " +
+                        "JOIN " + TABLE_CATEGORIES + " c ON r." + COL_RECORD_ACCOUNT + " = c." + COL_CATEGORY_ID + " " +
+                        "WHERE r." + COL_RECORD_USER + " = ? AND c." + COL_CATEGORY_TYPE + " = 'account' " +
+                        "AND (r." + COL_RECORD_TYPE + " = 'income' OR r." + COL_RECORD_TYPE + " = 'transfer_in')",
+                new String[]{username}
+        );
+        if (cursorIncome != null && cursorIncome.moveToFirst()) {
+            totalIncome = cursorIncome.getDouble(0);
+            cursorIncome.close();
+        }
+
+        // Get all expense and transfer_out for all accounts
+        Cursor cursorExpense = db.rawQuery(
+                "SELECT SUM(r." + COL_RECORD_AMOUNT + ") FROM " + TABLE_RECORDS + " r " +
+                        "JOIN " + TABLE_CATEGORIES + " c ON r." + COL_RECORD_ACCOUNT + " = c." + COL_CATEGORY_ID + " " +
+                        "WHERE r." + COL_RECORD_USER + " = ? AND c." + COL_CATEGORY_TYPE + " = 'account' " +
+                        "AND (r." + COL_RECORD_TYPE + " = 'expense' OR r." + COL_RECORD_TYPE + " = 'transfer_out')",
+                new String[]{username}
+        );
+        if (cursorExpense != null && cursorExpense.moveToFirst()) {
+            totalExpense = cursorExpense.getDouble(0);
+            cursorExpense.close();
+        }
+
+        return totalIncome - totalExpense;
+    }
+    // Delete a budget for a specific category
+    public boolean deleteBudget(String username, int categoryId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        try {
+            int rows = db.delete(TABLE_BUDGETS,
+                    COL_BUDGET_USER + " = ? AND " + COL_BUDGET_CATEGORY + " = ?",
+                    new String[]{username, String.valueOf(categoryId)});
+            return rows > 0;
+        } catch (Exception e) {
+            Log.e(TAG, "Error deleting budget: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // Update budget amount
+    public boolean updateBudget(String username, int categoryId, double newAmount) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COL_BUDGET_AMOUNT, newAmount);
+
+        try {
+            int rows = db.update(TABLE_BUDGETS, values,
+                    COL_BUDGET_USER + " = ? AND " + COL_BUDGET_CATEGORY + " = ?",
+                    new String[]{username, String.valueOf(categoryId)});
+            return rows > 0;
+        } catch (Exception e) {
+            Log.e(TAG, "Error updating budget: " + e.getMessage());
+            return false;
+        }
+    }
 
 
 

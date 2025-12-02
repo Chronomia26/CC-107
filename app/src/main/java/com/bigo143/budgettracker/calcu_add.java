@@ -185,7 +185,7 @@ public class calcu_add extends AppCompatActivity {
         tvTransfer.setBackgroundColor(0);
         tvExpense.setBackgroundColor(0);
 
-        int hl = ContextCompat.getColor(this, R.color.third);
+        int hl = ContextCompat.getColor(this, R.color.accent);
 
         switch (type) {
             case INCOME:

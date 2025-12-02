@@ -107,6 +107,8 @@ public class CategoriesFragment extends Fragment implements OnCategoriesUpdatedL
 
         showFragment(accountFragment);
         currentType = "account";
+        // ✅ Load all account data including total balance
+        loadAccountData();
         //double totalBalance = dbHelper.getTotalBalanceAllAccounts();
         //tvAllAccounts.setText("₱" + totalBalance);
 
@@ -250,6 +252,15 @@ public class CategoriesFragment extends Fragment implements OnCategoriesUpdatedL
         // Reload totals
         updateIncomeExpenseSummary();
     }
+    // ✅ NEW METHOD: Load all account data
+    private void loadAccountData() {
+        // Get total balance of all accounts
+        double totalBalance = dbHelper.getTotalAccountsBalance(currentUser);
+        tvAllAccounts.setText(String.format("[ All Accounts ₱ %.2f ]", totalBalance));
+
+        // Update income and expense summary
+        updateIncomeExpenseSummary();
+    }
 
     public void reloadData() {
         // Safety check
@@ -268,6 +279,7 @@ public class CategoriesFragment extends Fragment implements OnCategoriesUpdatedL
 
         // Reload totals regardless
         updateIncomeExpenseSummary();
+        loadAccountData();
     }
 
 

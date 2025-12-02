@@ -58,8 +58,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Log In"
-            android:backgroundTint="@color/primaryBlue"
-            android:textColor="@android:color/white"
+            android:backgroundTint="@color/primary"
+            android:textColor="@color/secondary"
             android:textAllCaps="false"
             android:layout_marginBottom="16dp" />
 
@@ -91,16 +91,7 @@
                 android:background="@android:color/darker_gray" />
         </LinearLayout>
 
-        <!-- Google Button -->
-        <Button
-            android:id="@+id/btnGoogle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Continue with Google"
-            android:backgroundTint="#E0E0E0"
-            android:textColor="@android:color/black"
-            android:textAllCaps="false"
-            android:layout_marginVertical="16dp" />
+
 
         <!-- Signup Redirect -->
         <TextView

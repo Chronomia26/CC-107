@@ -3,53 +3,60 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="navigation_view">
 
-<!--    <group android:checkableBehavior="single">-->
-<!--        <item-->
-<!--            android:id="@+id/nav_home"-->
-<!--            android:icon="@drawable/ic_records"-->
-<!--            android:title="Records" />-->
+    <!-- Main Navigation Items -->
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_home"
+            android:icon="@drawable/ic_records"
+            android:title="Records" />
 
-<!--        <item-->
-<!--            android:id="@+id/nav_charts"-->
-<!--            android:icon="@drawable/ic_chart"-->
-<!--            android:title="Charts" />-->
+        <item
+            android:id="@+id/nav_charts"
+            android:icon="@drawable/ic_chart"
+            android:title="Charts" />
 
-<!--        <item-->
-<!--            android:id="@+id/nav_budget"-->
-<!--            android:icon="@drawable/ic_budget"-->
-<!--            android:title="Budget" />-->
+        <item
+            android:id="@+id/nav_budget"
+            android:icon="@drawable/ic_budget"
+            android:title="Budget" />
 
-<!--        <item-->
-<!--            android:id="@+id/nav_categories"-->
-<!--            android:icon="@drawable/ic_categories"-->
-<!--            android:title="Categories" />-->
-<!--    </group>-->
+        <item
+            android:id="@+id/nav_categories"
+            android:icon="@drawable/ic_categories"
+            android:title="Categories" />
+    </group>
 
+    <!-- Preferences Section -->
     <item android:title="Preferences">
         <menu>
-            <item
-                android:id="@+id/nav_theme_toggle"
-                android:icon="@drawable/baseline_settings_24"
-                android:title="Toggle Theme" />
+            <group android:checkableBehavior="none">
+                <item
+                    android:id="@+id/nav_theme_toggle"
+                    android:icon="@drawable/baseline_settings_24"
+                    android:title="Toggle Theme" />
 
-            <item
-                android:id="@+id/nav_share"
-                android:icon="@drawable/baseline_share_24"
-                android:title="Share App" />
+                <item
+                    android:id="@+id/nav_share"
+                    android:icon="@drawable/baseline_share_24"
+                    android:title="Share App" />
 
-            <item
-                android:id="@+id/nav_about"
-                android:icon="@drawable/baseline_info_24"
-                android:title="About" />
+                <item
+                    android:id="@+id/nav_about"
+                    android:icon="@drawable/baseline_info_24"
+                    android:title="About" />
+            </group>
         </menu>
     </item>
 
-    <item android:title="">
+    <!-- Logout Section -->
+    <item android:title="Account">
         <menu>
-            <item
-                android:id="@+id/nav_logout"
-                android:icon="@drawable/baseline_exit_to_app_24"
-                android:title="Logout" />
+            <group android:checkableBehavior="none">
+                <item
+                    android:id="@+id/nav_logout"
+                    android:icon="@drawable/baseline_exit_to_app_24"
+                    android:title="Logout" />
+            </group>
         </menu>
     </item>
 </menu>

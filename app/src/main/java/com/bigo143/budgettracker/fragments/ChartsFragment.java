@@ -246,12 +246,16 @@ public class ChartsFragment extends Fragment {
         PieDataSet dataSet = new PieDataSet(entries, "Expense Categories");
         dataSet.setColors(colors);
         dataSet.setValueTextSize(12f);
+        //dataSet.setValueTextColor(getResources().getColor(R.color.secondary)); // <-- set secondary color
 
         PieData data = new PieData(dataSet);
         pieChart.setData(data);
         pieChart.setUsePercentValues(true);
+        // Set legend text color
+        pieChart.getLegend().setTextColor(getResources().getColor(R.color.secondary));
         pieChart.invalidate();
     }
+
 
 
     private void setupBar(View view) {
@@ -266,26 +270,34 @@ public class ChartsFragment extends Fragment {
 
         BarDataSet dataSet = new BarDataSet(entries, "Income vs Expense");
         dataSet.setColors(new int[]{
-                Color.parseColor("#4CAF50"), // Green
-                Color.parseColor("#F44336")  // Red
+                Color.parseColor("#66BB6A"), // Income green
+                Color.parseColor("#EF5350")  // Expense red
         });
+        dataSet.setValueTextColor(getResources().getColor(R.color.secondary)); // Values on top of bars
 
         BarData data = new BarData(dataSet);
+        data.setBarWidth(0.5f); // optional: bar width
         bar.setData(data);
 
         String[] labels = new String[]{"Income", "Expense"};
         bar.getXAxis().setValueFormatter(new com.github.mikephil.charting.formatter.IndexAxisValueFormatter(labels));
         bar.getXAxis().setGranularity(1f);
         bar.getXAxis().setPosition(com.github.mikephil.charting.components.XAxis.XAxisPosition.BOTTOM);
-        bar.getAxisRight().setEnabled(false);
-        bar.getDescription().setEnabled(false);
-        bar.invalidate();
+        bar.getXAxis().setTextColor(getResources().getColor(R.color.secondary)); // X-axis labels color
+
+        bar.getAxisLeft().setTextColor(getResources().getColor(R.color.secondary)); // Y-axis labels color
+        bar.getAxisRight().setEnabled(false); // disable right axis
+        bar.getLegend().setTextColor(getResources().getColor(R.color.secondary)); // Legend text color
+        bar.getDescription().setEnabled(false); // remove description
+
+        bar.invalidate(); // refresh chart
 
         double total = totalIncome - totalExpense;
         tvIncome.setText("₱" + totalIncome);
         tvExpense.setText("₱" + totalExpense);
         tvTotal.setText("₱" + total);
     }
+
     private enum ChartPeriod {
         WEEKLY, MONTHLY, YEARLY
     }
@@ -293,16 +305,16 @@ public class ChartsFragment extends Fragment {
     private ChartPeriod currentPeriod = ChartPeriod.MONTHLY; // default
 
     private void updateSegmentUI(TextView weekly, TextView monthly, TextView yearly) {
-        weekly.setBackgroundResource(currentPeriod == ChartPeriod.WEEKLY ? R.drawable.segment_selected : R.drawable.segment_unselected);
-        monthly.setBackgroundResource(currentPeriod == ChartPeriod.MONTHLY ? R.drawable.segment_selected : R.drawable.segment_unselected);
-        yearly.setBackgroundResource(currentPeriod == ChartPeriod.YEARLY ? R.drawable.segment_selected : R.drawable.segment_unselected);
+        weekly.setBackgroundResource(currentPeriod == ChartPeriod.WEEKLY ? R.drawable.bg_button_outline : R.drawable.segment_unselected);
+        monthly.setBackgroundResource(currentPeriod == ChartPeriod.MONTHLY ? R.drawable.bg_button_outline : R.drawable.segment_unselected);
+        yearly.setBackgroundResource(currentPeriod == ChartPeriod.YEARLY ? R.drawable.bg_button_outline : R.drawable.segment_unselected);
 
-        int selectedColor = getResources().getColor(R.color.primaryBlue);
-        int defaultColor = getResources().getColor(R.color.text_main);
+        int selectedColor = getResources().getColor(R.color.primary);
+        int defaultColor = getResources().getColor(R.color.textPrimary);
 
-        weekly.setTextColor(currentPeriod == ChartPeriod.WEEKLY ? selectedColor : defaultColor);
-        monthly.setTextColor(currentPeriod == ChartPeriod.MONTHLY ? selectedColor : defaultColor);
-        yearly.setTextColor(currentPeriod == ChartPeriod.YEARLY ? selectedColor : defaultColor);
+        weekly.setTextColor(currentPeriod == ChartPeriod.WEEKLY ? selectedColor :getResources().getColor(R.color.secondary ));
+        monthly.setTextColor(currentPeriod == ChartPeriod.MONTHLY ? selectedColor : getResources().getColor(R.color.secondary ));
+        yearly.setTextColor(currentPeriod == ChartPeriod.YEARLY ? selectedColor : getResources().getColor(R.color.secondary ));
     }
 
     private int getColorForCategory(String categoryName, ArrayList<String> categoryList) {

@@ -2,13 +2,17 @@ package com.bigo143.budgettracker.fragments;
 
 import static android.content.Context.MODE_PRIVATE;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -23,7 +27,7 @@ import com.bigo143.budgettracker.models.CategoryModel;
 
 import java.util.ArrayList;
 
-public class BudgetFragment extends Fragment {
+public class BudgetFragment extends Fragment implements BudgetedAdapter.OnBudgetActionListener {
 
     private FragmentBudgetBinding binding;
     private BudgetedAdapter budgetedAdapter;
@@ -54,8 +58,8 @@ public class BudgetFragment extends Fragment {
     }
 
     private void setupRecyclerViews() {
-        // Budgeted List
-        budgetedAdapter = new BudgetedAdapter(budgetedList, requireContext());
+        // Budgeted List - ✅ Pass 'this' as the listener
+        budgetedAdapter = new BudgetedAdapter(budgetedList, requireContext(), this);
         binding.rvBudgeted.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.rvBudgeted.setAdapter(budgetedAdapter);
 
@@ -71,6 +75,74 @@ public class BudgetFragment extends Fragment {
         });
         binding.rvNotBudgeted.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.rvNotBudgeted.setAdapter(notBudgetedAdapter);
+    }
+
+    // ✅ Implement OnBudgetActionListener - Reset Budget
+    @Override
+    public void onResetBudget(CategoryModel category, int position) {
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Reset Budget")
+                .setMessage("Are you sure you want to reset the budget for " + category.getName() + "?")
+                .setPositiveButton("Reset", (dialog, which) -> {
+                    int categoryId = dbHelper.getCategoryIdByName(currentUser, category.getName(), "expense");
+                    boolean success = dbHelper.deleteBudget(currentUser, categoryId);
+
+                    if (success) {
+                        Toast.makeText(getContext(), "Budget reset successfully", Toast.LENGTH_SHORT).show();
+                        reloadData();
+                    } else {
+                        Toast.makeText(getContext(), "Failed to reset budget", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    // ✅ Implement OnBudgetActionListener - Edit Budget
+    @Override
+    public void onEditBudget(CategoryModel category, int position) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Edit Budget for " + category.getName());
+
+        // Create EditText for input
+        EditText input = new EditText(getContext());
+        input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        input.setHint("Enter new budget amount");
+        input.setText(String.valueOf(category.getLimit()));
+
+        // Add padding to EditText
+        int padding = (int) (16 * getResources().getDisplayMetrics().density);
+        input.setPadding(padding, padding, padding, padding);
+
+        builder.setView(input);
+        builder.setPositiveButton("Update", (dialog, which) -> {
+            String amountStr = input.getText().toString().trim();
+            if (!amountStr.isEmpty()) {
+                try {
+                    double newAmount = Double.parseDouble(amountStr);
+                    if (newAmount <= 0) {
+                        Toast.makeText(getContext(), "Amount must be greater than 0", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    int categoryId = dbHelper.getCategoryIdByName(currentUser, category.getName(), "expense");
+                    boolean success = dbHelper.updateBudget(currentUser, categoryId, newAmount);
+
+                    if (success) {
+                        Toast.makeText(getContext(), "Budget updated successfully", Toast.LENGTH_SHORT).show();
+                        reloadData();
+                    } else {
+                        Toast.makeText(getContext(), "Failed to update budget", Toast.LENGTH_SHORT).show();
+                    }
+                } catch (NumberFormatException e) {
+                    Toast.makeText(getContext(), "Invalid amount entered", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                Toast.makeText(getContext(), "Please enter an amount", Toast.LENGTH_SHORT).show();
+            }
+        });
+        builder.setNegativeButton("Cancel", null);
+        builder.show();
     }
 
     // 🔹 Dynamic reload method
