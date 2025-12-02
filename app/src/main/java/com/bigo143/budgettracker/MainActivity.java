@@ -1,5 +1,5 @@
 package com.bigo143.budgettracker;
-
+import android.app.Dialog;
 import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Color;
@@ -9,138 +9,178 @@ import android.view.Gravity;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 
+import com.bigo143.budgettracker.calcu_add;
+import com.bigo143.budgettracker.fragments.AccountFragment;
 import com.bigo143.budgettracker.fragments.BudgetFragment;
 import com.bigo143.budgettracker.fragments.CategoriesFragment;
 import com.bigo143.budgettracker.fragments.ChartsFragment;
+import com.bigo143.budgettracker.fragments.ExpenseFragment;
+import com.bigo143.budgettracker.fragments.IncomeFragment;
 import com.bigo143.budgettracker.fragments.RecordsFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 
-//MainActivity is for fragments, navigation bar
+import java.util.ArrayList;
+
 public class MainActivity extends AppCompatActivity {
+    private RecordsFragment recordsFragment;
+    private AccountFragment accountFragment;
+    private IncomeFragment incomeFragment;
+    private ExpenseFragment expenseFragment;
+
+    private ChartsFragment chartsFragment;
+    private BudgetFragment budgetFragment;
+    private CategoriesFragment categoriesFragment;
+
+    public static OnTransactionSavedListener staticListener;
 
     private BottomNavigationView bottomNavigationView;
     private FloatingActionButton fab;
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
 
+    private ActivityResultLauncher<Intent> transactionLauncher;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Initialize views
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
-        fab = findViewById(R.id.fab); // Correctly assign to the class field
-        drawerLayout = findViewById(R.id.drawer_layout); // Correctly assign
-        navigationView = findViewById(R.id.nav_view); // Correctly assign
+        fab = findViewById(R.id.fab);
+        drawerLayout = findViewById(R.id.drawer_layout);
+        navigationView = findViewById(R.id.nav_view);
         Toolbar toolbar = findViewById(R.id.toolbar);
 
         setSupportActionBar(toolbar);
 
-        Window window = getWindow();
-        window.setStatusBarColor(ContextCompat.getColor(this, R.color.second));
+        // Status bar color
+        getWindow().setStatusBarColor(ContextCompat.getColor(this, R.color.second));
 
-        // Set up navigation drawer
+        // Drawer toggle
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawerLayout, toolbar, R.string.open_nav, R.string.close_nav);
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
 
-        // Load default fragment on first launch
+        recordsFragment = new RecordsFragment();
+        accountFragment = new AccountFragment(new ArrayList<>());
+        incomeFragment = new IncomeFragment(new ArrayList<>());
+        expenseFragment = new ExpenseFragment(new ArrayList<>());
+        categoriesFragment = new CategoriesFragment();
+
+        chartsFragment = new ChartsFragment();
+        budgetFragment = new BudgetFragment();
+
+
+
+        // Default fragment
         if (savedInstanceState == null) {
-            replaceFragment(new RecordsFragment()); // Default fragment
-//            navigationView.setCheckedItem(R.id.nav_home);
+            replaceFragment(recordsFragment); // use the persistent instance
         }
 
-        // Set up bottom navigation view
+
         setupBottomNavigationView();
 
-        // Floating Action Button click listener to show bottom sheet
-        fab.setOnClickListener(view -> showBottomDialog());
+        // Launcher for calcu_add
+        transactionLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK) {
+                        refreshAllData();
+                    }
+                }
+        );
+
+        fab.setOnClickListener(view -> {
+            Intent intent = new Intent(MainActivity.this, calcu_add.class);
+            transactionLauncher.launch(intent);
+        });
+
+
     }
 
-    // Set up bottom navigation behavior
+
     private void setupBottomNavigationView() {
-        bottomNavigationView.setBackground(null); // Optional styling
+        bottomNavigationView.setBackground(null);
 
         bottomNavigationView.setOnItemSelectedListener(item -> {
-            Fragment selectedFragment = getSelectedFragment(item.getItemId());
-            if (selectedFragment != null) {
-                replaceFragment(selectedFragment);
-            }
+            Fragment selected = getSelectedFragment(item.getItemId());
+            if (selected != null) replaceFragment(selected);
             return true;
         });
     }
 
-    // --- FIX 2: Enable the BudgetFragment logic ---
-    private Fragment getSelectedFragment(int itemId) {
-        if (itemId == R.id.records) {
-            return new RecordsFragment();
-        } else if (itemId == R.id.charts) {
-            return new ChartsFragment();
-        } else if (itemId == R.id.budget) {
-            return new BudgetFragment();
-        } else if (itemId == R.id.categories) {
-            return new CategoriesFragment();
-        }
-        else {
-            return null;
-        }
+    private Fragment getSelectedFragment(int id) {
+        if (id == R.id.records) return recordsFragment;
+        if (id == R.id.charts) return chartsFragment;
+        if (id == R.id.budget) return budgetFragment;
+        if (id == R.id.categories) return categoriesFragment;
+        return null;
     }
 
-    // Replace current fragment with new one
+
     private void replaceFragment(Fragment fragment) {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.replace(R.id.frame_layout, fragment);
-        transaction.commit();
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.frame_layout, fragment)
+                .commit();
     }
 
-    // Display bottom sheet dialog for upload options
     private void showBottomDialog() {
         final Dialog dialog = new Dialog(this);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.bottomsheetlayout);
 
-        LinearLayout videoLayout = dialog.findViewById(R.id.addRecord);
-        LinearLayout shortsLayout = dialog.findViewById(R.id.layoutShorts);
-        LinearLayout liveLayout = dialog.findViewById(R.id.layoutLive);
+        LinearLayout addRecord = dialog.findViewById(R.id.addRecord);
 
-        videoLayout.setOnClickListener(v -> {
+        addRecord.setOnClickListener(v -> {
             dialog.dismiss();
-            Toast.makeText(MainActivity.this, "Setting Values", Toast.LENGTH_SHORT).show();
-            // Note: Make sure calcu_add.class exists
-            startActivity(new Intent(MainActivity.this, calcu_add.class));
-        });
-
-        shortsLayout.setOnClickListener(v -> {
-            dialog.dismiss();
-            Toast.makeText(MainActivity.this, "Editting Budget", Toast.LENGTH_SHORT).show();
-        });
-
-        liveLayout.setOnClickListener(v -> {
-            dialog.dismiss();
-            Toast.makeText(MainActivity.this, "Adding Record", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(MainActivity.this, calcu_add.class);
+            transactionLauncher.launch(intent);
         });
 
         dialog.show();
         if (dialog.getWindow() != null) {
-            dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            dialog.getWindow().setLayout(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+            );
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
             dialog.getWindow().setGravity(Gravity.BOTTOM);
         }
     }
+
+    private void refreshAllData() {
+        Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.frame_layout);
+        if(currentFragment == null || !currentFragment.isAdded()) return;
+
+        if (currentFragment instanceof AccountFragment)
+            ((AccountFragment) currentFragment).reloadData();
+        else if (currentFragment instanceof IncomeFragment)
+            ((IncomeFragment) currentFragment).reloadData();
+        else if (currentFragment instanceof ExpenseFragment)
+            ((ExpenseFragment) currentFragment).reloadData();
+        else if (currentFragment instanceof CategoriesFragment)
+            ((CategoriesFragment) currentFragment).reloadData();
+        else if (currentFragment instanceof RecordsFragment) // ✅ add this
+            ((RecordsFragment) currentFragment).reloadData();
+    }
+
+
+
+
+
+
 }

@@ -2,10 +2,12 @@ package com.bigo143.budgettracker.fragments;
 
 import static android.content.Context.MODE_PRIVATE;
 
+import android.accounts.Account;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.os.Bundle;
-import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +22,7 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.bigo143.budgettracker.DatabaseHelper;
 import com.bigo143.budgettracker.R;
@@ -27,8 +30,9 @@ import com.bigo143.budgettracker.adapters.IconAdapter;
 import com.bigo143.budgettracker.models.CategoryModel;
 
 import java.util.ArrayList;
+import java.util.List;
 
-public class CategoriesFragment extends Fragment {
+public class CategoriesFragment extends Fragment implements OnCategoriesUpdatedListener {
 
     private Button btnIncome, btnAccount, btnExpense, btnAdd;
     private DatabaseHelper dbHelper;
@@ -46,6 +50,8 @@ public class CategoriesFragment extends Fragment {
 
 
 
+    private List<Account> accounts = new ArrayList<>();
+
     private int[] availableIcons = new int[]{
             R.drawable.ic_salary,
             R.drawable.ic_income,
@@ -58,6 +64,20 @@ public class CategoriesFragment extends Fragment {
     };
 
     public CategoriesFragment() {}
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        dbHelper = new DatabaseHelper(context);
+
+        SharedPreferences prefs = context.getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
+        currentUser = prefs.getString("logged_in_user", null);
+        if (currentUser == null) {
+            throw new IllegalStateException("No logged in user found in SharedPreferences");
+        }
+
+    }
+
+
 
     @Nullable
     @Override
@@ -65,12 +85,12 @@ public class CategoriesFragment extends Fragment {
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
 
-        SharedPreferences prefs = requireContext().getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
-        currentUser = prefs.getString("logged_in_user", null);
+
 
         View v = inflater.inflate(R.layout.fragment_categories, container, false);
+        FragmentUpdateListenerHolder.listener = this;
 
-        dbHelper = new DatabaseHelper(requireContext());
+
 
         btnIncome = v.findViewById(R.id.btnIncome);
         btnAccount = v.findViewById(R.id.btnAccount);
@@ -120,12 +140,22 @@ public class CategoriesFragment extends Fragment {
 
                 double amount = 0;
                 String subtitle = "";
+
+                // ✅ If type is "account", calculate current balance from records
+                if(type.equals("account")) {
+                    double income = dbHelper.getTotalIncomeForAccount(currentUser, id);
+                    double expense = dbHelper.getTotalExpenseForAccount(currentUser, id);
+                    amount = income - expense;
+                    subtitle = "Balance: ₱ " + String.format("%.2f", amount);
+                }
+
                 list.add(new CategoryModel(name, icon, subtitle, amount));
             } while(cursor.moveToNext());
             cursor.close();
         }
         return list;
     }
+
 
     private void showFragment(Fragment fragment){
         FragmentTransaction t = getChildFragmentManager().beginTransaction();
@@ -206,4 +236,40 @@ public class CategoriesFragment extends Fragment {
         tvIncomeValue.setText("₱ " + String.format("%.2f", totalIncome));
         tvExpenseValue.setText("₱ " + String.format("%.2f", totalExpense));
     }
+    @Override
+    public void onCategoriesUpdated() {
+        // Reload category lists
+        incomeFragment.updateList(loadCategoriesFromDB("income"));
+        accountFragment.updateList(loadCategoriesFromDB("account"));
+        expenseFragment.updateList(loadCategoriesFromDB("expense"));
+
+        // Reload totals
+        updateIncomeExpenseSummary();
+    }
+
+    public void reloadData() {
+        // Safety check
+        if (!isAdded()) return;  // CategoriesFragment itself must be attached
+
+        // Reload child fragments only if attached
+        Fragment current = getChildFragmentManager().findFragmentById(R.id.categoryContentContainer);
+
+        if (current instanceof IncomeFragment) {
+            ((IncomeFragment) current).reloadData();
+        } else if (current instanceof AccountFragment) {
+            ((AccountFragment) current).reloadData();
+        } else if (current instanceof ExpenseFragment) {
+            ((ExpenseFragment) current).reloadData();
+        }
+
+        // Reload totals regardless
+        updateIncomeExpenseSummary();
+    }
+
+
+
+
+
+
+
 }
