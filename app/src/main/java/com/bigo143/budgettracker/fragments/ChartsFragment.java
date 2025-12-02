@@ -38,6 +38,21 @@ public class ChartsFragment extends Fragment {
     private DatabaseHelper db;
     private String currentUser; // replace with actual logged-in user
     private TextView tvIncome, tvExpense, tvTotal; // move TextViews here
+    private final int[] CATEGORY_COLORS = new int[] {
+            Color.parseColor("#FF7043"), // Food
+            Color.parseColor("#42A5F5"), // Bills
+            Color.parseColor("#66BB6A"), // Transport
+            Color.parseColor("#AB47BC"), // Shopping
+            Color.parseColor("#FFA726"), // Other
+            Color.parseColor("#26C6DA"), // Health
+            Color.parseColor("#EC407A"), // Entertainment
+            Color.parseColor("#8D6E63"), // Education
+            Color.parseColor("#9CCC65"), // Gifts
+            Color.parseColor("#FFCA28"), // Travel
+            Color.parseColor("#5C6BC0"), // Insurance
+            Color.parseColor("#FF8A65")  // Misc
+    };
+
 
 
 
@@ -121,9 +136,6 @@ public class ChartsFragment extends Fragment {
 
     private void updateCharts() {
         // Fetch filtered data based on currentPeriod
-        ArrayList<BarEntry> barEntries = new ArrayList<>();
-        ArrayList<PieEntry> pieEntries = new ArrayList<>();
-
         double totalIncome = 0;
         double totalExpense = 0;
 
@@ -142,8 +154,9 @@ public class ChartsFragment extends Fragment {
                 break;
         }
 
-        // --- Bar chart ---
+        // --- Update Bar Chart ---
         BarChart bar = requireView().findViewById(R.id.barChart);
+        ArrayList<BarEntry> barEntries = new ArrayList<>();
         barEntries.add(new BarEntry(0, (float) totalIncome));
         barEntries.add(new BarEntry(1, (float) totalExpense));
 
@@ -158,9 +171,16 @@ public class ChartsFragment extends Fragment {
         bar.getDescription().setEnabled(false);
         bar.invalidate();
 
+        // --- Update Pie Chart ---
         updateCategoryPieChart();
 
+        // --- Update Summary TextViews dynamically ---
+        double total = totalIncome - totalExpense;
+        tvIncome.setText("₱" + String.format("%.2f", totalIncome));
+        tvExpense.setText("₱" + String.format("%.2f", totalExpense));
+        tvTotal.setText("₱" + String.format("%.2f", total));
     }
+
     private void updateCategoryPieChart() {
 
         PieChart pieChart = requireView().findViewById(R.id.pieChart);
@@ -184,26 +204,23 @@ public class ChartsFragment extends Fragment {
         ArrayList<PieEntry> entries = new ArrayList<>();
         ArrayList<Integer> colors = new ArrayList<>();
 
-        Map<String, Integer> categoryColors = new HashMap<>();
-        categoryColors.put("Food", Color.parseColor("#FF7043"));
-        categoryColors.put("Bills", Color.parseColor("#42A5F5"));
-        categoryColors.put("Transport", Color.parseColor("#66BB6A"));
-        categoryColors.put("Shopping", Color.parseColor("#AB47BC"));
-        categoryColors.put("Other", Color.parseColor("#FFA726"));
+        ArrayList<String> categoryNames = new ArrayList<>(percentages.keySet());
 
-        for (Map.Entry<String, Double> e : percentages.entrySet()) {
-            entries.add(new PieEntry(e.getValue().floatValue(), e.getKey()));
-            colors.add(categoryColors.getOrDefault(e.getKey(), Color.GRAY));
+        for (String cat : categoryNames) {
+            entries.add(new PieEntry(percentages.get(cat).floatValue(), cat));
+            colors.add(getColorForCategory(cat, categoryNames));
         }
 
         PieDataSet dataSet = new PieDataSet(entries, "Expense Categories");
         dataSet.setValueTextSize(12f);
         dataSet.setColors(colors);
 
-        pieChart.setData(new PieData(dataSet));
+        PieData data = new PieData(dataSet);
+        pieChart.setData(data);
         pieChart.setUsePercentValues(true);
         pieChart.invalidate();
     }
+
 
 
 
@@ -215,33 +232,25 @@ public class ChartsFragment extends Fragment {
         ArrayList<PieEntry> entries = new ArrayList<>();
         ArrayList<Integer> colors = new ArrayList<>();
 
-        Map<String, Double> percentages = db.getExpensePercentageByCategory("userOne");
+        // fetch percentages for current user
+        Map<String, Double> percentages = db.getExpensePercentageByCategory(currentUser);
 
-        Map<String, Integer> categoryColors = new HashMap<>();
-        categoryColors.put("Food", Color.parseColor("#FF7043"));
-        categoryColors.put("Bills", Color.parseColor("#42A5F5"));
-        categoryColors.put("Transport", Color.parseColor("#66BB6A"));
-        categoryColors.put("Shopping", Color.parseColor("#AB47BC"));
-        categoryColors.put("Other", Color.parseColor("#FFA726"));
+        ArrayList<String> categoryNames = new ArrayList<>(percentages.keySet());
 
-        for (Map.Entry<String, Double> e : percentages.entrySet()) {
-            entries.add(new PieEntry(e.getValue().floatValue(), e.getKey()));
-
-            if (categoryColors.containsKey(e.getKey()))
-                colors.add(categoryColors.get(e.getKey()));
-            else
-                colors.add(Color.GRAY);
+        for (String cat : categoryNames) {
+            double value = percentages.get(cat);
+            entries.add(new PieEntry((float) value, cat));
+            colors.add(getColorForCategory(cat, categoryNames));
         }
 
         PieDataSet dataSet = new PieDataSet(entries, "Expense Categories");
         dataSet.setColors(colors);
         dataSet.setValueTextSize(12f);
 
-        pieChart.setData(new PieData(dataSet));
+        PieData data = new PieData(dataSet);
+        pieChart.setData(data);
         pieChart.setUsePercentValues(true);
         pieChart.invalidate();
-
-
     }
 
 
@@ -295,6 +304,19 @@ public class ChartsFragment extends Fragment {
         monthly.setTextColor(currentPeriod == ChartPeriod.MONTHLY ? selectedColor : defaultColor);
         yearly.setTextColor(currentPeriod == ChartPeriod.YEARLY ? selectedColor : defaultColor);
     }
+
+    private int getColorForCategory(String categoryName, ArrayList<String> categoryList) {
+        int index = categoryList.indexOf(categoryName);
+        if (index == -1) index = 0; // fallback
+        return CATEGORY_COLORS[index % CATEGORY_COLORS.length];
+    }
+
+
+    public void reloadData() {
+        // Recalculate summary and refresh charts
+        updateCharts();
+    }
+
 
 
 

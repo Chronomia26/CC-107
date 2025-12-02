@@ -18,6 +18,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
@@ -239,6 +240,7 @@ public class calcu_add extends AppCompatActivity {
                     Toast.makeText(this, "Income category or account not found", Toast.LENGTH_SHORT).show();
                     return;
                 }
+
                 ok = db.insertRecord(loggedInUser, incId, incomeAccId, "income", amount, timestamp, note);
                 break;
 
@@ -251,14 +253,39 @@ public class calcu_add extends AppCompatActivity {
                 }
 
                 double balance = db.getAccountBalance(expenseAccId, loggedInUser); // correct balance check
-
                 if (balance < amount) {
                     Toast.makeText(this, "Insufficient funds in " + fromAcc, Toast.LENGTH_SHORT).show();
                     return;
                 }
 
+                // --- NEW: Check budget ---
+                double budgeted = db.getBudgetedAmount(loggedInUser, expId);
+                double spent = db.getTotalSpentForCategory(loggedInUser, expId);
+                if (budgeted > 0 && spent + amount > budgeted) {
+                    // Show warning dialog and allow override
+                    new AlertDialog.Builder(this)
+                            .setTitle("Budget Exceeded!")
+                            .setMessage("This transaction will exceed the budgeted amount for this category.\nDo you want to continue?")
+                            .setPositiveButton("Yes", (dialog, which) -> {
+                                boolean inserted = db.insertRecord(loggedInUser, expId, expenseAccId, "expense", amount, timestamp, note);
+                                if (inserted) {
+                                    Toast.makeText(this, "Transaction Saved!", Toast.LENGTH_SHORT).show();
+                                    if (listener != null) listener.onTransactionSaved();
+                                    if (staticListener != null) staticListener.onTransactionSaved();
+                                    finishWithUpdate();
+                                } else {
+                                    Toast.makeText(this, "Saving failed", Toast.LENGTH_SHORT).show();
+                                }
+                            })
+                            .setNegativeButton("No", null)
+                            .show();
+                    return; // exit early since user needs to confirm
+                }
+
+                // If under budget, insert normally
                 ok = db.insertRecord(loggedInUser, expId, expenseAccId, "expense", amount, timestamp, note);
                 break;
+
 
             case TRANSFER:
                 int aFrom = db.getAccountIdByName(loggedInUser, fromAcc);

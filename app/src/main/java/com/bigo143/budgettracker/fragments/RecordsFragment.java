@@ -151,6 +151,16 @@ public class RecordsFragment extends Fragment {
         // Reload transactions from DB
         loadTransactions();
     }
+    private boolean willExceedBudget(int categoryId, double newAmount) {
+        double budgeted = db.getBudgetedAmount(currentUser, categoryId);
+        double spent = db.getTotalSpentForCategory(currentUser, categoryId);
+
+        if (budgeted > 0 && spent + newAmount > budgeted) {
+            return true;
+        }
+        return false;
+    }
+
 
 
 

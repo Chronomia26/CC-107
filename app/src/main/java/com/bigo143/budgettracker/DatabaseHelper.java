@@ -427,9 +427,12 @@ public boolean updateCategory(int id, String newName) {
                 "SELECT r." + COL_RECORD_ID + ", r." + COL_RECORD_CATEGORY + ", c." + COL_CATEGORY_NAME +
                         ", r." + COL_RECORD_TYPE + ", r." + COL_RECORD_AMOUNT + ", r." + COL_RECORD_DATE +
                         ", r." + COL_RECORD_NOTE + ", c." + COL_CATEGORY_ICON +
+                        ", r." + COL_RECORD_ACCOUNT + ", acc." + COL_CATEGORY_NAME + " AS accountName" +
                         " FROM " + TABLE_RECORDS + " r " +
                         "JOIN " + TABLE_CATEGORIES + " c " +
                         "ON r." + COL_RECORD_CATEGORY + " = c." + COL_CATEGORY_ID +
+                        " LEFT JOIN " + TABLE_CATEGORIES + " acc " +
+                        "ON r." + COL_RECORD_ACCOUNT + " = acc." + COL_CATEGORY_ID +
                         " WHERE r." + COL_RECORD_USER + " = ? " +
                         "ORDER BY r." + COL_RECORD_DATE + " DESC",
                 new String[]{username}
@@ -440,13 +443,19 @@ public boolean updateCategory(int id, String newName) {
                 int id = cursor.getInt(cursor.getColumnIndexOrThrow(COL_RECORD_ID));
                 int categoryId = cursor.getInt(cursor.getColumnIndexOrThrow(COL_RECORD_CATEGORY));
                 String categoryName = cursor.getString(cursor.getColumnIndexOrThrow(COL_CATEGORY_NAME));
-                String typeStr = cursor.getString(cursor.getColumnIndexOrThrow(COL_RECORD_TYPE)); // must be "income"/"expense"/"transfer"
+                String typeStr = cursor.getString(cursor.getColumnIndexOrThrow(COL_RECORD_TYPE));
                 double amount = cursor.getDouble(cursor.getColumnIndexOrThrow(COL_RECORD_AMOUNT));
                 String date = cursor.getString(cursor.getColumnIndexOrThrow(COL_RECORD_DATE));
                 String note = cursor.getString(cursor.getColumnIndexOrThrow(COL_RECORD_NOTE));
-                int icon = cursor.getInt(cursor.getColumnIndexOrThrow(COL_CATEGORY_ICON)); // get icon from DB
+                int icon = cursor.getInt(cursor.getColumnIndexOrThrow(COL_CATEGORY_ICON));
 
-                list.add(new Record(id, categoryId, categoryName, typeStr, amount, date, note, icon));
+                // Get account name (will be null if no account assigned)
+                String accountName = cursor.getString(cursor.getColumnIndexOrThrow("accountName"));
+                if (accountName == null || accountName.isEmpty()) {
+                    accountName = "No Account";
+                }
+
+                list.add(new Record(id, categoryId, categoryName, typeStr, amount, date, note, icon, accountName));
 
             } while (cursor.moveToNext());
 
@@ -767,10 +776,12 @@ public boolean updateCategory(int id, String newName) {
         SQLiteDatabase db = getReadableDatabase();
         return db.rawQuery(
                 "SELECT c.name, c.type, c.icon FROM " + TABLE_CATEGORIES + " c " +
-                        "LEFT JOIN " + TABLE_BUDGETS + " b ON c.id=b.category_id AND b.username=? " +
-                        "WHERE b.category_id IS NULL",
-                new String[]{username});
+                        "LEFT JOIN " + TABLE_BUDGETS + " b " +
+                        "ON c.id = b.category_id AND b.username = ? " +
+                        "WHERE c.username = ? AND b.category_id IS NULL",
+                new String[]{username, username});
     }
+
 
     public double getTotalBudget(String username) {
         SQLiteDatabase db = getReadableDatabase();
@@ -847,6 +858,78 @@ public boolean updateCategory(int id, String newName) {
 
         return income - expense;
     }
+    // Returns the budgeted amount for a specific category for the current user
+    public double getBudgetedAmount(String user, int categoryId) {
+        double budget = 0;
+        Cursor cursor = getReadableDatabase().rawQuery(
+                "SELECT amount FROM " + TABLE_BUDGETS + " WHERE username = ? AND category_id = ?",
+                new String[]{user, String.valueOf(categoryId)}
+        );
+
+        if (cursor != null && cursor.moveToFirst()) {
+            budget = cursor.getDouble(cursor.getColumnIndexOrThrow("amount"));
+            cursor.close();
+        }
+
+        return budget;
+    }
+
+    // Returns total spent for that category
+
+    public String getAccountNameById(int accountId, String user) {
+        String name = "Unknown";
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(
+                "SELECT name FROM " + TABLE_CATEGORIES + " WHERE id = ? AND username = ? AND type='account'",
+                new String[]{String.valueOf(accountId), user}
+        );
+        if (cursor != null && cursor.moveToFirst()) {
+            name = cursor.getString(cursor.getColumnIndexOrThrow("name"));
+            cursor.close();
+        }
+        return name;
+    }
+
+    public ArrayList<Record> getTransactions(String user) {
+        var list = new ArrayList<Record>();
+        Cursor cursor = getReadableDatabase().rawQuery("SELECT * FROM " + TABLE_RECORDS + " WHERE " + COL_RECORD_USER + " = ?",
+                new String[]{user});
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                int categoryId = cursor.getInt(cursor.getColumnIndexOrThrow(COL_RECORD_CATEGORY));
+                int accountId = cursor.getInt(cursor.getColumnIndexOrThrow(COL_RECORD_ACCOUNT));
+                String type = cursor.getString(cursor.getColumnIndexOrThrow(COL_RECORD_TYPE));
+                double amount = cursor.getDouble(cursor.getColumnIndexOrThrow(COL_RECORD_AMOUNT));
+                String date = cursor.getString(cursor.getColumnIndexOrThrow(COL_RECORD_DATE));
+                String note = cursor.getString(cursor.getColumnIndexOrThrow(COL_RECORD_NOTE));
+
+                String categoryName = getCategoryNameById(categoryId, user);
+                String accountName = getAccountNameById(accountId, user);
+
+                list.add(new Record(categoryName, accountName, amount, date, note));
+            } while (cursor.moveToNext());
+            cursor.close();
+        }
+        return list;
+    }
+    public String getCategoryNameById(int categoryId, String user) {
+        String name = "Unknown";
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(
+                "SELECT name FROM " + TABLE_CATEGORIES + " WHERE id = ? AND username = ?",
+                new String[]{String.valueOf(categoryId), user}
+        );
+        if (cursor != null && cursor.moveToFirst()) {
+            name = cursor.getString(cursor.getColumnIndexOrThrow("name"));
+            cursor.close();
+        }
+        return name;
+    }
+
+
+
+
+
 
 
 

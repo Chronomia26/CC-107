@@ -7,12 +7,8 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -22,7 +18,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.bigo143.budgettracker.BudgetedAdapter;
 import com.bigo143.budgettracker.DatabaseHelper;
 import com.bigo143.budgettracker.NotBudgetedAdapter;
-import com.bigo143.budgettracker.R;
 import com.bigo143.budgettracker.databinding.FragmentBudgetBinding;
 import com.bigo143.budgettracker.models.CategoryModel;
 
@@ -37,16 +32,14 @@ public class BudgetFragment extends Fragment {
     private ArrayList<CategoryModel> budgetedList = new ArrayList<>();
     private ArrayList<CategoryModel> notBudgetedList = new ArrayList<>();
     private DatabaseHelper dbHelper;
-    private String currentUser ; //
-    private int icon; // NOT String
+    private String currentUser;
 
-    private TextView tvTotalBudget, tvTotalSpent;
-
-
-
-    public BudgetFragment() {
-        // Required empty public constructor
-        setHasOptionsMenu(true); // enables toolbar menu
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        dbHelper = new DatabaseHelper(context);
+        SharedPreferences prefs = context.getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
+        currentUser = prefs.getString("logged_in_user", null);
     }
 
     @Nullable
@@ -54,59 +47,51 @@ public class BudgetFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        SharedPreferences prefs = requireContext().getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
-        currentUser = prefs.getString("logged_in_user", null);
-
         binding = FragmentBudgetBinding.inflate(inflater, container, false);
-        dbHelper = new DatabaseHelper(requireContext());
+        setupRecyclerViews();
+        reloadData(); // Load initially
         return binding.getRoot();
     }
 
-    @Override
-    public void onViewCreated(@NonNull View view,
-                              @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        tvTotalBudget = binding.editTotalBudget;  // your XML ID
-        tvTotalSpent = binding.editTotalSpent;    // your XML ID
+    private void setupRecyclerViews() {
+        // Budgeted List
+        budgetedAdapter = new BudgetedAdapter(budgetedList, requireContext());
+        binding.rvBudgeted.setLayoutManager(new LinearLayoutManager(requireContext()));
+        binding.rvBudgeted.setAdapter(budgetedAdapter);
 
+        // Not Budgeted List
+        notBudgetedAdapter = new NotBudgetedAdapter(notBudgetedList, requireContext(), new NotBudgetedAdapter.OnBudgetSetListener() {
+            @Override
+            public void onBudgetSet(String categoryName, double amount) {
+                boolean success = dbHelper.insertBudget(currentUser,
+                        dbHelper.getCategoryIdByName(currentUser, categoryName, "expense"),
+                        amount);
+                if(success) reloadData();
+            }
+        });
+        binding.rvNotBudgeted.setLayoutManager(new LinearLayoutManager(requireContext()));
+        binding.rvNotBudgeted.setAdapter(notBudgetedAdapter);
+    }
 
+    // 🔹 Dynamic reload method
+    public void reloadData() {
         loadBudgetedData();
         loadNotBudgetedData();
+
+        if(budgetedAdapter != null) budgetedAdapter.updateData(budgetedList);
+        if(notBudgetedAdapter != null) notBudgetedAdapter.updateData(notBudgetedList);
+
         updateBudgetSummary();
-        setupRecyclerViews();
-    }
-
-    // --------------------------
-    // MENU (Calendar / Filter / Search)
-    // --------------------------
-    @Override
-    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
-        inflater.inflate(R.menu.menu_normal, menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-
-        int id = item.getItemId();
-
-        if (id == R.id.action_search) {
-            // open search UI
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     private void loadBudgetedData() {
         budgetedList.clear();
         Cursor cursor = dbHelper.getBudgetedCategories(currentUser);
 
-        if (cursor != null && cursor.moveToFirst()) {
+        if(cursor != null && cursor.moveToFirst()) {
             do {
-
-                // 🔥 FILTER ONLY EXPENSE CATEGORIES
                 String type = cursor.getString(cursor.getColumnIndexOrThrow("type"));
-                if (!type.equals("expense")) continue;
+                if(!type.equals("expense")) continue;
 
                 String name = cursor.getString(cursor.getColumnIndexOrThrow("name"));
                 double limit = cursor.getDouble(cursor.getColumnIndexOrThrow("amount"));
@@ -114,8 +99,7 @@ public class BudgetFragment extends Fragment {
                 int icon = cursor.getInt(cursor.getColumnIndexOrThrow("icon"));
 
                 budgetedList.add(new CategoryModel(name, limit, spent, icon));
-
-            } while (cursor.moveToNext());
+            } while(cursor.moveToNext());
             cursor.close();
         }
     }
@@ -124,69 +108,30 @@ public class BudgetFragment extends Fragment {
         notBudgetedList.clear();
         Cursor cursor = dbHelper.getUnbudgetedCategories(currentUser);
 
-        if (cursor != null && cursor.moveToFirst()) {
+        if(cursor != null && cursor.moveToFirst()) {
             do {
-                // 🔥 FILTER ONLY EXPENSE CATEGORIES
                 String type = cursor.getString(cursor.getColumnIndexOrThrow("type"));
-                if (!type.equals("expense")) continue;
+                if(!type.equals("expense")) continue;
 
                 String name = cursor.getString(cursor.getColumnIndexOrThrow("name"));
-                int icon = cursor.getInt(cursor.getColumnIndexOrThrow("icon")); // <-- IMPORTANT
+                int icon = cursor.getInt(cursor.getColumnIndexOrThrow("icon"));
 
                 notBudgetedList.add(new CategoryModel(name, 0, 0, icon));
-
-            } while (cursor.moveToNext());
+            } while(cursor.moveToNext());
             cursor.close();
         }
     }
 
-
-    private void setupRecyclerViews() {
-        // Budgeted List
-        budgetedAdapter = new BudgetedAdapter(budgetedList, requireContext());
-        binding.rvBudgeted.setLayoutManager(new LinearLayoutManager(requireContext()));
-        binding.rvBudgeted.setAdapter(budgetedAdapter);
-
-        // Not Budgeted List with OnBudgetSetListener
-        notBudgetedAdapter = new NotBudgetedAdapter(notBudgetedList, requireContext(),
-                new NotBudgetedAdapter.OnBudgetSetListener() {
-                    @Override
-                    public void onBudgetSet(String categoryName, double amount) {
-                        // Insert budget for this category in the database
-                        boolean success = dbHelper.insertBudget(currentUser,
-                                dbHelper.getCategoryIdByName(currentUser, categoryName, "expense"),
-                                amount);
-
-                        if (success) {
-                            // Reload data
-                            loadBudgetedData();
-                            loadNotBudgetedData();
-
-                            // Notify adapters
-                            budgetedAdapter.notifyDataSetChanged();
-                            notBudgetedAdapter.notifyDataSetChanged();
-                            updateBudgetSummary();
-                        }
-                    }
-                });
-        binding.rvNotBudgeted.setLayoutManager(new LinearLayoutManager(requireContext()));
-        binding.rvNotBudgeted.setAdapter(notBudgetedAdapter);
-    }
     private void updateBudgetSummary() {
         double totalBudget = 0;
         double totalSpent = 0;
 
-        for (CategoryModel c : budgetedList) {
-            totalBudget += c.getLimit();   // limit set by user
-            totalSpent += c.getSpent();    // total expenses recorded
+        for(CategoryModel c : budgetedList) {
+            totalBudget += c.getLimit();
+            totalSpent += c.getSpent();
         }
 
-        // Update TextViews
-        tvTotalBudget.setText("₱ " + String.format("%.2f", totalBudget));
-        tvTotalSpent.setText("₱ " + String.format("%.2f", totalSpent));
+        binding.editTotalBudget.setText("₱ " + String.format("%.2f", totalBudget));
+        binding.editTotalSpent.setText("₱ " + String.format("%.2f", totalSpent));
     }
-
-
-
-
 }

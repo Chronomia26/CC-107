@@ -54,8 +54,8 @@
                 android:id="@+id/tvAccount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="₱Cash"
-                android:textColor="@color/textSecondary" />
+
+                android:textColor="@color/black" />
         </LinearLayout>
 
         <TextView

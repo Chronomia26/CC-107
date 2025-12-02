@@ -14,8 +14,8 @@ public class Record {
     private String account;
     private double amount;
     private int type;
-    private int icon;  // changed name to match adapter usage
-    private String date;  // store as string
+    private int icon;
+    private String date;
     private String note;
 
     public Record() { }
@@ -28,21 +28,30 @@ public class Record {
         return r;
     }
 
-    // Item constructor
+    // ✅ UPDATED: Item constructor with accountName parameter
     public Record(int id, int categoryId, String categoryName, String typeStr,
-                  double amount, String date, String note, int icon) {
+                  double amount, String date, String note, int icon, String accountName) {
 
         this.isHeader = false;
         this.category = categoryName;
-        this.account = ""; // you can set account if needed
+        this.account = accountName; // ✅ NOW USES THE ACCOUNT NAME
         this.amount = amount;
         this.date = date;
         this.note = note;
-        this.icon = icon; // now using the actual icon from DB
+        this.icon = icon;
 
         if (typeStr.equalsIgnoreCase("income")) this.type = TYPE_INCOME;
         else if (typeStr.equalsIgnoreCase("expense")) this.type = TYPE_EXPENSE;
         else this.type = TYPE_TRANSFER;
+    }
+
+    // ✅ ADDED: Simple constructor for basic transactions (if you need it elsewhere)
+    public Record(String categoryName, String accountName, double amount, String date, String note) {
+        this.category = categoryName;
+        this.account = accountName;
+        this.amount = amount;
+        this.date = date;
+        this.note = note;
     }
 
     // Getters
@@ -52,7 +61,7 @@ public class Record {
     public String getAccount() { return account; }
     public double getAmount() { return amount; }
     public int getType() { return type; }
-    public int getIcon() { return icon; } // updated getter to match adapter
+    public int getIcon() { return icon; }
     public String getDate() { return date; }
     public String getNote() { return note; }
 }

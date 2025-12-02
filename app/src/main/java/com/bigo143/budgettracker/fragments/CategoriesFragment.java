@@ -46,7 +46,7 @@ public class CategoriesFragment extends Fragment implements OnCategoriesUpdatedL
     private IncomeFragment incomeFragment;
     private AccountFragment accountFragment;
     private ExpenseFragment expenseFragment;
-    private TextView tvIncomeValue, tvExpenseValue;
+    private TextView tvIncomeValue, tvExpenseValue, tvAllAccounts;
 
 
 
@@ -99,6 +99,7 @@ public class CategoriesFragment extends Fragment implements OnCategoriesUpdatedL
 
         tvIncomeValue = v.findViewById(R.id.tvIncomeValue);
         tvExpenseValue = v.findViewById(R.id.tvExpenseValue);
+        tvAllAccounts = v.findViewById(R.id.tvAllAccounts);
 
         incomeFragment = new IncomeFragment(loadCategoriesFromDB("income"));
         accountFragment = new AccountFragment(loadCategoriesFromDB("account"));
@@ -106,6 +107,9 @@ public class CategoriesFragment extends Fragment implements OnCategoriesUpdatedL
 
         showFragment(accountFragment);
         currentType = "account";
+        //double totalBalance = dbHelper.getTotalBalanceAllAccounts();
+        //tvAllAccounts.setText("₱" + totalBalance);
+
 
         btnIncome.setOnClickListener(view -> {
             showFragment(incomeFragment);

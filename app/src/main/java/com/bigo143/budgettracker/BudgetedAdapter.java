@@ -40,11 +40,10 @@ public class BudgetedAdapter extends RecyclerView.Adapter<BudgetedAdapter.ViewHo
         holder.spent.setText("Spent: ₱" + model.getSpent());
         holder.icon.setImageResource(model.getIcon());
 
-        // Safely calculate percentage
         int percentage = 0;
         if (model.getLimit() > 0) {
             percentage = (int) ((model.getSpent() / model.getLimit()) * 100);
-            if (percentage > 100) percentage = 100; // cap to 100%
+            if (percentage > 100) percentage = 100;
         }
         holder.progressBar.setProgress(percentage);
     }
@@ -54,6 +53,12 @@ public class BudgetedAdapter extends RecyclerView.Adapter<BudgetedAdapter.ViewHo
         return list.size();
     }
 
+    // 🔹 Move updateData here, in Adapter
+    public void updateData(ArrayList<CategoryModel> newList) {
+        this.list = newList;
+        notifyDataSetChanged();
+    }
+
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView name, limit, spent;
         ImageView icon;
@@ -61,7 +66,6 @@ public class BudgetedAdapter extends RecyclerView.Adapter<BudgetedAdapter.ViewHo
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-
             name = itemView.findViewById(R.id.catName);
             limit = itemView.findViewById(R.id.catLimit);
             spent = itemView.findViewById(R.id.catSpent);

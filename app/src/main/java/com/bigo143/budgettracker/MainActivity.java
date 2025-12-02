@@ -174,8 +174,12 @@ public class MainActivity extends AppCompatActivity {
             ((ExpenseFragment) currentFragment).reloadData();
         else if (currentFragment instanceof CategoriesFragment)
             ((CategoriesFragment) currentFragment).reloadData();
-        else if (currentFragment instanceof RecordsFragment) // ✅ add this
+        else if (currentFragment instanceof RecordsFragment)
             ((RecordsFragment) currentFragment).reloadData();
+        else if (currentFragment instanceof BudgetFragment)
+            ((BudgetFragment) currentFragment).reloadData();
+        else if (currentFragment instanceof ChartsFragment)
+            ((ChartsFragment) currentFragment).reloadData();
     }
 
 
