@@ -77,18 +77,19 @@ public class RecordAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         item.tvCategory.setText(r.getCategory());
         item.tvAccount.setText(r.getAccount());
 
-        // format amount
-        String amountText = (r.getType() == Record.TYPE_EXPENSE)
-                ? "-₱" + r.getAmount()
-                : "₱" + r.getAmount();
+        // format amount and set color
+        if (r.getType() == Record.TYPE_EXPENSE) {
+            item.tvAmount.setText("-₱" + r.getAmount());
+            item.tvAmount.setTextColor(item.tvAmount.getResources().getColor(R.color.expenseRed));
+        } else {
+            item.tvAmount.setText("+₱" + r.getAmount());
+            item.tvAmount.setTextColor(item.tvAmount.getResources().getColor(R.color.incomeValue));
+        }
 
-        item.tvAmount.setText(amountText);
-
-        // -----------------------------
-        // ✅ USE ACTUAL ICON FROM DATABASE
-        // -----------------------------
+        // Set actual icon from database
         item.iconCategory.setImageResource(r.getIcon());
     }
+
 
     // ------------------------------
     // HEADER HOLDER

@@ -65,6 +65,6 @@
             android:text="-₱50.00"
             android:textSize="15sp"
             android:textStyle="bold"
-            android:textColor="@color/expenseRed" />
+             />
     </LinearLayout>
 </LinearLayout>
