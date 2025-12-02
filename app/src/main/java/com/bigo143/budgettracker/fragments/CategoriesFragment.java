@@ -12,10 +12,12 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
@@ -40,6 +42,9 @@ public class CategoriesFragment extends Fragment {
     private IncomeFragment incomeFragment;
     private AccountFragment accountFragment;
     private ExpenseFragment expenseFragment;
+    private TextView tvIncomeValue, tvExpenseValue;
+
+
 
     private int[] availableIcons = new int[]{
             R.drawable.ic_salary,
@@ -72,6 +77,9 @@ public class CategoriesFragment extends Fragment {
         btnExpense = v.findViewById(R.id.btnExpense);
         btnAdd = v.findViewById(R.id.btnOpenCategoryAdd);
 
+        tvIncomeValue = v.findViewById(R.id.tvIncomeValue);
+        tvExpenseValue = v.findViewById(R.id.tvExpenseValue);
+
         incomeFragment = new IncomeFragment(loadCategoriesFromDB("income"));
         accountFragment = new AccountFragment(loadCategoriesFromDB("account"));
         expenseFragment = new ExpenseFragment(loadCategoriesFromDB("expense"));
@@ -82,16 +90,20 @@ public class CategoriesFragment extends Fragment {
         btnIncome.setOnClickListener(view -> {
             showFragment(incomeFragment);
             currentType = "income";
+            highlightTab(btnIncome, btnAccount, btnExpense);
         });
         btnAccount.setOnClickListener(view -> {
             showFragment(accountFragment);
             currentType = "account";
+            highlightTab(btnAccount, btnIncome, btnExpense);
         });
         btnExpense.setOnClickListener(view -> {
             showFragment(expenseFragment);
             currentType = "expense";
+            highlightTab(btnExpense, btnIncome, btnAccount);
         });
         btnAdd.setOnClickListener(view -> showAddDialog());
+        updateIncomeExpenseSummary();
 
         return v;
     }
@@ -175,5 +187,23 @@ public class CategoriesFragment extends Fragment {
         builder.setView(gridViewLayout);
         builder.setPositiveButton("Done", null);
         builder.show();
+    }
+
+    private void highlightTab(Button selected, Button... others) {
+        selected.setBackgroundResource(R.drawable.bg_button_glow);
+        selected.setTextColor(ContextCompat.getColor(requireContext(), R.color.white));
+
+        for (Button b : others) {
+            b.setBackgroundResource(R.drawable.bg_button_outline);
+            b.setTextColor(ContextCompat.getColor(requireContext(), R.color.textPrimary));
+        }
+    }
+
+    private void updateIncomeExpenseSummary() {
+        double totalIncome = dbHelper.getTotalIncome(currentUser);
+        double totalExpense = dbHelper.getTotalExpense(currentUser);
+
+        tvIncomeValue.setText("₱ " + String.format("%.2f", totalIncome));
+        tvExpenseValue.setText("₱ " + String.format("%.2f", totalExpense));
     }
 }

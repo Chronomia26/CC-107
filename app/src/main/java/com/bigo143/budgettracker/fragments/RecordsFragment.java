@@ -101,9 +101,7 @@ public class RecordsFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
-    // --------------------------
-    // Sample Data
-    // --------------------------
+
 
 
     private void loadTransactions() {

@@ -14,7 +14,7 @@ public class Record {
     private String account;
     private double amount;
     private int type;
-    private int iconResId;
+    private int icon;  // changed name to match adapter usage
     private String date;  // store as string
     private String note;
 
@@ -30,7 +30,7 @@ public class Record {
 
     // Item constructor
     public Record(int id, int categoryId, String categoryName, String typeStr,
-                  double amount, String date, String note, int iconResId) {
+                  double amount, String date, String note, int icon) {
 
         this.isHeader = false;
         this.category = categoryName;
@@ -38,7 +38,7 @@ public class Record {
         this.amount = amount;
         this.date = date;
         this.note = note;
-        this.iconResId = iconResId;
+        this.icon = icon; // now using the actual icon from DB
 
         if (typeStr.equalsIgnoreCase("income")) this.type = TYPE_INCOME;
         else if (typeStr.equalsIgnoreCase("expense")) this.type = TYPE_EXPENSE;
@@ -52,7 +52,7 @@ public class Record {
     public String getAccount() { return account; }
     public double getAmount() { return amount; }
     public int getType() { return type; }
-    public int getIconName() { return iconResId; }
+    public int getIcon() { return icon; } // updated getter to match adapter
     public String getDate() { return date; }
     public String getNote() { return note; }
 }

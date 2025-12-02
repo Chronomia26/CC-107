@@ -313,14 +313,18 @@ public boolean updateCategory(int id, String newName) {
         SQLiteDatabase db = this.getReadableDatabase();
 
         return db.rawQuery(
-                "SELECT c." + COL_CATEGORY_NAME + ", b." + COL_BUDGET_AMOUNT + ", c." + COL_CATEGORY_TYPE +
-                        " FROM " + TABLE_BUDGETS + " b " +
-                        "JOIN " + TABLE_CATEGORIES + " c " +
-                        "ON b." + COL_BUDGET_CATEGORY + " = c." + COL_CATEGORY_ID + " " +
-                        "WHERE b." + COL_BUDGET_USER + " = ?",
+                "SELECT c." + COL_CATEGORY_NAME +
+                        ", b." + COL_BUDGET_AMOUNT +
+                        ", c." + COL_CATEGORY_ICON +         // ✅ ADD THIS
+                        ", c." + COL_CATEGORY_TYPE +
+                        " FROM " + TABLE_BUDGETS + " b" +
+                        " JOIN " + TABLE_CATEGORIES + " c" +
+                        " ON b." + COL_BUDGET_CATEGORY + " = c." + COL_CATEGORY_ID +
+                        " WHERE b." + COL_BUDGET_USER + " = ?",
                 new String[]{username}
         );
     }
+
 
 
 
@@ -328,20 +332,18 @@ public boolean updateCategory(int id, String newName) {
         SQLiteDatabase db = this.getReadableDatabase();
 
         return db.rawQuery(
-                "SELECT c." + COL_CATEGORY_ID + ", " +
-                        "c." + COL_CATEGORY_NAME + ", " +
-                        "c." + COL_CATEGORY_TYPE + ", " +
-                        "c." + COL_CATEGORY_ICON +
-                        " FROM " + TABLE_CATEGORIES + " c " +
-                        "WHERE c." + COL_CATEGORY_USER + " = ? " +
-                        "AND c." + COL_CATEGORY_ID + " NOT IN (" +
-                        "SELECT " + COL_BUDGET_CATEGORY +
-                        " FROM " + TABLE_BUDGETS +
-                        " WHERE " + COL_BUDGET_USER + " = ?" +
-                        ")",
-                new String[]{username, username}
+                "SELECT c." + COL_CATEGORY_NAME +
+                        ", c." + COL_CATEGORY_TYPE +
+                        ", c." + COL_CATEGORY_ICON +       // ✅ ADD THIS
+                        " FROM " + TABLE_CATEGORIES + " c" +
+                        " LEFT JOIN " + TABLE_BUDGETS + " b" +
+                        " ON c." + COL_CATEGORY_ID + " = b." + COL_BUDGET_CATEGORY +
+                        " AND b." + COL_BUDGET_USER + " = ?" +
+                        " WHERE b." + COL_BUDGET_CATEGORY + " IS NULL",
+                new String[]{username}
         );
     }
+
 
 
 
@@ -579,35 +581,39 @@ public boolean updateCategory(int id, String newName) {
         SQLiteDatabase db = this.getReadableDatabase();
 
         Cursor cursor = db.rawQuery(
-                "SELECT r.id, r.category_id, r.type, r.amount, r.date, r.note, " +
-                        "c.name, c.icon " +
-                        "FROM records r " +
-                        "LEFT JOIN categories c ON r.category_id = c.id " +
-                        "WHERE r.username = ? " +
-                        "ORDER BY r.date DESC",
+                "SELECT r." + COL_RECORD_ID + ", r." + COL_RECORD_CATEGORY + ", c." + COL_CATEGORY_NAME +
+                        ", r." + COL_RECORD_TYPE + ", r." + COL_RECORD_AMOUNT + ", r." + COL_RECORD_DATE +
+                        ", r." + COL_RECORD_NOTE + ", c." + COL_CATEGORY_ICON +
+                        " FROM " + TABLE_RECORDS + " r " +
+                        "JOIN " + TABLE_CATEGORIES + " c " +
+                        "ON r." + COL_RECORD_CATEGORY + " = c." + COL_CATEGORY_ID +
+                        " WHERE r." + COL_RECORD_USER + " = ? " +
+                        "ORDER BY r." + COL_RECORD_DATE + " DESC",
                 new String[]{username}
         );
 
-        if (cursor.moveToFirst()) {
+        if (cursor != null && cursor.moveToFirst()) {
             do {
-                int id = cursor.getInt(cursor.getColumnIndexOrThrow("id"));
-                int categoryId = cursor.getInt(cursor.getColumnIndexOrThrow("category_id"));
-                String typeStr = cursor.getString(cursor.getColumnIndexOrThrow("type"));
-                double amount = cursor.getDouble(cursor.getColumnIndexOrThrow("amount"));
-                String date = cursor.getString(cursor.getColumnIndexOrThrow("date"));
-                String note = cursor.getString(cursor.getColumnIndexOrThrow("note"));
-                String categoryName = cursor.getString(cursor.getColumnIndexOrThrow("name"));
-                int icon = cursor.getInt(cursor.getColumnIndexOrThrow("icon"));
+                int id = cursor.getInt(cursor.getColumnIndexOrThrow(COL_RECORD_ID));
+                int categoryId = cursor.getInt(cursor.getColumnIndexOrThrow(COL_RECORD_CATEGORY));
+                String categoryName = cursor.getString(cursor.getColumnIndexOrThrow(COL_CATEGORY_NAME));
+                String typeStr = cursor.getString(cursor.getColumnIndexOrThrow(COL_RECORD_TYPE)); // must be "income"/"expense"/"transfer"
+                double amount = cursor.getDouble(cursor.getColumnIndexOrThrow(COL_RECORD_AMOUNT));
+                String date = cursor.getString(cursor.getColumnIndexOrThrow(COL_RECORD_DATE));
+                String note = cursor.getString(cursor.getColumnIndexOrThrow(COL_RECORD_NOTE));
+                int icon = cursor.getInt(cursor.getColumnIndexOrThrow(COL_CATEGORY_ICON)); // get icon from DB
 
-                Record record = new Record(id, categoryId, categoryName, typeStr, amount, date, note, icon);
-                list.add(record);
+                list.add(new Record(id, categoryId, categoryName, typeStr, amount, date, note, icon));
 
             } while (cursor.moveToNext());
+
+            cursor.close();
         }
 
-        cursor.close();
         return list;
     }
+
+
 
     public double getIncomeForLastDays(String username, int days) {
         SQLiteDatabase db = getReadableDatabase();

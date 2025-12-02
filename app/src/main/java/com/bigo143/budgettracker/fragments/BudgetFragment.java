@@ -2,6 +2,7 @@ package com.bigo143.budgettracker.fragments;
 
 import static android.content.Context.MODE_PRIVATE;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -11,6 +12,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -35,7 +37,12 @@ public class BudgetFragment extends Fragment {
     private ArrayList<CategoryModel> budgetedList = new ArrayList<>();
     private ArrayList<CategoryModel> notBudgetedList = new ArrayList<>();
     private DatabaseHelper dbHelper;
-    private String currentUser ; // TODO: replace with actual logged-in username
+    private String currentUser ; //
+    private int icon; // NOT String
+
+    private TextView tvTotalBudget, tvTotalSpent;
+
+
 
     public BudgetFragment() {
         // Required empty public constructor
@@ -59,9 +66,13 @@ public class BudgetFragment extends Fragment {
     public void onViewCreated(@NonNull View view,
                               @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        tvTotalBudget = binding.editTotalBudget;  // your XML ID
+        tvTotalSpent = binding.editTotalSpent;    // your XML ID
+
 
         loadBudgetedData();
         loadNotBudgetedData();
+        updateBudgetSummary();
         setupRecyclerViews();
     }
 
@@ -100,7 +111,7 @@ public class BudgetFragment extends Fragment {
                 String name = cursor.getString(cursor.getColumnIndexOrThrow("name"));
                 double limit = cursor.getDouble(cursor.getColumnIndexOrThrow("amount"));
                 double spent = dbHelper.getTotalExpenseForCategory(currentUser, name);
-                int icon = getIconForCategory(name);
+                int icon = cursor.getInt(cursor.getColumnIndexOrThrow("icon"));
 
                 budgetedList.add(new CategoryModel(name, limit, spent, icon));
 
@@ -115,13 +126,12 @@ public class BudgetFragment extends Fragment {
 
         if (cursor != null && cursor.moveToFirst()) {
             do {
-
                 // 🔥 FILTER ONLY EXPENSE CATEGORIES
                 String type = cursor.getString(cursor.getColumnIndexOrThrow("type"));
                 if (!type.equals("expense")) continue;
 
                 String name = cursor.getString(cursor.getColumnIndexOrThrow("name"));
-                int icon = getIconForCategory(name);
+                int icon = cursor.getInt(cursor.getColumnIndexOrThrow("icon")); // <-- IMPORTANT
 
                 notBudgetedList.add(new CategoryModel(name, 0, 0, icon));
 
@@ -129,6 +139,7 @@ public class BudgetFragment extends Fragment {
             cursor.close();
         }
     }
+
 
     private void setupRecyclerViews() {
         // Budgeted List
@@ -154,27 +165,28 @@ public class BudgetFragment extends Fragment {
                             // Notify adapters
                             budgetedAdapter.notifyDataSetChanged();
                             notBudgetedAdapter.notifyDataSetChanged();
+                            updateBudgetSummary();
                         }
                     }
                 });
         binding.rvNotBudgeted.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.rvNotBudgeted.setAdapter(notBudgetedAdapter);
     }
+    private void updateBudgetSummary() {
+        double totalBudget = 0;
+        double totalSpent = 0;
 
-
-    private int getIconForCategory(String name) {
-        switch (name.toLowerCase()) {
-            case "food":
-                return R.drawable.ic_food;
-            case "transport":
-                return R.drawable.ic_transport;
-            case "bills":
-                return R.drawable.ic_bills;
-            case "shopping":
-                return R.drawable.ic_shopping;
-            case "snacks":
-                return R.drawable.ic_snacks;
+        for (CategoryModel c : budgetedList) {
+            totalBudget += c.getLimit();   // limit set by user
+            totalSpent += c.getSpent();    // total expenses recorded
         }
-        return 0;
+
+        // Update TextViews
+        tvTotalBudget.setText("₱ " + String.format("%.2f", totalBudget));
+        tvTotalSpent.setText("₱ " + String.format("%.2f", totalSpent));
     }
+
+
+
+
 }

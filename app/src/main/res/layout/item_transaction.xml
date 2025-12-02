@@ -30,7 +30,6 @@
             android:id="@+id/iconCategory"
             android:layout_width="36dp"
             android:layout_height="36dp"
-            android:background="@drawable/ic_food"
             android:gravity="center"
             android:textColor="@color/textPrimary"
             android:textSize="28sp"/>
