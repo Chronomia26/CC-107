@@ -14,12 +14,6 @@ import com.bigo143.budgettracker.models.Record;
 
 import java.util.List;
 
-/**
- * CLEAN + FIXED + WORKING RecordAdapter
- * Supports:
- *  - Date Header Rows
- *  - Transaction Rows (Income, Expense, Transfer)
- */
 public class RecordAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private final Context context;
@@ -35,7 +29,6 @@ public class RecordAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     @Override
     public int getItemViewType(int position) {
-        // if Record.isHeader() == true → header row
         return list.get(position).isHeader() ? VIEW_TYPE_HEADER : VIEW_TYPE_ITEM;
     }
 
@@ -45,7 +38,7 @@ public class RecordAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     }
 
     // ------------------------------
-    // CREATE VIEW HOLDER
+    // CREATE VIEW HOLDERS
     // ------------------------------
     @NonNull
     @Override
@@ -65,7 +58,7 @@ public class RecordAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     }
 
     // ------------------------------
-    // BIND DATA TO VIEW HOLDER
+    // BIND VALUES
     // ------------------------------
     @Override
     public void onBindViewHolder(
@@ -79,23 +72,24 @@ public class RecordAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             return;
         }
 
-        // ITEM ROW
         ItemHolder item = (ItemHolder) holder;
 
         item.tvCategory.setText(r.getCategory());
         item.tvAccount.setText(r.getAccount());
 
-        // Format amount (expense = negative / income = positive)
-        String amountText =
-                (r.getType() == Record.TYPE_EXPENSE)
-                        ? "-₱" + r.getAmount()
-                        : "₱" + r.getAmount();
+        // format amount and set color
+        if (r.getType() == Record.TYPE_EXPENSE) {
+            item.tvAmount.setText("-₱" + r.getAmount());
+            item.tvAmount.setTextColor(item.tvAmount.getResources().getColor(R.color.expenseRed));
+        } else {
+            item.tvAmount.setText("+₱" + r.getAmount());
+            item.tvAmount.setTextColor(item.tvAmount.getResources().getColor(R.color.incomeValue));
+        }
 
-        item.tvAmount.setText(amountText);
-
-        // icon name stored as "ic_food", "ic_salary" etc.
-        item.iconCategory.setImageResource(r.getIconName());
+        // Set actual icon from database
+        item.iconCategory.setImageResource(r.getIcon());
     }
+
 
     // ------------------------------
     // HEADER HOLDER

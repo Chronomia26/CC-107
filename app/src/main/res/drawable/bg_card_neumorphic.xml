@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  This drawable creates the soft, "lifted from the background" Neumorphic effect.
+  It uses a layer-list to create two shadows: a dark one on the bottom and
+  a light one on the top, giving the illusion of a 3D, extruded surface.
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Layer 1: The Dark Bottom Shadow -->
+    <item>
+        <shape android:shape="rectangle">
+            <!-- Uses the dark shadow color derived from our background -->
+            <solid android:color="@color/neumorphic_shadow_dark" />
+            <corners android:radius="20dp" />
+        </shape>
+    </item>
+
+    <!-- Layer 2: The Light Top Highlight -->
+    <item android:bottom="4dp" android:right="2dp"> <!-- Offset to reveal the dark shadow -->
+        <shape android:shape="rectangle">
+            <!-- Uses the light highlight color -->
+            <solid android:color="@color/neumorphic_highlight_light" />
+            <corners android:radius="20dp" />
+        </shape>
+    </item>
+
+    <!-- Layer 3: The Main Surface (on top) -->
+    <item android:bottom="2dp" android:right="1dp" android:top="1dp" android:left="1dp">
+        <shape android:shape="rectangle">
+            <!-- This is the visible surface of the card -->
+            <solid android:color="@color/neumorphic_surface" />
+            <!-- Rounded corners to match the soft aesthetic -->
+            <corners android:radius="18dp" />
+        </shape>
+    </item>
+</layer-list>

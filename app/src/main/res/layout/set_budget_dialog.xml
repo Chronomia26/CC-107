@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:padding="20dp"
-    android:background="@drawable/gradient_background"
+    android:outlineSpotShadowColor="@color/material_dynamic_primary95"
+    android:background="@drawable/bg_shape_bordered"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 

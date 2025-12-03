@@ -1,30 +1,33 @@
 package com.bigo143.budgettracker.models;
 
 public class CategoryModel {
-    private String name;
-    private int iconRes;
-    private String subtitle; // optional (balance / tag)
-    private double amount; // optional
 
+    private String name;
+
+    private int icon;        // <- THE ONLY ICON FIELD
+    private String subtitle;
+    private double amount;
 
     private double limit;
     private double spent;
-    private int icon;
 
-    public CategoryModel(String name, int iconRes){
+    // Constructor for simple category list (name + icon)
+    public CategoryModel(String name, int icon) {
         this.name = name;
-        this.iconRes = iconRes;
+        this.icon = icon;
         this.subtitle = "";
         this.amount = 0;
     }
 
-    public CategoryModel(String name, int iconRes, String subtitle, double amount){
+    // Constructor for home page categories (subtitle, amount)
+    public CategoryModel(String name, int icon, String subtitle, double amount) {
         this.name = name;
-        this.iconRes = iconRes;
+        this.icon = icon;
         this.subtitle = subtitle;
         this.amount = amount;
     }
 
+    // Constructor for budgeted categories
     public CategoryModel(String name, double limit, double spent, int icon) {
         this.name = name;
         this.limit = limit;
@@ -32,13 +35,15 @@ public class CategoryModel {
         this.icon = icon;
     }
 
-    public String getName(){ return name; }
-    public int getIconRes(){ return iconRes; }
-    public String getSubtitle(){ return subtitle; }
-    public double getAmount(){ return amount; }
+    public String getName() { return name; }
 
+    public int getIcon() { return icon; }
+
+    public String getSubtitle() { return subtitle; }
+
+    public double getAmount() { return amount; }
 
     public double getLimit() { return limit; }
+
     public double getSpent() { return spent; }
-    public int getIcon() { return icon; }
 }

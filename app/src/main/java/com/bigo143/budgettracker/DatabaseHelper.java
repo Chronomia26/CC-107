@@ -19,7 +19,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String TAG = "DatabaseHelper";
 
     private static final String DATABASE_NAME = "budget_tracker.db";
-    private static final int DATABASE_VERSION = 8; // Increment to force upgrade
+    private static final int DATABASE_VERSION = 10; // Increment to force upgrade
 
     // --- Users table ---
     private static final String TABLE_USERS = "users";
@@ -43,7 +43,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COL_BUDGET_CATEGORY = "category_id";
     public static final String COL_BUDGET_AMOUNT = "amount";
 
-    // --- Records table ---
+    // Records table
     private static final String TABLE_RECORDS = "records";
     public static final String COL_RECORD_ID = "id";
     public static final String COL_RECORD_USER = "username";
@@ -52,6 +52,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COL_RECORD_AMOUNT = "amount";
     public static final String COL_RECORD_DATE = "date";
     public static final String COL_RECORD_NOTE = "note";
+    public static final String COL_RECORD_ACCOUNT = "account_id";
+
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -81,11 +83,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 COL_BUDGET_CATEGORY + " INTEGER, " +
                 COL_BUDGET_AMOUNT + " REAL)");
 
-        // Records table
+        // Records
         db.execSQL("CREATE TABLE " + TABLE_RECORDS + " (" +
                 COL_RECORD_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COL_RECORD_USER + " TEXT, " +
                 COL_RECORD_CATEGORY + " INTEGER, " +
+                COL_RECORD_ACCOUNT + " INTEGER DEFAULT 0, " +
                 COL_RECORD_TYPE + " TEXT, " +
                 COL_RECORD_AMOUNT + " REAL, " +
                 COL_RECORD_DATE + " TEXT, " +
@@ -94,39 +97,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 
 
-    }
-    public void insertTestData(SQLiteDatabase db) {
-
-        // 2024 November
-        db.execSQL("INSERT INTO records (username, category_id, type, amount, date, note) " +
-                "VALUES ('userOne', 17, 'income', 1000.0, '2024-11-10 10:12:24', '')");
-        db.execSQL("INSERT INTO records (username, category_id, type, amount, date, note) " +
-                "VALUES ('userOne', 16, 'expense', 500.0, '2024-11-12 15:20:52', '')");
-
-        // 2024 December
-        db.execSQL("INSERT INTO records (username, category_id, type, amount, date, note) " +
-                "VALUES ('userOne', 17, 'income', 1200.0, '2024-12-05 09:30:11', '')");
-        db.execSQL("INSERT INTO records (username, category_id, type, amount, date, note) " +
-                "VALUES ('userOne', 16, 'expense', 300.0, '2024-12-06 11:45:25', '')");
-
-        // 2025 January
-        db.execSQL("INSERT INTO records (username, category_id, type, amount, date, note) " +
-                "VALUES ('userOne', 17, 'income', 1500.0, '2025-01-10 08:50:51', '')");
-        db.execSQL("INSERT INTO records (username, category_id, type, amount, date, note) " +
-                "VALUES ('userOne', 16, 'expense', 700.0, '2025-01-12 10:00:12', '')");
-
-        // 2025 November
-        db.execSQL("INSERT INTO records (username, category_id, type, amount, date, note) " +
-                "VALUES ('userOne', 17, 'income', 2000.0, '2025-11-20 16:32:11', '')");
-        db.execSQL("INSERT INTO records (username, category_id, type, amount, date, note) " +
-                "VALUES ('userOne', 16, 'expense', 400.0, '2025-11-21 17:01:02', '')");
-        db.execSQL("INSERT INTO records (username, category_id, type, amount, date, note) " +
-                "VALUES ('userOne', 2, 'income', 5000.0, '2025-11-25 17:05:26', '')");
-        db.execSQL("INSERT INTO records (username, category_id, type, amount, date, note) " +
-                "VALUES ('userOne', 1, 'expense', 2500.0, '2025-11-25 17:06:41', '')");
-
-        // No need to close db here if called from onCreate/onUpgrade
-        // db.close();
     }
 
 
@@ -134,45 +104,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         Log.w(TAG, "Upgrading database from version " + oldVersion + " to " + newVersion);
 
-        // Add icon column safely if it doesn't exist
-        if (oldVersion < 6) {
+        // Add account_id column if upgrading from older versions
+        if (oldVersion < 10) {
             try {
-                db.execSQL("ALTER TABLE " + TABLE_CATEGORIES +
-                        " ADD COLUMN " + COL_CATEGORY_ICON + " INTEGER DEFAULT " + R.drawable.ic_default);
+                db.execSQL("ALTER TABLE " + TABLE_RECORDS + " ADD COLUMN " + COL_RECORD_ACCOUNT + " INTEGER DEFAULT 0");
             } catch (Exception e) {
-                Log.e(TAG, "Error adding icon column: " + e.getMessage());
+                Log.e(TAG, "Error adding account_id column: " + e.getMessage());
             }
         }
 
-        // Ensure other tables exist
-        db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_USERS + " (" +
-                COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                COL_USERNAME + " TEXT UNIQUE, " +
-                COL_EMAIL + " TEXT UNIQUE, " +
-                COL_PASSWORD + " TEXT)");
 
-        db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_CATEGORIES + " (" +
-                COL_CATEGORY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                COL_CATEGORY_USER + " TEXT, " +
-                COL_CATEGORY_TYPE + " TEXT, " +
-                COL_CATEGORY_NAME + " TEXT, " +
-                COL_CATEGORY_ICON + " INTEGER DEFAULT " + R.drawable.ic_default + ")");
 
-        db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_BUDGETS + " (" +
-                COL_BUDGET_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                COL_BUDGET_USER + " TEXT, " +
-                COL_BUDGET_CATEGORY + " INTEGER, " +
-                COL_BUDGET_AMOUNT + " REAL)");
-
-        db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_RECORDS + " (" +
-                COL_RECORD_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                COL_RECORD_USER + " TEXT, " +
-                COL_RECORD_CATEGORY + " INTEGER, " +
-                COL_RECORD_TYPE + " TEXT, " +
-                COL_RECORD_AMOUNT + " REAL, " +
-                COL_RECORD_DATE + " TEXT, " +
-                COL_RECORD_NOTE + " TEXT)");
-        //insertTestData(db); FOR TESTING ONLY
     }
 
     // ---------------- User management ----------------
@@ -293,121 +235,14 @@ public boolean updateCategory(int id, String newName) {
 
     // ---------------- Budget management ----------------
 
-    public boolean insertBudget(String username, int categoryId, double amount) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put(COL_BUDGET_USER, username);
-        values.put(COL_BUDGET_CATEGORY, categoryId);
-        values.put(COL_BUDGET_AMOUNT, amount);
 
-        try {
-            long result = db.insert(TABLE_BUDGETS, null, values);
-            return result != -1;
-        } catch (Exception e) {
-            Log.e(TAG, "Error inserting budget: " + e.getMessage());
-            return false;
-        }
-    }
-
-    public Cursor getBudgetedCategories(String username) {
-        SQLiteDatabase db = this.getReadableDatabase();
-
-        return db.rawQuery(
-                "SELECT c." + COL_CATEGORY_NAME + ", b." + COL_BUDGET_AMOUNT + ", c." + COL_CATEGORY_TYPE +
-                        " FROM " + TABLE_BUDGETS + " b " +
-                        "JOIN " + TABLE_CATEGORIES + " c " +
-                        "ON b." + COL_BUDGET_CATEGORY + " = c." + COL_CATEGORY_ID + " " +
-                        "WHERE b." + COL_BUDGET_USER + " = ?",
-                new String[]{username}
-        );
-    }
-
-
-
-    public Cursor getUnbudgetedCategories(String username) {
-        SQLiteDatabase db = this.getReadableDatabase();
-
-        return db.rawQuery(
-                "SELECT c." + COL_CATEGORY_ID + ", " +
-                        "c." + COL_CATEGORY_NAME + ", " +
-                        "c." + COL_CATEGORY_TYPE + ", " +
-                        "c." + COL_CATEGORY_ICON +
-                        " FROM " + TABLE_CATEGORIES + " c " +
-                        "WHERE c." + COL_CATEGORY_USER + " = ? " +
-                        "AND c." + COL_CATEGORY_ID + " NOT IN (" +
-                        "SELECT " + COL_BUDGET_CATEGORY +
-                        " FROM " + TABLE_BUDGETS +
-                        " WHERE " + COL_BUDGET_USER + " = ?" +
-                        ")",
-                new String[]{username, username}
-        );
-    }
-
-
-
-    public double getTotalBudget(String username) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT SUM(amount) FROM " + TABLE_BUDGETS + " WHERE username = ?", new String[]{username});
-        double total = 0;
-        if (cursor != null && cursor.moveToFirst()) {
-            total = cursor.getDouble(0);
-            cursor.close();
-        }
-        return total;
-    }
 
     // ---------------- Records management ----------------
 
-    public boolean insertRecord(String username, int categoryId, String type, double amount, String date, String note) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put(COL_RECORD_USER, username);
-        values.put(COL_RECORD_CATEGORY, categoryId);
-        values.put(COL_RECORD_TYPE, type);
-        values.put(COL_RECORD_AMOUNT, amount);
-        values.put(COL_RECORD_DATE, date);
-        values.put(COL_RECORD_NOTE, note);
 
-        try {
-            long result = db.insert(TABLE_RECORDS, null, values);
-            return result != -1;
-        } catch (Exception e) {
-            Log.e(TAG, "Error inserting record: " + e.getMessage());
-            return false;
-        }
-    }
 
-    public double getTotalExpense(String username) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT SUM(amount) FROM " + TABLE_RECORDS + " WHERE username = ? AND type = 'expense'",
-                new String[]{username});
-        double total = 0;
-        if (cursor != null && cursor.moveToFirst()) {
-            total = cursor.getDouble(0);
-            cursor.close();
-        }
-        return total;
-    }
 
-    public double getTotalIncome(String username) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT SUM(amount) FROM " + TABLE_RECORDS + " WHERE username = ? AND type = 'income'",
-                new String[]{username});
-        double total = 0;
-        if (cursor != null && cursor.moveToFirst()) {
-            total = cursor.getDouble(0);
-            cursor.close();
-        }
-        return total;
-    }
 
-    public Cursor getRecordsForUser(String username) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        return db.rawQuery("SELECT r.id, c.name, r.type, r.amount, r.date, r.note FROM " + TABLE_RECORDS + " r " +
-                        "LEFT JOIN " + TABLE_CATEGORIES + " c ON r.category_id = c.id " +
-                        "WHERE r.username = ? ORDER BY r.date DESC",
-                new String[]{username});
-    }
 
     // Calculate total spent for a category for a user
     public double getTotalExpenseForCategory(String username, String categoryName) {
@@ -477,13 +312,13 @@ public boolean updateCategory(int id, String newName) {
     }
 
     // ---------------- Account management ----------------
-    public Cursor getAccounts(String username) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        return db.rawQuery(
-                "SELECT id, name FROM " + TABLE_CATEGORIES + " WHERE username = ? AND type = 'account'",
-                new String[]{username}
-        );
-    }
+//    public Cursor getAccounts(String username) {
+//        SQLiteDatabase db = this.getReadableDatabase();
+//        return db.rawQuery(
+//                "SELECT id, name FROM " + TABLE_CATEGORIES + " WHERE username = ? AND type = 'account'",
+//                new String[]{username}
+//        );
+//    }
 
 
     // ---------------- Helper methods for calcu_add ----------------
@@ -524,37 +359,47 @@ public boolean updateCategory(int id, String newName) {
     }
 
     // ---------------- Transfer management ----------------
-    public boolean insertTransfer(String username, int fromAccountId, int toAccountId, double amount, String date, String note) {
+    public boolean insertTransfer(String username, int fromAccountId, int toAccountId, double amount, String timestamp, String note) {
         SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues fromValues = new ContentValues();
-        ContentValues toValues = new ContentValues();
-
+        db.beginTransaction();
         try {
-            // Deduct from source account
-            fromValues.put(COL_RECORD_USER, username);
-            fromValues.put(COL_RECORD_CATEGORY, fromAccountId);
-            fromValues.put(COL_RECORD_TYPE, "transfer_out");
-            fromValues.put(COL_RECORD_AMOUNT, amount);
-            fromValues.put(COL_RECORD_DATE, date);
-            fromValues.put(COL_RECORD_NOTE, note);
+            // --- 1. Check if source account has enough balance ---
+            double currentBalance = getTotalIncomeForAccount(username, fromAccountId)
+                    - getTotalExpenseForAccount(username, fromAccountId);
+            if (currentBalance < amount) {
+                return false; // insufficient funds
+            }
 
-            // Add to destination account
-            toValues.put(COL_RECORD_USER, username);
-            toValues.put(COL_RECORD_CATEGORY, toAccountId);
-            toValues.put(COL_RECORD_TYPE, "transfer_in");
-            toValues.put(COL_RECORD_AMOUNT, amount);
-            toValues.put(COL_RECORD_DATE, date);
-            toValues.put(COL_RECORD_NOTE, note);
+            // --- 2. Insert transfer_out record for source account ---
+            ContentValues cvOut = new ContentValues();
+            cvOut.put("username", username);
+            cvOut.put("category_id", fromAccountId);
+            cvOut.put("type", "transfer_out");
+            cvOut.put("amount", amount);
+            cvOut.put("timestamp", timestamp);
+            cvOut.put("note", note);
+            db.insert(TABLE_RECORDS, null, cvOut);
 
-            long outResult = db.insert(TABLE_RECORDS, null, fromValues);
-            long inResult = db.insert(TABLE_RECORDS, null, toValues);
+            // --- 3. Insert income record for target account ---
+            ContentValues cvIn = new ContentValues();
+            cvIn.put("username", username);
+            cvIn.put("category_id", toAccountId);
+            cvIn.put("type", "income");
+            cvIn.put("amount", amount);
+            cvIn.put("timestamp", timestamp);
+            cvIn.put("note", note);
+            db.insert(TABLE_RECORDS, null, cvIn);
 
-            return outResult != -1 && inResult != -1;
+            db.setTransactionSuccessful();
+            return true;
         } catch (Exception e) {
-            Log.e(TAG, "Error inserting transfer: " + e.getMessage());
+            e.printStackTrace();
             return false;
+        } finally {
+            db.endTransaction();
         }
     }
+
 
     // ---------------- Get categories by type ----------------
     public Cursor getCategoriesByType(String username, String type) {
@@ -579,35 +424,48 @@ public boolean updateCategory(int id, String newName) {
         SQLiteDatabase db = this.getReadableDatabase();
 
         Cursor cursor = db.rawQuery(
-                "SELECT r.id, r.category_id, r.type, r.amount, r.date, r.note, " +
-                        "c.name, c.icon " +
-                        "FROM records r " +
-                        "LEFT JOIN categories c ON r.category_id = c.id " +
-                        "WHERE r.username = ? " +
-                        "ORDER BY r.date DESC",
+                "SELECT r." + COL_RECORD_ID + ", r." + COL_RECORD_CATEGORY + ", c." + COL_CATEGORY_NAME +
+                        ", r." + COL_RECORD_TYPE + ", r." + COL_RECORD_AMOUNT + ", r." + COL_RECORD_DATE +
+                        ", r." + COL_RECORD_NOTE + ", c." + COL_CATEGORY_ICON +
+                        ", r." + COL_RECORD_ACCOUNT + ", acc." + COL_CATEGORY_NAME + " AS accountName" +
+                        " FROM " + TABLE_RECORDS + " r " +
+                        "JOIN " + TABLE_CATEGORIES + " c " +
+                        "ON r." + COL_RECORD_CATEGORY + " = c." + COL_CATEGORY_ID +
+                        " LEFT JOIN " + TABLE_CATEGORIES + " acc " +
+                        "ON r." + COL_RECORD_ACCOUNT + " = acc." + COL_CATEGORY_ID +
+                        " WHERE r." + COL_RECORD_USER + " = ? " +
+                        "ORDER BY r." + COL_RECORD_DATE + " DESC",
                 new String[]{username}
         );
 
-        if (cursor.moveToFirst()) {
+        if (cursor != null && cursor.moveToFirst()) {
             do {
-                int id = cursor.getInt(cursor.getColumnIndexOrThrow("id"));
-                int categoryId = cursor.getInt(cursor.getColumnIndexOrThrow("category_id"));
-                String typeStr = cursor.getString(cursor.getColumnIndexOrThrow("type"));
-                double amount = cursor.getDouble(cursor.getColumnIndexOrThrow("amount"));
-                String date = cursor.getString(cursor.getColumnIndexOrThrow("date"));
-                String note = cursor.getString(cursor.getColumnIndexOrThrow("note"));
-                String categoryName = cursor.getString(cursor.getColumnIndexOrThrow("name"));
-                int icon = cursor.getInt(cursor.getColumnIndexOrThrow("icon"));
+                int id = cursor.getInt(cursor.getColumnIndexOrThrow(COL_RECORD_ID));
+                int categoryId = cursor.getInt(cursor.getColumnIndexOrThrow(COL_RECORD_CATEGORY));
+                String categoryName = cursor.getString(cursor.getColumnIndexOrThrow(COL_CATEGORY_NAME));
+                String typeStr = cursor.getString(cursor.getColumnIndexOrThrow(COL_RECORD_TYPE));
+                double amount = cursor.getDouble(cursor.getColumnIndexOrThrow(COL_RECORD_AMOUNT));
+                String date = cursor.getString(cursor.getColumnIndexOrThrow(COL_RECORD_DATE));
+                String note = cursor.getString(cursor.getColumnIndexOrThrow(COL_RECORD_NOTE));
+                int icon = cursor.getInt(cursor.getColumnIndexOrThrow(COL_CATEGORY_ICON));
 
-                Record record = new Record(id, categoryId, categoryName, typeStr, amount, date, note, icon);
-                list.add(record);
+                // Get account name (will be null if no account assigned)
+                String accountName = cursor.getString(cursor.getColumnIndexOrThrow("accountName"));
+                if (accountName == null || accountName.isEmpty()) {
+                    accountName = "No Account";
+                }
+
+                list.add(new Record(id, categoryId, categoryName, typeStr, amount, date, note, icon, accountName));
 
             } while (cursor.moveToNext());
+
+            cursor.close();
         }
 
-        cursor.close();
         return list;
     }
+
+
 
     public double getIncomeForLastDays(String username, int days) {
         SQLiteDatabase db = getReadableDatabase();
@@ -804,14 +662,332 @@ public boolean updateCategory(int id, String newName) {
     }
 
 
+    // Get all accounts (categories of type "account")
+
+    public boolean deductFromAccount(int accountId, String username, double amount, String date, String note) {
+        double balance = getAccountBalance(accountId, username);
+        if (balance < amount) return false; // insufficient funds
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COL_RECORD_USER, username);
+        values.put(COL_RECORD_CATEGORY, accountId);
+        values.put(COL_RECORD_TYPE, "expense");
+        values.put(COL_RECORD_AMOUNT, amount);
+        values.put(COL_RECORD_DATE, date);
+        values.put(COL_RECORD_NOTE, note);
+
+        long result = db.insert(TABLE_RECORDS, null, values);
+        return result != -1;
+    }
+    public boolean addToAccount(int accountId, String username, double amount, String date, String note) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COL_RECORD_USER, username);
+        values.put(COL_RECORD_CATEGORY, accountId);
+        values.put(COL_RECORD_TYPE, "income");
+        values.put(COL_RECORD_AMOUNT, amount);
+        values.put(COL_RECORD_DATE, date);
+        values.put(COL_RECORD_NOTE, note);
+
+        long result = db.insert(TABLE_RECORDS, null, values);
+        return result != -1;
+    }
+    public boolean transferBetweenAccounts(int fromAccountId, int toAccountId, String username, double amount, String date, String note) {
+        double fromBalance = getAccountBalance(fromAccountId, username);
+        if (fromBalance < amount) return false; // insufficient funds
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.beginTransaction();
+        try {
+            // Deduct from source
+            ContentValues outValues = new ContentValues();
+            outValues.put(COL_RECORD_USER, username);
+            outValues.put(COL_RECORD_CATEGORY, fromAccountId);
+            outValues.put(COL_RECORD_TYPE, "transfer_out");
+            outValues.put(COL_RECORD_AMOUNT, amount);
+            outValues.put(COL_RECORD_DATE, date);
+            outValues.put(COL_RECORD_NOTE, note);
+            db.insert(TABLE_RECORDS, null, outValues);
+
+            // Add to destination
+            ContentValues inValues = new ContentValues();
+            inValues.put(COL_RECORD_USER, username);
+            inValues.put(COL_RECORD_CATEGORY, toAccountId);
+            inValues.put(COL_RECORD_TYPE, "transfer_in");
+            inValues.put(COL_RECORD_AMOUNT, amount);
+            inValues.put(COL_RECORD_DATE, date);
+            inValues.put(COL_RECORD_NOTE, note);
+            db.insert(TABLE_RECORDS, null, inValues);
+
+            db.setTransactionSuccessful();
+            return true;
+        } finally {
+            db.endTransaction();
+        }
+    }
+
+    // Get total income for a specific account
+    public double getTotalIncomeForAccount(String username, int accountId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        double total = 0;
+        Cursor cursor = db.rawQuery(
+                "SELECT SUM(amount) FROM " + TABLE_RECORDS +
+                        " WHERE username = ? AND account_id = ? AND type = 'income'",
+                new String[]{username, String.valueOf(accountId)}
+        );
+        if(cursor.moveToFirst()) total = cursor.getDouble(0);
+        cursor.close();
+        return total;
+    }
+
+    public double getTotalExpenseForAccount(String username, int accountId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        double total = 0;
+        Cursor cursor = db.rawQuery(
+                "SELECT SUM(amount) FROM " + TABLE_RECORDS +
+                        " WHERE username = ? AND account_id = ? AND (type = 'expense' OR type='transfer_out')",
+                new String[]{username, String.valueOf(accountId)}
+        );
+        if(cursor.moveToFirst()) total = cursor.getDouble(0);
+        cursor.close();
+        return total;
+    }
+    // ---------------- Budgets ----------------
+    public boolean insertBudget(String username, int categoryId, double amount) {
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COL_BUDGET_USER, username);
+        values.put(COL_BUDGET_CATEGORY, categoryId);
+        values.put(COL_BUDGET_AMOUNT, amount);
+        return db.insert(TABLE_BUDGETS, null, values) != -1;
+    }
+
+    public Cursor getBudgetedCategories(String username) {
+        SQLiteDatabase db = getReadableDatabase();
+        return db.rawQuery(
+                "SELECT c.name, b.amount, c.icon, c.type FROM " + TABLE_BUDGETS + " b " +
+                        "JOIN " + TABLE_CATEGORIES + " c ON b.category_id=c.id " +
+                        "WHERE b.username=?",
+                new String[]{username});
+    }
+
+    public Cursor getUnbudgetedCategories(String username) {
+        SQLiteDatabase db = getReadableDatabase();
+        return db.rawQuery(
+                "SELECT c.name, c.type, c.icon FROM " + TABLE_CATEGORIES + " c " +
+                        "LEFT JOIN " + TABLE_BUDGETS + " b " +
+                        "ON c.id = b.category_id AND b.username = ? " +
+                        "WHERE c.username = ? AND b.category_id IS NULL",
+                new String[]{username, username});
+    }
 
 
+    public double getTotalBudget(String username) {
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT SUM(amount) FROM " + TABLE_BUDGETS + " WHERE username=?", new String[]{username});
+        double total = cursor.moveToFirst() ? cursor.getDouble(0) : 0;
+        cursor.close();
+        return total;
+    }
 
+    // ---------------- Records ----------------
+    public boolean insertRecord(String username, int categoryId, int accountId, String type, double amount, String date, String note) {
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COL_RECORD_USER, username);
+        values.put(COL_RECORD_CATEGORY, categoryId);
+        values.put(COL_RECORD_ACCOUNT, accountId);
+        values.put(COL_RECORD_TYPE, type);
+        values.put(COL_RECORD_AMOUNT, amount);
+        values.put(COL_RECORD_DATE, date);
+        values.put(COL_RECORD_NOTE, note);
 
+        return db.insert(TABLE_RECORDS, null, values) != -1;
+    }
 
+    public double getTotalExpense(String username) {
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT SUM(amount) FROM " + TABLE_RECORDS + " WHERE username=? AND type='expense'", new String[]{username});
+        double total = cursor.moveToFirst() ? cursor.getDouble(0) : 0;
+        cursor.close();
+        return total;
+    }
 
+    public double getTotalIncome(String username) {
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT SUM(amount) FROM " + TABLE_RECORDS + " WHERE username=? AND type='income'", new String[]{username});
+        double total = cursor.moveToFirst() ? cursor.getDouble(0) : 0;
+        cursor.close();
+        return total;
+    }
 
+    public Cursor getRecordsForUser(String username) {
+        SQLiteDatabase db = getReadableDatabase();
+        return db.rawQuery("SELECT r.id, c.name, r.type, r.amount, r.date, r.note FROM " + TABLE_RECORDS + " r " +
+                        "LEFT JOIN " + TABLE_CATEGORIES + " c ON r.category_id=c.id " +
+                        "WHERE r.username=? ORDER BY r.date DESC",
+                new String[]{username});
+    }
 
+    // ---------------- Account Balances ----------------
+    public Cursor getAccounts(String username) {
+        SQLiteDatabase db = getReadableDatabase();
+        return db.rawQuery("SELECT id, name, icon FROM " + TABLE_CATEGORIES + " WHERE username=? AND type='account'", new String[]{username});
+    }
+
+    public double getAccountBalance(int accountId, String username) {
+        SQLiteDatabase db = getReadableDatabase();
+        double income = 0, expense = 0;
+
+        Cursor cursorIncome = db.rawQuery(
+                "SELECT SUM(amount) FROM " + TABLE_RECORDS +
+                        " WHERE username=? AND account_id=? AND (type='income' OR type='transfer_in')",
+                new String[]{username, String.valueOf(accountId)}
+        );
+        if (cursorIncome.moveToFirst()) income = cursorIncome.getDouble(0);
+        cursorIncome.close();
+
+        Cursor cursorExpense = db.rawQuery(
+                "SELECT SUM(amount) FROM " + TABLE_RECORDS +
+                        " WHERE username=? AND account_id=? AND (type='expense' OR type='transfer_out')",
+                new String[]{username, String.valueOf(accountId)}
+        );
+        if (cursorExpense.moveToFirst()) expense = cursorExpense.getDouble(0);
+        cursorExpense.close();
+
+        return income - expense;
+    }
+    // Returns the budgeted amount for a specific category for the current user
+    public double getBudgetedAmount(String user, int categoryId) {
+        double budget = 0;
+        Cursor cursor = getReadableDatabase().rawQuery(
+                "SELECT amount FROM " + TABLE_BUDGETS + " WHERE username = ? AND category_id = ?",
+                new String[]{user, String.valueOf(categoryId)}
+        );
+
+        if (cursor != null && cursor.moveToFirst()) {
+            budget = cursor.getDouble(cursor.getColumnIndexOrThrow("amount"));
+            cursor.close();
+        }
+
+        return budget;
+    }
+
+    // Returns total spent for that category
+
+    public String getAccountNameById(int accountId, String user) {
+        String name = "Unknown";
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(
+                "SELECT name FROM " + TABLE_CATEGORIES + " WHERE id = ? AND username = ? AND type='account'",
+                new String[]{String.valueOf(accountId), user}
+        );
+        if (cursor != null && cursor.moveToFirst()) {
+            name = cursor.getString(cursor.getColumnIndexOrThrow("name"));
+            cursor.close();
+        }
+        return name;
+    }
+
+    public ArrayList<Record> getTransactions(String user) {
+        var list = new ArrayList<Record>();
+        Cursor cursor = getReadableDatabase().rawQuery("SELECT * FROM " + TABLE_RECORDS + " WHERE " + COL_RECORD_USER + " = ?",
+                new String[]{user});
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                int categoryId = cursor.getInt(cursor.getColumnIndexOrThrow(COL_RECORD_CATEGORY));
+                int accountId = cursor.getInt(cursor.getColumnIndexOrThrow(COL_RECORD_ACCOUNT));
+                String type = cursor.getString(cursor.getColumnIndexOrThrow(COL_RECORD_TYPE));
+                double amount = cursor.getDouble(cursor.getColumnIndexOrThrow(COL_RECORD_AMOUNT));
+                String date = cursor.getString(cursor.getColumnIndexOrThrow(COL_RECORD_DATE));
+                String note = cursor.getString(cursor.getColumnIndexOrThrow(COL_RECORD_NOTE));
+
+                String categoryName = getCategoryNameById(categoryId, user);
+                String accountName = getAccountNameById(accountId, user);
+
+                list.add(new Record(categoryName, accountName, amount, date, note));
+            } while (cursor.moveToNext());
+            cursor.close();
+        }
+        return list;
+    }
+    public String getCategoryNameById(int categoryId, String user) {
+        String name = "Unknown";
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(
+                "SELECT name FROM " + TABLE_CATEGORIES + " WHERE id = ? AND username = ?",
+                new String[]{String.valueOf(categoryId), user}
+        );
+        if (cursor != null && cursor.moveToFirst()) {
+            name = cursor.getString(cursor.getColumnIndexOrThrow("name"));
+            cursor.close();
+        }
+        return name;
+    }
+    // Get total balance across all accounts for a user
+    public double getTotalAccountsBalance(String username) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        double totalIncome = 0, totalExpense = 0;
+
+        // Get all income and transfer_in for all accounts
+        Cursor cursorIncome = db.rawQuery(
+                "SELECT SUM(r." + COL_RECORD_AMOUNT + ") FROM " + TABLE_RECORDS + " r " +
+                        "JOIN " + TABLE_CATEGORIES + " c ON r." + COL_RECORD_ACCOUNT + " = c." + COL_CATEGORY_ID + " " +
+                        "WHERE r." + COL_RECORD_USER + " = ? AND c." + COL_CATEGORY_TYPE + " = 'account' " +
+                        "AND (r." + COL_RECORD_TYPE + " = 'income' OR r." + COL_RECORD_TYPE + " = 'transfer_in')",
+                new String[]{username}
+        );
+        if (cursorIncome != null && cursorIncome.moveToFirst()) {
+            totalIncome = cursorIncome.getDouble(0);
+            cursorIncome.close();
+        }
+
+        // Get all expense and transfer_out for all accounts
+        Cursor cursorExpense = db.rawQuery(
+                "SELECT SUM(r." + COL_RECORD_AMOUNT + ") FROM " + TABLE_RECORDS + " r " +
+                        "JOIN " + TABLE_CATEGORIES + " c ON r." + COL_RECORD_ACCOUNT + " = c." + COL_CATEGORY_ID + " " +
+                        "WHERE r." + COL_RECORD_USER + " = ? AND c." + COL_CATEGORY_TYPE + " = 'account' " +
+                        "AND (r." + COL_RECORD_TYPE + " = 'expense' OR r." + COL_RECORD_TYPE + " = 'transfer_out')",
+                new String[]{username}
+        );
+        if (cursorExpense != null && cursorExpense.moveToFirst()) {
+            totalExpense = cursorExpense.getDouble(0);
+            cursorExpense.close();
+        }
+
+        return totalIncome - totalExpense;
+    }
+    // Delete a budget for a specific category
+    public boolean deleteBudget(String username, int categoryId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        try {
+            int rows = db.delete(TABLE_BUDGETS,
+                    COL_BUDGET_USER + " = ? AND " + COL_BUDGET_CATEGORY + " = ?",
+                    new String[]{username, String.valueOf(categoryId)});
+            return rows > 0;
+        } catch (Exception e) {
+            Log.e(TAG, "Error deleting budget: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // Update budget amount
+    public boolean updateBudget(String username, int categoryId, double newAmount) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COL_BUDGET_AMOUNT, newAmount);
+
+        try {
+            int rows = db.update(TABLE_BUDGETS, values,
+                    COL_BUDGET_USER + " = ? AND " + COL_BUDGET_CATEGORY + " = ?",
+                    new String[]{username, String.valueOf(categoryId)});
+            return rows > 0;
+        } catch (Exception e) {
+            Log.e(TAG, "Error updating budget: " + e.getMessage());
+            return false;
+        }
+    }
 
 
 

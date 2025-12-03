@@ -2,6 +2,7 @@ package com.bigo143.budgettracker.fragments;
 
 import static android.content.Context.MODE_PRIVATE;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -40,14 +41,25 @@ public class RecordsFragment extends Fragment {
     public RecordsFragment() {
         setHasOptionsMenu(true); // enables toolbar menu
     }
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        db = new DatabaseHelper(context);
+
+        SharedPreferences prefs = context.getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
+        currentUser = prefs.getString("logged_in_user", null);
+        if (currentUser == null) {
+            throw new IllegalStateException("No logged in user found in SharedPreferences");
+        }
+
+    }
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_records, container, false);
-        SharedPreferences prefs = requireContext().getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
-        currentUser = prefs.getString("logged_in_user", null);
+
 
         // RecyclerView
         recyclerView = view.findViewById(R.id.recyclerRecords);
@@ -80,30 +92,28 @@ public class RecordsFragment extends Fragment {
         inflater.inflate(R.menu.menu_records, menu);
     }
 
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+//    @Override
+//    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+//
+//        int id = item.getItemId();  // GOOD — Java allows this
+//
+//        if (id == R.id.action_calendar) {
+//            // open calendar modal
+//            return true;
+//
+//        } else if (id == R.id.action_filter) {
+//            // open filter modal
+//            return true;
+//
+//        } else if (id == R.id.action_search) {
+//            // open search UI
+//            return true;
+//        }
+//
+//        return super.onOptionsItemSelected(item);
+//    }
 
-        int id = item.getItemId();  // GOOD — Java allows this
 
-        if (id == R.id.action_calendar) {
-            // open calendar modal
-            return true;
-
-        } else if (id == R.id.action_filter) {
-            // open filter modal
-            return true;
-
-        } else if (id == R.id.action_search) {
-            // open search UI
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    // --------------------------
-    // Sample Data
-    // --------------------------
 
 
     private void loadTransactions() {
@@ -133,5 +143,25 @@ public class RecordsFragment extends Fragment {
         tvExpense.setText("₱" + totalExpense);
         tvTotal.setText("₱" + total);
     }
+
+    public void reloadData() {
+        // Make sure fragment is attached
+        if (!isAdded()) return;
+
+        // Reload transactions from DB
+        loadTransactions();
+    }
+    private boolean willExceedBudget(int categoryId, double newAmount) {
+        double budgeted = db.getBudgetedAmount(currentUser, categoryId);
+        double spent = db.getTotalSpentForCategory(currentUser, categoryId);
+
+        if (budgeted > 0 && spent + newAmount > budgeted) {
+            return true;
+        }
+        return false;
+    }
+
+
+
 
 }

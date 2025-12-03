@@ -38,6 +38,21 @@ public class ChartsFragment extends Fragment {
     private DatabaseHelper db;
     private String currentUser; // replace with actual logged-in user
     private TextView tvIncome, tvExpense, tvTotal; // move TextViews here
+    private final int[] CATEGORY_COLORS = new int[] {
+            Color.parseColor("#FF7043"), // Food
+            Color.parseColor("#42A5F5"), // Bills
+            Color.parseColor("#66BB6A"), // Transport
+            Color.parseColor("#AB47BC"), // Shopping
+            Color.parseColor("#FFA726"), // Other
+            Color.parseColor("#26C6DA"), // Health
+            Color.parseColor("#EC407A"), // Entertainment
+            Color.parseColor("#8D6E63"), // Education
+            Color.parseColor("#9CCC65"), // Gifts
+            Color.parseColor("#FFCA28"), // Travel
+            Color.parseColor("#5C6BC0"), // Insurance
+            Color.parseColor("#FF8A65")  // Misc
+    };
+
 
 
 
@@ -121,9 +136,6 @@ public class ChartsFragment extends Fragment {
 
     private void updateCharts() {
         // Fetch filtered data based on currentPeriod
-        ArrayList<BarEntry> barEntries = new ArrayList<>();
-        ArrayList<PieEntry> pieEntries = new ArrayList<>();
-
         double totalIncome = 0;
         double totalExpense = 0;
 
@@ -142,8 +154,9 @@ public class ChartsFragment extends Fragment {
                 break;
         }
 
-        // --- Bar chart ---
+        // --- Update Bar Chart ---
         BarChart bar = requireView().findViewById(R.id.barChart);
+        ArrayList<BarEntry> barEntries = new ArrayList<>();
         barEntries.add(new BarEntry(0, (float) totalIncome));
         barEntries.add(new BarEntry(1, (float) totalExpense));
 
@@ -158,9 +171,16 @@ public class ChartsFragment extends Fragment {
         bar.getDescription().setEnabled(false);
         bar.invalidate();
 
+        // --- Update Pie Chart ---
         updateCategoryPieChart();
 
+        // --- Update Summary TextViews dynamically ---
+        double total = totalIncome - totalExpense;
+        tvIncome.setText("₱" + String.format("%.2f", totalIncome));
+        tvExpense.setText("₱" + String.format("%.2f", totalExpense));
+        tvTotal.setText("₱" + String.format("%.2f", total));
     }
+
     private void updateCategoryPieChart() {
 
         PieChart pieChart = requireView().findViewById(R.id.pieChart);
@@ -184,26 +204,23 @@ public class ChartsFragment extends Fragment {
         ArrayList<PieEntry> entries = new ArrayList<>();
         ArrayList<Integer> colors = new ArrayList<>();
 
-        Map<String, Integer> categoryColors = new HashMap<>();
-        categoryColors.put("Food", Color.parseColor("#FF7043"));
-        categoryColors.put("Bills", Color.parseColor("#42A5F5"));
-        categoryColors.put("Transport", Color.parseColor("#66BB6A"));
-        categoryColors.put("Shopping", Color.parseColor("#AB47BC"));
-        categoryColors.put("Other", Color.parseColor("#FFA726"));
+        ArrayList<String> categoryNames = new ArrayList<>(percentages.keySet());
 
-        for (Map.Entry<String, Double> e : percentages.entrySet()) {
-            entries.add(new PieEntry(e.getValue().floatValue(), e.getKey()));
-            colors.add(categoryColors.getOrDefault(e.getKey(), Color.GRAY));
+        for (String cat : categoryNames) {
+            entries.add(new PieEntry(percentages.get(cat).floatValue(), cat));
+            colors.add(getColorForCategory(cat, categoryNames));
         }
 
         PieDataSet dataSet = new PieDataSet(entries, "Expense Categories");
         dataSet.setValueTextSize(12f);
         dataSet.setColors(colors);
 
-        pieChart.setData(new PieData(dataSet));
+        PieData data = new PieData(dataSet);
+        pieChart.setData(data);
         pieChart.setUsePercentValues(true);
         pieChart.invalidate();
     }
+
 
 
 
@@ -215,34 +232,30 @@ public class ChartsFragment extends Fragment {
         ArrayList<PieEntry> entries = new ArrayList<>();
         ArrayList<Integer> colors = new ArrayList<>();
 
-        Map<String, Double> percentages = db.getExpensePercentageByCategory("userOne");
+        // fetch percentages for current user
+        Map<String, Double> percentages = db.getExpensePercentageByCategory(currentUser);
 
-        Map<String, Integer> categoryColors = new HashMap<>();
-        categoryColors.put("Food", Color.parseColor("#FF7043"));
-        categoryColors.put("Bills", Color.parseColor("#42A5F5"));
-        categoryColors.put("Transport", Color.parseColor("#66BB6A"));
-        categoryColors.put("Shopping", Color.parseColor("#AB47BC"));
-        categoryColors.put("Other", Color.parseColor("#FFA726"));
+        ArrayList<String> categoryNames = new ArrayList<>(percentages.keySet());
 
-        for (Map.Entry<String, Double> e : percentages.entrySet()) {
-            entries.add(new PieEntry(e.getValue().floatValue(), e.getKey()));
-
-            if (categoryColors.containsKey(e.getKey()))
-                colors.add(categoryColors.get(e.getKey()));
-            else
-                colors.add(Color.GRAY);
+        for (String cat : categoryNames) {
+            double value = percentages.get(cat);
+            entries.add(new PieEntry((float) value, cat));
+            colors.add(getColorForCategory(cat, categoryNames));
         }
 
         PieDataSet dataSet = new PieDataSet(entries, "Expense Categories");
         dataSet.setColors(colors);
         dataSet.setValueTextSize(12f);
+        //dataSet.setValueTextColor(getResources().getColor(R.color.secondary)); // <-- set secondary color
 
-        pieChart.setData(new PieData(dataSet));
+        PieData data = new PieData(dataSet);
+        pieChart.setData(data);
         pieChart.setUsePercentValues(true);
+        // Set legend text color
+        pieChart.getLegend().setTextColor(getResources().getColor(R.color.secondary));
         pieChart.invalidate();
-
-
     }
+
 
 
     private void setupBar(View view) {
@@ -257,26 +270,34 @@ public class ChartsFragment extends Fragment {
 
         BarDataSet dataSet = new BarDataSet(entries, "Income vs Expense");
         dataSet.setColors(new int[]{
-                Color.parseColor("#4CAF50"), // Green
-                Color.parseColor("#F44336")  // Red
+                Color.parseColor("#66BB6A"), // Income green
+                Color.parseColor("#EF5350")  // Expense red
         });
+        dataSet.setValueTextColor(getResources().getColor(R.color.secondary)); // Values on top of bars
 
         BarData data = new BarData(dataSet);
+        data.setBarWidth(0.5f); // optional: bar width
         bar.setData(data);
 
         String[] labels = new String[]{"Income", "Expense"};
         bar.getXAxis().setValueFormatter(new com.github.mikephil.charting.formatter.IndexAxisValueFormatter(labels));
         bar.getXAxis().setGranularity(1f);
         bar.getXAxis().setPosition(com.github.mikephil.charting.components.XAxis.XAxisPosition.BOTTOM);
-        bar.getAxisRight().setEnabled(false);
-        bar.getDescription().setEnabled(false);
-        bar.invalidate();
+        bar.getXAxis().setTextColor(getResources().getColor(R.color.secondary)); // X-axis labels color
+
+        bar.getAxisLeft().setTextColor(getResources().getColor(R.color.secondary)); // Y-axis labels color
+        bar.getAxisRight().setEnabled(false); // disable right axis
+        bar.getLegend().setTextColor(getResources().getColor(R.color.secondary)); // Legend text color
+        bar.getDescription().setEnabled(false); // remove description
+
+        bar.invalidate(); // refresh chart
 
         double total = totalIncome - totalExpense;
         tvIncome.setText("₱" + totalIncome);
         tvExpense.setText("₱" + totalExpense);
         tvTotal.setText("₱" + total);
     }
+
     private enum ChartPeriod {
         WEEKLY, MONTHLY, YEARLY
     }
@@ -284,17 +305,30 @@ public class ChartsFragment extends Fragment {
     private ChartPeriod currentPeriod = ChartPeriod.MONTHLY; // default
 
     private void updateSegmentUI(TextView weekly, TextView monthly, TextView yearly) {
-        weekly.setBackgroundResource(currentPeriod == ChartPeriod.WEEKLY ? R.drawable.segment_selected : R.drawable.segment_unselected);
-        monthly.setBackgroundResource(currentPeriod == ChartPeriod.MONTHLY ? R.drawable.segment_selected : R.drawable.segment_unselected);
-        yearly.setBackgroundResource(currentPeriod == ChartPeriod.YEARLY ? R.drawable.segment_selected : R.drawable.segment_unselected);
+        weekly.setBackgroundResource(currentPeriod == ChartPeriod.WEEKLY ? R.drawable.bg_button_outline : R.drawable.segment_unselected);
+        monthly.setBackgroundResource(currentPeriod == ChartPeriod.MONTHLY ? R.drawable.bg_button_outline : R.drawable.segment_unselected);
+        yearly.setBackgroundResource(currentPeriod == ChartPeriod.YEARLY ? R.drawable.bg_button_outline : R.drawable.segment_unselected);
 
-        int selectedColor = getResources().getColor(R.color.primaryBlue);
-        int defaultColor = getResources().getColor(R.color.text_main);
+        int selectedColor = getResources().getColor(R.color.primary);
+        int defaultColor = getResources().getColor(R.color.textPrimary);
 
-        weekly.setTextColor(currentPeriod == ChartPeriod.WEEKLY ? selectedColor : defaultColor);
-        monthly.setTextColor(currentPeriod == ChartPeriod.MONTHLY ? selectedColor : defaultColor);
-        yearly.setTextColor(currentPeriod == ChartPeriod.YEARLY ? selectedColor : defaultColor);
+        weekly.setTextColor(currentPeriod == ChartPeriod.WEEKLY ? selectedColor :getResources().getColor(R.color.secondary ));
+        monthly.setTextColor(currentPeriod == ChartPeriod.MONTHLY ? selectedColor : getResources().getColor(R.color.secondary ));
+        yearly.setTextColor(currentPeriod == ChartPeriod.YEARLY ? selectedColor : getResources().getColor(R.color.secondary ));
     }
+
+    private int getColorForCategory(String categoryName, ArrayList<String> categoryList) {
+        int index = categoryList.indexOf(categoryName);
+        if (index == -1) index = 0; // fallback
+        return CATEGORY_COLORS[index % CATEGORY_COLORS.length];
+    }
+
+
+    public void reloadData() {
+        // Recalculate summary and refresh charts
+        updateCharts();
+    }
+
 
 
 

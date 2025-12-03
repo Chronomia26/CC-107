@@ -1,5 +1,7 @@
 package com.bigo143.budgettracker;
 
+import static com.bigo143.budgettracker.MainActivity.staticListener;
+
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
@@ -16,6 +18,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
@@ -54,6 +57,20 @@ public class calcu_add extends AppCompatActivity {
     private final List<String> accounts = new ArrayList<>();
     private final List<String> incomeCats = new ArrayList<>();
     private final List<String> expenseCats = new ArrayList<>();
+
+    public static OnTransactionSavedListener staticListener;
+    public interface OnTransactionSavedListener {
+        void onTransactionSaved();
+    }
+
+    private OnTransactionSavedListener listener;
+
+    public void setOnTransactionSavedListener(OnTransactionSavedListener listener) {
+        this.listener = listener;
+    }
+
+
+
 
     // ***********************************************
     //  ACTIVITIES
@@ -168,7 +185,7 @@ public class calcu_add extends AppCompatActivity {
         tvTransfer.setBackgroundColor(0);
         tvExpense.setBackgroundColor(0);
 
-        int hl = ContextCompat.getColor(this, R.color.third);
+        int hl = ContextCompat.getColor(this, R.color.accent);
 
         switch (type) {
             case INCOME:
@@ -218,17 +235,74 @@ public class calcu_add extends AppCompatActivity {
         switch (currentType) {
             case INCOME:
                 int incId = db.getCategoryIdByName(loggedInUser, categoryOrTarget, "income");
-                ok = db.insertRecord(loggedInUser, incId, "income", amount, timestamp, note);
+                int incomeAccId = db.getAccountIdByName(loggedInUser, fromAcc); // account to add income
+                if (incId == -1 || incomeAccId == -1) {
+                    Toast.makeText(this, "Income category or account not found", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                ok = db.insertRecord(loggedInUser, incId, incomeAccId, "income", amount, timestamp, note);
                 break;
 
             case EXPENSE:
                 int expId = db.getCategoryIdByName(loggedInUser, categoryOrTarget, "expense");
-                ok = db.insertRecord(loggedInUser, expId, "expense", amount, timestamp, note);
+                int expenseAccId = db.getAccountIdByName(loggedInUser, fromAcc); // account to deduct from
+                if (expId == -1 || expenseAccId == -1) {
+                    Toast.makeText(this, "Expense category or account not found", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                double balance = db.getAccountBalance(expenseAccId, loggedInUser); // correct balance check
+                if (balance < amount) {
+                    Toast.makeText(this, "Insufficient funds in " + fromAcc, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                // --- NEW: Check budget ---
+                double budgeted = db.getBudgetedAmount(loggedInUser, expId);
+                double spent = db.getTotalSpentForCategory(loggedInUser, expId);
+                if (budgeted > 0 && spent + amount > budgeted) {
+                    // Show warning dialog and allow override
+                    new AlertDialog.Builder(this)
+                            .setTitle("Budget Exceeded!")
+                            .setMessage("This transaction will exceed the budgeted amount for this category.\nDo you want to continue?")
+                            .setPositiveButton("Yes", (dialog, which) -> {
+                                boolean inserted = db.insertRecord(loggedInUser, expId, expenseAccId, "expense", amount, timestamp, note);
+                                if (inserted) {
+                                    Toast.makeText(this, "Transaction Saved!", Toast.LENGTH_SHORT).show();
+                                    if (listener != null) listener.onTransactionSaved();
+                                    if (staticListener != null) staticListener.onTransactionSaved();
+                                    finishWithUpdate();
+                                } else {
+                                    Toast.makeText(this, "Saving failed", Toast.LENGTH_SHORT).show();
+                                }
+                            })
+                            .setNegativeButton("No", null)
+                            .show();
+                    return; // exit early since user needs to confirm
+                }
+
+                // If under budget, insert normally
+                ok = db.insertRecord(loggedInUser, expId, expenseAccId, "expense", amount, timestamp, note);
                 break;
+
 
             case TRANSFER:
                 int aFrom = db.getAccountIdByName(loggedInUser, fromAcc);
                 int aTo = db.getAccountIdByName(loggedInUser, categoryOrTarget);
+
+                if (aFrom == -1 || aTo == -1) {
+                    Toast.makeText(this, "Account not found", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                double fromBalance = db.getAccountBalance(aFrom, loggedInUser);
+
+                if (fromBalance < amount) {
+                    Toast.makeText(this, "Insufficient funds in " + fromAcc, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 ok = db.insertTransfer(loggedInUser, aFrom, aTo, amount, timestamp, note);
                 break;
 
@@ -236,14 +310,22 @@ public class calcu_add extends AppCompatActivity {
                 ok = false;
         }
 
+
         if (!ok) {
             Toast.makeText(this, "Saving failed", Toast.LENGTH_SHORT).show();
             return;
         }
 
         Toast.makeText(this, "Transaction Saved!", Toast.LENGTH_SHORT).show();
-        finish();
+        // Notify listener
+        if (listener != null) listener.onTransactionSaved();
+        if (staticListener != null) staticListener.onTransactionSaved();
+        finishWithUpdate();
+        //finish();
+
+
     }
+
 
     private boolean validate() {
         lyAccount.setError(null);
@@ -449,4 +531,16 @@ public class calcu_add extends AppCompatActivity {
             public void afterTextChanged(Editable s){}
         };
     }
+    private void finishWithUpdate() {
+        setResult(RESULT_OK); // signal MainActivity that a change happened
+        finish();
+    }
+
+
+
+
+
+
+
+
 }

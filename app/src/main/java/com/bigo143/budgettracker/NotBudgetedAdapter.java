@@ -71,7 +71,13 @@ public class NotBudgetedAdapter extends RecyclerView.Adapter<NotBudgetedAdapter.
         return list.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    // 🔹 Add this method to dynamically update the list
+    public void updateData(ArrayList<CategoryModel> newList) {
+        this.list = newList;
+        notifyDataSetChanged();
+    }
+
+    public static class ViewHolder extends RecyclerView.ViewHolder {
 
         ImageView icon;
         TextView title, limit;
@@ -84,13 +90,12 @@ public class NotBudgetedAdapter extends RecyclerView.Adapter<NotBudgetedAdapter.
             icon = itemView.findViewById(R.id.imgCategory);
             title = itemView.findViewById(R.id.tvNotBudgetTitle);
             limit = itemView.findViewById(R.id.tvNotBudgetLimit);
-            editBudgetAmount = itemView.findViewById(R.id.editBudgetAmount); // make sure this exists in XML
-            btnSetBudget = itemView.findViewById(R.id.btnSetBudget); // make sure this exists in XML
+            editBudgetAmount = itemView.findViewById(R.id.editBudgetAmount);
+            btnSetBudget = itemView.findViewById(R.id.btnSetBudget);
         }
     }
 
     public interface OnBudgetSetListener {
         void onBudgetSet(String categoryName, double amount);
     }
-
 }

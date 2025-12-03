@@ -62,22 +62,25 @@ public class CategoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         CategoryModel m = list.get(position);
         if(holder instanceof IncomeVH){
             ((IncomeVH) holder).name.setText(m.getName());
-            ((IncomeVH) holder).icon.setImageResource(m.getIconRes());
+            ((IncomeVH) holder).icon.setImageResource(m.getIcon());
             ((IncomeVH) holder).more.setOnClickListener(v -> {
                 if(listener!=null) listener.onMoreClick(m, position);
             });
             holder.itemView.setOnClickListener(v -> { if(listener!=null) listener.onItemClick(m, position);});
         } else if(holder instanceof AccountVH){
             ((AccountVH) holder).name.setText(m.getName());
-            ((AccountVH) holder).icon.setImageResource(m.getIconRes());
-            ((AccountVH) holder).balance.setText("Balance: ₱" + String.format("%.2f", m.getAmount()));
+            ((AccountVH) holder).icon.setImageResource(m.getIcon());
+            ((AccountVH) holder).balance.setText(m.getSubtitle()); // use subtitle from model
             ((AccountVH) holder).more.setOnClickListener(v -> {
                 if(listener!=null) listener.onMoreClick(m, position);
+            });
+            holder.itemView.setOnClickListener(v -> {
+                if(listener!=null) listener.onItemClick(m, position);
             });
             holder.itemView.setOnClickListener(v -> { if(listener!=null) listener.onItemClick(m, position);});
         } else if(holder instanceof ExpenseVH){
             ((ExpenseVH) holder).name.setText(m.getName());
-            ((ExpenseVH) holder).icon.setImageResource(m.getIconRes());
+            ((ExpenseVH) holder).icon.setImageResource(m.getIcon());
             ((ExpenseVH) holder).more.setOnClickListener(v -> {
                 if(listener!=null) listener.onMoreClick(m, position);
             });
@@ -112,4 +115,9 @@ public class CategoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             more = v.findViewById(R.id.btnExpenseMore);
         }
     }
+    public void updateData(ArrayList<CategoryModel> newData){
+        this.list = newData;
+        notifyDataSetChanged();
+    }
+
 }
