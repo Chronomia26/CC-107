@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <!-- Account Name Input -->
+    <EditText
+        android:id="@+id/etAccountName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Account Name"
+        android:inputType="textCapWords"
+        android:padding="8dp" />
+
+    <!-- Initial Balance Input -->
+    <EditText
+        android:id="@+id/etInitialBalance"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:hint="Initial Balance (Optional)"
+        android:inputType="numberDecimal"
+        android:padding="8dp" />
+
+    <!-- Icon Selection Button -->
+    <Button
+        android:id="@+id/btnSelectIcon"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="Select Icon"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/bg_button_filled"
+        android:textColor="@android:color/white"
+        android:textStyle="bold"/>
+
+</LinearLayout>

@@ -990,6 +990,25 @@ public boolean updateCategory(int id, String newName) {
     }
 
 
+    public boolean deleteCategory(int categoryId, String username) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        try {
+            // Delete related records first
+            db.delete(TABLE_RECORDS, "category_id=? AND username=?", new String[]{
+                    String.valueOf(categoryId), username});
+
+            // Delete category
+            int rows = db.delete(TABLE_CATEGORIES, "id=? AND username=?", new String[]{
+                    String.valueOf(categoryId), username});
+
+            return rows > 0;
+
+        } catch (Exception e) {
+            Log.e("DB", "Delete category error: " + e.getMessage());
+            return false;
+        }
+    }
 
 
 

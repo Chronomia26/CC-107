@@ -80,6 +80,7 @@ public class BudgetedAdapter extends RecyclerView.Adapter<BudgetedAdapter.ViewHo
 
             popup.show();
         });
+
     }
 
     @Override

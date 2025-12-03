@@ -48,9 +48,11 @@ public class CategoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         if(viewType == TYPE_INCOME){
             v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_income_category, parent, false);
             return new IncomeVH(v);
+
         } else if(viewType == TYPE_ACCOUNT){
             v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_account_category, parent, false);
             return new AccountVH(v);
+
         } else {
             v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_expense_category, parent, false);
             return new ExpenseVH(v);
@@ -59,38 +61,65 @@ public class CategoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+
         CategoryModel m = list.get(position);
+
+        // INCOME
         if(holder instanceof IncomeVH){
-            ((IncomeVH) holder).name.setText(m.getName());
-            ((IncomeVH) holder).icon.setImageResource(m.getIcon());
-            ((IncomeVH) holder).more.setOnClickListener(v -> {
-                if(listener!=null) listener.onMoreClick(m, position);
+            IncomeVH h = (IncomeVH) holder;
+
+            h.name.setText(m.getName());
+            h.icon.setImageResource(m.getIcon());
+
+            h.more.setOnClickListener(v -> {
+                if(listener != null) listener.onMoreClick(m, position);
             });
-            holder.itemView.setOnClickListener(v -> { if(listener!=null) listener.onItemClick(m, position);});
-        } else if(holder instanceof AccountVH){
-            ((AccountVH) holder).name.setText(m.getName());
-            ((AccountVH) holder).icon.setImageResource(m.getIcon());
-            ((AccountVH) holder).balance.setText(m.getSubtitle()); // use subtitle from model
-            ((AccountVH) holder).more.setOnClickListener(v -> {
-                if(listener!=null) listener.onMoreClick(m, position);
+
+            h.itemView.setOnClickListener(v -> {
+                if(listener != null) listener.onItemClick(m, position);
             });
-            holder.itemView.setOnClickListener(v -> {
-                if(listener!=null) listener.onItemClick(m, position);
+        }
+
+        // ACCOUNT
+        else if(holder instanceof AccountVH){
+            AccountVH h = (AccountVH) holder;
+
+            h.name.setText(m.getName());
+            h.icon.setImageResource(m.getIcon());
+            h.balance.setText(m.getSubtitle());
+
+            h.more.setOnClickListener(v -> {
+                if(listener != null) listener.onMoreClick(m, position);
             });
-            holder.itemView.setOnClickListener(v -> { if(listener!=null) listener.onItemClick(m, position);});
-        } else if(holder instanceof ExpenseVH){
-            ((ExpenseVH) holder).name.setText(m.getName());
-            ((ExpenseVH) holder).icon.setImageResource(m.getIcon());
-            ((ExpenseVH) holder).more.setOnClickListener(v -> {
-                if(listener!=null) listener.onMoreClick(m, position);
+
+            h.itemView.setOnClickListener(v -> {
+                if(listener != null) listener.onItemClick(m, position);
             });
-            holder.itemView.setOnClickListener(v -> { if(listener!=null) listener.onItemClick(m, position);});
+        }
+
+        // EXPENSE
+        else if(holder instanceof ExpenseVH){
+            ExpenseVH h = (ExpenseVH) holder;
+
+            h.name.setText(m.getName());
+            h.icon.setImageResource(m.getIcon());
+
+            h.more.setOnClickListener(v -> {
+                if(listener != null) listener.onMoreClick(m, position);
+            });
+
+            h.itemView.setOnClickListener(v -> {
+                if(listener != null) listener.onItemClick(m, position);
+            });
         }
     }
 
+    // VIEW HOLDERS
     static class IncomeVH extends RecyclerView.ViewHolder {
-        ImageView icon; TextView name; ImageView more;
-        IncomeVH(View v){ super(v);
+        ImageView icon, more;
+        TextView name;
+        IncomeVH(View v){
+            super(v);
             icon = v.findViewById(R.id.iconIncome);
             name = v.findViewById(R.id.nameIncome);
             more = v.findViewById(R.id.btnIncomeMore);
@@ -98,8 +127,10 @@ public class CategoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
     static class AccountVH extends RecyclerView.ViewHolder {
-        ImageView icon; TextView name; TextView balance; ImageView more;
-        AccountVH(View v){ super(v);
+        ImageView icon, more;
+        TextView name, balance;
+        AccountVH(View v){
+            super(v);
             icon = v.findViewById(R.id.iconAccount);
             name = v.findViewById(R.id.nameAccount);
             balance = v.findViewById(R.id.balanceAccount);
@@ -108,16 +139,18 @@ public class CategoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
     static class ExpenseVH extends RecyclerView.ViewHolder {
-        ImageView icon; TextView name; ImageView more;
-        ExpenseVH(View v){ super(v);
+        ImageView icon, more;
+        TextView name;
+        ExpenseVH(View v){
+            super(v);
             icon = v.findViewById(R.id.iconExpense);
             name = v.findViewById(R.id.nameExpense);
             more = v.findViewById(R.id.btnExpenseMore);
         }
     }
+
     public void updateData(ArrayList<CategoryModel> newData){
         this.list = newData;
         notifyDataSetChanged();
     }
-
 }

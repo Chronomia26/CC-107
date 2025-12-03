@@ -52,6 +52,8 @@ public class CategoriesFragment extends Fragment implements OnCategoriesUpdatedL
 
     private List<Account> accounts = new ArrayList<>();
 
+    private int selectedIconResource = R.drawable.ic_default;
+
     private int[] availableIcons = new int[]{
             R.drawable.ic_salary,
             R.drawable.ic_income,
@@ -169,43 +171,74 @@ public class CategoriesFragment extends Fragment implements OnCategoriesUpdatedL
         t.commit();
     }
 
+
+    private void showIconSelectionDialog(Button targetButton) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Select Icon");
+
+        View gridViewLayout = getLayoutInflater().inflate(R.layout.dialog_select_icon, null);
+        GridView grid = gridViewLayout.findViewById(R.id.gridIcons);
+        grid.setAdapter(new IconAdapter(requireContext(), availableIcons));
+        grid.setOnItemClickListener((parent, view, position, id) -> {
+            selectedIconResource = availableIcons[position];
+            targetButton.setText("Icon Selected");
+            Toast.makeText(getContext(), "Icon selected", Toast.LENGTH_SHORT).show();
+        });
+
+        builder.setView(gridViewLayout);
+        builder.setPositiveButton("Done", (dialog, which) -> dialog.dismiss());
+        builder.show();
+    }
     private void showAddDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle("Add " + currentType + " category");
 
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_add_category, null);
-        EditText input = dialogView.findViewById(R.id.editCategoryName);
+        EditText input = dialogView.findViewById(R.id.etCategoryName);
         Button btnSelectIcon = dialogView.findViewById(R.id.btnSelectIcon);
 
-        final int[] selectedIcon = {R.drawable.ic_default};
+        // Reset to default icon
+        selectedIconResource = R.drawable.ic_default;
 
-        btnSelectIcon.setOnClickListener(v -> showIconSelectionDialog(selectedIcon));
+        btnSelectIcon.setOnClickListener(v -> showIconSelectionDialog(btnSelectIcon));
 
         builder.setView(dialogView);
 
-        builder.setPositiveButton("Add", (dialog, which) -> {
-            String name = input.getText().toString().trim();
-            if(!name.isEmpty()){
-                boolean ok = dbHelper.insertCategory(currentUser, currentType, name, selectedIcon[0]);
-                if(ok){
-                    CategoryModel newCat = new CategoryModel(name, selectedIcon[0]);
-                    Fragment current = getChildFragmentManager()
-                            .findFragmentById(R.id.categoryContentContainer);
-                    if(current instanceof IncomeFragment)
-                        ((IncomeFragment) current).addCategory(newCat);
-                    else if(current instanceof AccountFragment)
-                        ((AccountFragment) current).addCategory(newCat);
-                    else if(current instanceof ExpenseFragment)
-                        ((ExpenseFragment) current).addCategory(newCat);
+        builder.setPositiveButton("Add", null); // Set null to override default behavior
+        builder.setNegativeButton("Cancel", null);
 
-                    Toast.makeText(getContext(), "Category added", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(getContext(), "Failed to add", Toast.LENGTH_SHORT).show();
-                }
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        // Override positive button to prevent auto-dismiss on validation error
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            String name = input.getText().toString().trim();
+
+            if (name.isEmpty()) {
+                Toast.makeText(getContext(), "Please enter category name", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            boolean ok = dbHelper.insertCategory(currentUser, currentType, name, selectedIconResource);
+
+            if (ok) {
+                CategoryModel newCat = new CategoryModel(name, selectedIconResource);
+                Fragment current = getChildFragmentManager()
+                        .findFragmentById(R.id.categoryContentContainer);
+
+                if (current instanceof IncomeFragment)
+                    ((IncomeFragment) current).addCategory(newCat);
+                else if (current instanceof AccountFragment)
+                    ((AccountFragment) current).addCategory(newCat);
+                else if (current instanceof ExpenseFragment)
+                    ((ExpenseFragment) current).addCategory(newCat);
+
+                Toast.makeText(getContext(), "Category added", Toast.LENGTH_SHORT).show();
+                dialog.dismiss();
+            } else {
+                Toast.makeText(getContext(), "Failed to add", Toast.LENGTH_SHORT).show();
             }
         });
-        builder.setNegativeButton("Cancel", null);
-        builder.show();
     }
 
     private void showIconSelectionDialog(int[] selectedIcon){
@@ -281,6 +314,27 @@ public class CategoriesFragment extends Fragment implements OnCategoriesUpdatedL
         updateIncomeExpenseSummary();
         loadAccountData();
     }
+    public void deleteCategoryDialog(int categoryId, String categoryName) {
+
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Delete " + categoryName)
+                .setMessage("Are you sure you want to delete this? All records linked to this will also be removed.")
+                .setPositiveButton("Delete", (dialog, which) -> {
+
+                    boolean ok = dbHelper.deleteCategory(categoryId, currentUser);
+
+                    if (ok) {
+                        Toast.makeText(getContext(), "Deleted successfully", Toast.LENGTH_SHORT).show();
+                        reloadData();   // refresh ALL fragments and totals
+                    } else {
+                        Toast.makeText(getContext(), "Delete failed", Toast.LENGTH_SHORT).show();
+                    }
+
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
 
 
 
