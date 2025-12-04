@@ -80,19 +80,14 @@ public class CategoriesFragment extends Fragment implements OnCategoriesUpdatedL
     }
 
 
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
 
-
-
         View v = inflater.inflate(R.layout.fragment_categories, container, false);
         FragmentUpdateListenerHolder.listener = this;
-
-
 
         btnIncome = v.findViewById(R.id.btnIncome);
         btnAccount = v.findViewById(R.id.btnAccount);
@@ -103,33 +98,34 @@ public class CategoriesFragment extends Fragment implements OnCategoriesUpdatedL
         tvExpenseValue = v.findViewById(R.id.tvExpenseValue);
         tvAllAccounts = v.findViewById(R.id.tvAllAccounts);
 
-        incomeFragment = new IncomeFragment(loadCategoriesFromDB("income"));
-        accountFragment = new AccountFragment(loadCategoriesFromDB("account"));
-        expenseFragment = new ExpenseFragment(loadCategoriesFromDB("expense"));
+        // ✅ FIXED: Create fragments without parameters
+        incomeFragment = new IncomeFragment();
+        accountFragment = new AccountFragment();
+        expenseFragment = new ExpenseFragment();
 
         showFragment(accountFragment);
         currentType = "account";
-        // ✅ Load all account data including total balance
-        loadAccountData();
-        //double totalBalance = dbHelper.getTotalBalanceAllAccounts();
-        //tvAllAccounts.setText("₱" + totalBalance);
 
+        loadAccountData();
 
         btnIncome.setOnClickListener(view -> {
             showFragment(incomeFragment);
             currentType = "income";
             highlightTab(btnIncome, btnAccount, btnExpense);
         });
+
         btnAccount.setOnClickListener(view -> {
             showFragment(accountFragment);
             currentType = "account";
             highlightTab(btnAccount, btnIncome, btnExpense);
         });
+
         btnExpense.setOnClickListener(view -> {
             showFragment(expenseFragment);
             currentType = "expense";
             highlightTab(btnExpense, btnIncome, btnAccount);
         });
+
         btnAdd.setOnClickListener(view -> showAddDialog());
         updateIncomeExpenseSummary();
 

@@ -1,14 +1,19 @@
 package com.bigo143.budgettracker.adapters;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bigo143.budgettracker.DatabaseHelper;
 import com.bigo143.budgettracker.R;
 import com.bigo143.budgettracker.models.CategoryModel;
 
@@ -23,10 +28,17 @@ public class CategoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private ArrayList<CategoryModel> list;
     private int viewType;
     private OnItemClickListener listener;
+    private OnCategoryActionListener actionListener;
 
     public interface OnItemClickListener {
         void onItemClick(CategoryModel model, int position);
         void onMoreClick(CategoryModel model, int position);
+    }
+
+    // ✅ NEW: Interface for Edit/Delete actions
+    public interface OnCategoryActionListener {
+        void onDeleteCategory(String categoryName, int categoryId);
+        void onEditCategory(String categoryName, int categoryId);
     }
 
     public CategoryAdapter(ArrayList<CategoryModel> list, int viewType){
@@ -36,6 +48,11 @@ public class CategoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     public void setOnItemClickListener(OnItemClickListener l){
         this.listener = l;
+    }
+
+    // ✅ NEW: Set the action listener
+    public void setOnCategoryActionListener(OnCategoryActionListener l){
+        this.actionListener = l;
     }
 
     @Override
@@ -71,8 +88,9 @@ public class CategoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             h.name.setText(m.getName());
             h.icon.setImageResource(m.getIcon());
 
+            // ✅ Modified: Show Edit/Delete options
             h.more.setOnClickListener(v -> {
-                if(listener != null) listener.onMoreClick(m, position);
+                showOptionsDialog(v.getContext(), m, position);
             });
 
             h.itemView.setOnClickListener(v -> {
@@ -88,8 +106,9 @@ public class CategoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             h.icon.setImageResource(m.getIcon());
             h.balance.setText(m.getSubtitle());
 
+            // ✅ Modified: Show Edit/Delete options
             h.more.setOnClickListener(v -> {
-                if(listener != null) listener.onMoreClick(m, position);
+                showOptionsDialog(v.getContext(), m, position);
             });
 
             h.itemView.setOnClickListener(v -> {
@@ -104,14 +123,65 @@ public class CategoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             h.name.setText(m.getName());
             h.icon.setImageResource(m.getIcon());
 
+            // ✅ Modified: Show Edit/Delete options
             h.more.setOnClickListener(v -> {
-                if(listener != null) listener.onMoreClick(m, position);
+                showOptionsDialog(v.getContext(), m, position);
             });
 
             h.itemView.setOnClickListener(v -> {
                 if(listener != null) listener.onItemClick(m, position);
             });
         }
+    }
+
+    // ✅ NEW: Show options dialog when "more" button is clicked
+    private void showOptionsDialog(Context context, CategoryModel model, int position) {
+        // Get category ID from database
+        SharedPreferences prefs = context.getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
+        String currentUser = prefs.getString("logged_in_user", null);
+
+        if (currentUser == null) {
+            Toast.makeText(context, "User not logged in", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        DatabaseHelper dbHelper = new DatabaseHelper(context);
+
+        // Determine type based on viewType
+        String type = "";
+        if (viewType == TYPE_INCOME) type = "income";
+        else if (viewType == TYPE_EXPENSE) type = "expense";
+        else if (viewType == TYPE_ACCOUNT) type = "account";
+
+        int categoryId = dbHelper.getCategoryIdByName(currentUser, model.getName(), type);
+
+        if (categoryId == -1) {
+            Toast.makeText(context, "Category not found", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Show dialog with Edit/Delete options
+        new AlertDialog.Builder(context)
+                .setTitle(model.getName())
+                .setItems(new String[]{"Edit", "Delete"}, (dialog, which) -> {
+                    if (which == 0) {
+                        // Edit
+                        if (actionListener != null) {
+                            actionListener.onEditCategory(model.getName(), categoryId);
+                        } else {
+                            Toast.makeText(context, "Edit functionality coming soon", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        // Delete
+                        if (actionListener != null) {
+                            actionListener.onDeleteCategory(model.getName(), categoryId);
+                        } else {
+                            Toast.makeText(context, "Delete listener not set", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
     }
 
     // VIEW HOLDERS
