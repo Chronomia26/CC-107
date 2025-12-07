@@ -6,9 +6,6 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -27,7 +24,6 @@ import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
-import com.github.mikephil.charting.utils.ColorTemplate;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -107,15 +103,15 @@ public class ChartsFragment extends Fragment {
     // --------------------------
     // MENU (Calendar / Filter / Search)
     // --------------------------
-    @Override
-    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
-        inflater.inflate(R.menu.menu_normal, menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-
-        int id = item.getItemId();  // GOOD — Java allows this
+//    @Override
+//    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+//        inflater.inflate(R.menu.menu_normal, menu);
+//    }
+//
+//    @Override
+//    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+//
+//        int id = item.getItemId();  // GOOD — Java allows this
 
 //        if (id == R.id.action_calendar) {
 //            // open calendar modal
@@ -123,15 +119,15 @@ public class ChartsFragment extends Fragment {
 //
 //        } else if (id == R.id.action_filter) {
 //            // open filter modal
-//            return true;         } else
-
-        if (id == R.id.action_search) {
-            // open search UI
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
+//            return true;
+//
+//        } else if (id == R.id.action_search) {
+//            // open search UI
+//            return true;
+//        }
+//
+//        return super.onOptionsItemSelected(item);
+//    }
 
 
     private void updateCharts() {
