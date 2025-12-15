@@ -7,9 +7,6 @@ import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -116,15 +113,15 @@ public class ChartsFragment extends Fragment {
     // --------------------------
     // MENU (Calendar / Filter / Search)
     // --------------------------
-    @Override
-    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
-        inflater.inflate(R.menu.menu_normal, menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-
-        int id = item.getItemId();  // GOOD — Java allows this
+//    @Override
+//    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+//        inflater.inflate(R.menu.menu_normal, menu);
+//    }
+//
+//    @Override
+//    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+//
+//        int id = item.getItemId();  // GOOD — Java allows this
 
 //        if (id == R.id.action_calendar) {
 //            // open calendar modal
@@ -132,15 +129,15 @@ public class ChartsFragment extends Fragment {
 //
 //        } else if (id == R.id.action_filter) {
 //            // open filter modal
-//            return true;         } else
-
-        if (id == R.id.action_search) {
-            // open search UI
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
+//            return true;
+//
+//        } else if (id == R.id.action_search) {
+//            // open search UI
+//            return true;
+//        }
+//
+//        return super.onOptionsItemSelected(item);
+//    }
 
 
     private void updateCharts() {
