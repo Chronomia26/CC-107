@@ -3,6 +3,7 @@ package com.bigo143.budgettracker.fragments;
 import static android.content.Context.MODE_PRIVATE;
 
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -12,6 +13,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.bigo143.budgettracker.DatabaseHelper;
@@ -24,6 +26,8 @@ import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
+import com.github.mikephil.charting.utils.ColorTemplate;
+import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -73,29 +77,35 @@ public class ChartsFragment extends Fragment {
         tvExpense = view.findViewById(R.id.tvExpense);
         tvTotal = view.findViewById(R.id.tvTotal);
 
-        TextView segWeekly = view.findViewById(R.id.segWeekly);
-        TextView segMonthly = view.findViewById(R.id.segMonthly);
-        TextView segYearly = view.findViewById(R.id.segYearly);
+
 
         setupPie(view);
-        setupBar(view);
+        //setupBar(view);
+        MaterialButton segWeekly = view.findViewById(R.id.segWeekly);
+        MaterialButton segMonthly = view.findViewById(R.id.segMonthly);
+        MaterialButton segYearly = view.findViewById(R.id.segYearly);
+
+// Initial highlight
+        highlightTab(segMonthly, segWeekly, segYearly); // default monthly
+
         segWeekly.setOnClickListener(v -> {
             currentPeriod = ChartPeriod.WEEKLY;
-            updateSegmentUI(segWeekly, segMonthly, segYearly);
+            highlightTab(segWeekly, segMonthly, segYearly);
             updateCharts();
         });
 
         segMonthly.setOnClickListener(v -> {
             currentPeriod = ChartPeriod.MONTHLY;
-            updateSegmentUI(segWeekly, segMonthly, segYearly);
+            highlightTab(segMonthly, segWeekly, segYearly);
             updateCharts();
         });
 
         segYearly.setOnClickListener(v -> {
             currentPeriod = ChartPeriod.YEARLY;
-            updateSegmentUI(segWeekly, segMonthly, segYearly);
+            highlightTab(segYearly, segWeekly, segMonthly);
             updateCharts();
         });
+
 
         return view;
     }
@@ -151,21 +161,21 @@ public class ChartsFragment extends Fragment {
         }
 
         // --- Update Bar Chart ---
-        BarChart bar = requireView().findViewById(R.id.barChart);
-        ArrayList<BarEntry> barEntries = new ArrayList<>();
-        barEntries.add(new BarEntry(0, (float) totalIncome));
-        barEntries.add(new BarEntry(1, (float) totalExpense));
-
-        BarDataSet barDataSet = new BarDataSet(barEntries, "Income vs Expense");
-        barDataSet.setColors(new int[]{Color.parseColor("#4CAF50"), Color.parseColor("#F44336")});
-        BarData barData = new BarData(barDataSet);
-        bar.setData(barData);
-        bar.getXAxis().setValueFormatter(new com.github.mikephil.charting.formatter.IndexAxisValueFormatter(new String[]{"Income","Expense"}));
-        bar.getXAxis().setGranularity(1f);
-        bar.getXAxis().setPosition(com.github.mikephil.charting.components.XAxis.XAxisPosition.BOTTOM);
-        bar.getAxisRight().setEnabled(false);
-        bar.getDescription().setEnabled(false);
-        bar.invalidate();
+//        BarChart bar = requireView().findViewById(R.id.barChart);
+//        ArrayList<BarEntry> barEntries = new ArrayList<>();
+//        barEntries.add(new BarEntry(0, (float) totalIncome));
+//        barEntries.add(new BarEntry(1, (float) totalExpense));
+//
+//        BarDataSet barDataSet = new BarDataSet(barEntries, "Income vs Expense");
+//        barDataSet.setColors(new int[]{Color.parseColor("#4CAF50"), Color.parseColor("#F44336")});
+//        BarData barData = new BarData(barDataSet);
+//        bar.setData(barData);
+//        bar.getXAxis().setValueFormatter(new com.github.mikephil.charting.formatter.IndexAxisValueFormatter(new String[]{"Income","Expense"}));
+//        bar.getXAxis().setGranularity(1f);
+//        bar.getXAxis().setPosition(com.github.mikephil.charting.components.XAxis.XAxisPosition.BOTTOM);
+//        bar.getAxisRight().setEnabled(false);
+//        bar.getDescription().setEnabled(false);
+//        bar.invalidate();
 
         // --- Update Pie Chart ---
         updateCategoryPieChart();
@@ -254,45 +264,45 @@ public class ChartsFragment extends Fragment {
 
 
 
-    private void setupBar(View view) {
-        BarChart bar = view.findViewById(R.id.barChart);
-
-        double totalIncome = db.getTotalIncome(currentUser);
-        double totalExpense = db.getTotalExpense(currentUser);
-
-        ArrayList<BarEntry> entries = new ArrayList<>();
-        entries.add(new BarEntry(0, (float) totalIncome));
-        entries.add(new BarEntry(1, (float) totalExpense));
-
-        BarDataSet dataSet = new BarDataSet(entries, "Income vs Expense");
-        dataSet.setColors(new int[]{
-                Color.parseColor("#66BB6A"), // Income green
-                Color.parseColor("#EF5350")  // Expense red
-        });
-        dataSet.setValueTextColor(getResources().getColor(R.color.secondary)); // Values on top of bars
-
-        BarData data = new BarData(dataSet);
-        data.setBarWidth(0.5f); // optional: bar width
-        bar.setData(data);
-
-        String[] labels = new String[]{"Income", "Expense"};
-        bar.getXAxis().setValueFormatter(new com.github.mikephil.charting.formatter.IndexAxisValueFormatter(labels));
-        bar.getXAxis().setGranularity(1f);
-        bar.getXAxis().setPosition(com.github.mikephil.charting.components.XAxis.XAxisPosition.BOTTOM);
-        bar.getXAxis().setTextColor(getResources().getColor(R.color.secondary)); // X-axis labels color
-
-        bar.getAxisLeft().setTextColor(getResources().getColor(R.color.secondary)); // Y-axis labels color
-        bar.getAxisRight().setEnabled(false); // disable right axis
-        bar.getLegend().setTextColor(getResources().getColor(R.color.secondary)); // Legend text color
-        bar.getDescription().setEnabled(false); // remove description
-
-        bar.invalidate(); // refresh chart
-
-        double total = totalIncome - totalExpense;
-        tvIncome.setText("₱" + totalIncome);
-        tvExpense.setText("₱" + totalExpense);
-        tvTotal.setText("₱" + total);
-    }
+//    private void setupBar(View view) {
+//        BarChart bar = view.findViewById(R.id.barChart);
+//
+//        double totalIncome = db.getTotalIncome(currentUser);
+//        double totalExpense = db.getTotalExpense(currentUser);
+//
+//        ArrayList<BarEntry> entries = new ArrayList<>();
+//        entries.add(new BarEntry(0, (float) totalIncome));
+//        entries.add(new BarEntry(1, (float) totalExpense));
+//
+//        BarDataSet dataSet = new BarDataSet(entries, "Income vs Expense");
+//        dataSet.setColors(new int[]{
+//                Color.parseColor("#66BB6A"), // Income green
+//                Color.parseColor("#EF5350")  // Expense red
+//        });
+//        dataSet.setValueTextColor(getResources().getColor(R.color.secondary)); // Values on top of bars
+//
+//        BarData data = new BarData(dataSet);
+//        data.setBarWidth(0.5f); // optional: bar width
+//        bar.setData(data);
+//
+//        String[] labels = new String[]{"Income", "Expense"};
+//        bar.getXAxis().setValueFormatter(new com.github.mikephil.charting.formatter.IndexAxisValueFormatter(labels));
+//        bar.getXAxis().setGranularity(1f);
+//        bar.getXAxis().setPosition(com.github.mikephil.charting.components.XAxis.XAxisPosition.BOTTOM);
+//        bar.getXAxis().setTextColor(getResources().getColor(R.color.secondary)); // X-axis labels color
+//
+//        bar.getAxisLeft().setTextColor(getResources().getColor(R.color.secondary)); // Y-axis labels color
+//        bar.getAxisRight().setEnabled(false); // disable right axis
+//        bar.getLegend().setTextColor(getResources().getColor(R.color.secondary)); // Legend text color
+//        bar.getDescription().setEnabled(false); // remove description
+//
+//        bar.invalidate(); // refresh chart
+//
+//        double total = totalIncome - totalExpense;
+//        tvIncome.setText("₱" + totalIncome);
+//        tvExpense.setText("₱" + totalExpense);
+//        tvTotal.setText("₱" + total);
+//    }
 
     private enum ChartPeriod {
         WEEKLY, MONTHLY, YEARLY
@@ -324,6 +334,21 @@ public class ChartsFragment extends Fragment {
         // Recalculate summary and refresh charts
         updateCharts();
     }
+    private void highlightTab(MaterialButton selected, MaterialButton... others) {
+        // Selected button: filled
+        selected.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.primary)));
+        selected.setTextColor(ContextCompat.getColor(requireContext(), R.color.white));
+        selected.setStrokeWidth(0);
+
+        // Other buttons: outlined
+        for (MaterialButton b : others) {
+            b.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), android.R.color.transparent)));
+            b.setTextColor(ContextCompat.getColor(requireContext(), R.color.textPrimary));
+            b.setStrokeColor(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.primary)));
+            b.setStrokeWidth(2);
+        }
+    }
+
 
 
 
