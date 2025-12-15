@@ -14,9 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <!-- ====== ALL ACCOUNTS (Top Summary Line) ====== -->
-
-        <!-- ====== INCOME / EXPENSE SUMMARY ====== -->
+        <!-- ===== ALL ACCOUNTS ===== -->
         <TextView
             android:id="@+id/tvAllAccounts"
             android:layout_width="wrap_content"
@@ -29,19 +27,19 @@
             android:textStyle="bold"
             android:textSize="16sp" />
 
+        <!-- ===== INCOME / EXPENSE SUMMARY ===== -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
+            android:paddingVertical="8dp"
             android:weightSum="2">
 
             <!-- INCOME -->
             <LinearLayout
                 android:layout_width="0dp"
-                android:layout_weight="1"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:gravity="center_horizontal"
                 android:orientation="vertical">
 
@@ -61,10 +59,9 @@
                     android:text="₱ 0"
                     android:textSize="16sp"
                     android:textColor="@color/incomeValue"
-                    android:textStyle="bold"/>
+                    android:textStyle="bold" />
             </LinearLayout>
 
-            <!-- Divider -->
             <View
                 android:layout_width="1dp"
                 android:layout_height="40dp"
@@ -73,8 +70,8 @@
             <!-- EXPENSE -->
             <LinearLayout
                 android:layout_width="0dp"
-                android:layout_weight="1"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:gravity="center_horizontal"
                 android:orientation="vertical">
 
@@ -99,7 +96,7 @@
 
         </LinearLayout>
 
-        <!-- ====== CATEGORY BUTTONS (INCOME / ACCOUNT / EXPENSE) ====== -->
+        <!-- ===== CATEGORY BUTTONS ===== -->
         <LinearLayout
             android:id="@+id/categoryButtons"
             android:layout_width="match_parent"
@@ -109,91 +106,90 @@
             android:weightSum="3"
             android:layout_marginTop="12dp">
 
-            <Button
+            <!-- INCOME BUTTON -->
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnIncome"
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="44dp"
                 android:text="INCOME"
-                android:background="@drawable/bg_button_outline"
                 android:textSize="14sp"
-                android:textColor="@color/textPrimary"/>
+                android:textColor="@color/textPrimary"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:includeFontPadding="false"
+                android:minHeight="0dp"
+                android:paddingTop="0dp"
+                android:paddingBottom="0dp"
+                app:cornerRadius="8dp"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
 
-            <Button
+            <!-- ACCOUNT BUTTON (ACTIVE by default, filled) -->
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnAccount"
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="44dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginEnd="8dp"
+                android:layout_marginHorizontal="8dp"
                 android:text="ACCOUNT"
-                android:background="@drawable/bg_button_outline"
                 android:textSize="14sp"
-                android:textColor="@color/textPrimary"/>
+                android:textColor="@color/textPrimary"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:includeFontPadding="false"
+                android:minHeight="0dp"
+                android:paddingTop="0dp"
+                android:paddingBottom="0dp"
+                app:cornerRadius="8dp"
+                style="@style/Widget.MaterialComponents.Button"/>
 
-            <Button
+            <!-- EXPENSE BUTTON -->
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnExpense"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="0dp"
-                android:layout_weight="1"
                 android:layout_height="44dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:includeFontPadding="false"
+                android:minHeight="0dp"
+                android:paddingTop="0dp"
+                android:paddingBottom="0dp"
                 android:text="EXPENSE"
-                android:background="@drawable/bg_button_outline"
+                android:textColor="@color/textPrimary"
                 android:textSize="14sp"
-                android:textColor="@color/textPrimary"/>
-
+                android:textStyle="bold"
+                app:cornerRadius="8dp" />
         </LinearLayout>
 
 
-        <!-- ====== CHILD FRAGMENT CONTAINER ====== -->
-        <FrameLayout
+
+        <!-- CHILD FRAGMENT CONTAINER -->
+        <LinearLayout
             android:id="@+id/categoryContentContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="vertical"
             android:layout_marginTop="12dp"/>
 
-        <RelativeLayout
-            android:layout_width="wrap_content"
-            android:layout_height="463dp"
-            android:layout_marginLeft="200dp"
-            android:orientation="horizontal"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
-            android:weightSum="2">
+
+        <!-- FIXED ADD CATEGORY BUTTON -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:paddingTop="16dp"
+            android:paddingBottom="40dp">
 
             <Button
                 android:id="@+id/btnOpenCategoryAdd"
-                android:layout_width="125dp"
+                android:layout_width="160dp"
                 android:layout_height="50dp"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentTop="true"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentBottom="true"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="10dp"
-                android:layout_marginEnd="15dp"
-                android:layout_marginBottom="400dp"
                 android:background="@drawable/bg_button_filled"
-                android:text="Add Category"
+                android:text="Add Account"
                 android:textColor="@color/white"
                 android:textStyle="bold" />
-
-<!--            <Button-->
-<!--                android:id="@+id/btnSaveCategory"-->
-<!--                android:layout_width="113dp"-->
-<!--                android:layout_height="48dp"-->
-<!--                android:layout_alignParentStart="true"-->
-<!--                android:layout_alignParentEnd="true"-->
-<!--                android:layout_alignParentBottom="true"-->
-<!--                android:layout_marginStart="10dp"-->
-<!--                android:layout_marginTop="440dp"-->
-<!--                android:layout_marginEnd="15dp"-->
-<!--                android:layout_marginBottom="25dp"-->
-<!--                android:background="@drawable/bg_button_filled"-->
-<!--                android:text="Save"-->
-<!--                android:textColor="@color/white"-->
-<!--                android:textStyle="bold" />-->
-        </RelativeLayout>
-
+        </LinearLayout>
 
     </LinearLayout>
 

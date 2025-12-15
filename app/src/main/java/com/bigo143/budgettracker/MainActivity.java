@@ -106,9 +106,9 @@ public class MainActivity extends AppCompatActivity {
         });
 
         recordsFragment = new RecordsFragment();
-        accountFragment = new AccountFragment(new ArrayList<>());
-        incomeFragment = new IncomeFragment(new ArrayList<>());
-        expenseFragment = new ExpenseFragment(new ArrayList<>());
+        accountFragment = new AccountFragment();
+        incomeFragment = new IncomeFragment();
+        expenseFragment = new ExpenseFragment();
         categoriesFragment = new CategoriesFragment();
 
         chartsFragment = new ChartsFragment();

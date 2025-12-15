@@ -1,6 +1,8 @@
 package com.bigo143.budgettracker;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,23 +48,40 @@ public class NotBudgetedAdapter extends RecyclerView.Adapter<NotBudgetedAdapter.
         holder.limit.setText("Not set");
 
         holder.btnSetBudget.setOnClickListener(v -> {
-            String input = holder.editBudgetAmount.getText().toString().trim();
-            if (input.isEmpty()) {
-                Toast.makeText(context, "Enter a valid amount", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            double amount;
-            try {
-                amount = Double.parseDouble(input);
-            } catch (NumberFormatException e) {
-                Toast.makeText(context, "Invalid number", Toast.LENGTH_SHORT).show();
-                return;
-            }
+            // Open a dialog for user input
+            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            builder.setTitle("Set Budget for " + model.getName());
 
-            // Trigger the listener
-            if (listener != null) {
-                listener.onBudgetSet(model.getName(), amount);
-            }
+            final EditText input = new EditText(context);
+            input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+            input.setHint("Enter budget amount");
+            int padding = (int) (16 * context.getResources().getDisplayMetrics().density);
+            input.setPadding(padding, padding, padding, padding);
+
+            builder.setView(input);
+
+            builder.setPositiveButton("Save", (dialog, which) -> {
+                String text = input.getText().toString().trim();
+                if (text.isEmpty()) {
+                    Toast.makeText(context, "Please enter a valid amount", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                double amount;
+                try {
+                    amount = Double.parseDouble(text);
+                } catch (NumberFormatException e) {
+                    Toast.makeText(context, "Invalid number", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                if (listener != null) {
+                    listener.onBudgetSet(model.getName(), amount);
+                }
+            });
+
+            builder.setNegativeButton("Cancel", null);
+            builder.show();
         });
     }
 
@@ -71,26 +90,21 @@ public class NotBudgetedAdapter extends RecyclerView.Adapter<NotBudgetedAdapter.
         return list.size();
     }
 
-    // 🔹 Add this method to dynamically update the list
     public void updateData(ArrayList<CategoryModel> newList) {
         this.list = newList;
         notifyDataSetChanged();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-
         ImageView icon;
         TextView title, limit;
-        EditText editBudgetAmount;
         Button btnSetBudget;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-
             icon = itemView.findViewById(R.id.imgCategory);
             title = itemView.findViewById(R.id.tvNotBudgetTitle);
             limit = itemView.findViewById(R.id.tvNotBudgetLimit);
-            editBudgetAmount = itemView.findViewById(R.id.editBudgetAmount);
             btnSetBudget = itemView.findViewById(R.id.btnSetBudget);
         }
     }

@@ -242,15 +242,20 @@ public class calcu_add extends AppCompatActivity {
                 return;
             }
 
-            double initialBalance = 0;
-            if (!balanceStr.isEmpty()) {
-                try {
-                    initialBalance = Double.parseDouble(balanceStr);
-                } catch (NumberFormatException e) {
-                    Toast.makeText(this, "Invalid balance amount", Toast.LENGTH_SHORT).show();
-                    return;
-                }
+// Require initial balance
+            if (balanceStr.isEmpty()) {
+                Toast.makeText(this, "Please enter initial balance", Toast.LENGTH_SHORT).show();
+                return;
             }
+
+            double initialBalance;
+            try {
+                initialBalance = Double.parseDouble(balanceStr);
+            } catch (NumberFormatException e) {
+                Toast.makeText(this, "Invalid balance amount", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
 
             // Insert account into database
             boolean success = db.insertCategory(loggedInUser, "account", accountName, selectedIconResource);
