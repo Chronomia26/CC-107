@@ -1,7 +1,5 @@
 package com.bigo143.budgettracker.fragments;
 
-import static android.content.Context.MODE_PRIVATE;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -9,6 +7,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -25,15 +24,17 @@ import java.util.ArrayList;
 
 public class AccountFragment extends Fragment {
 
-    private ArrayList<CategoryModel> list;
+    private ArrayList<CategoryModel> list = new ArrayList<>();
     private RecyclerView rv;
     private CategoryAdapter adapter;
     private DatabaseHelper dbHelper;
     private String currentUser;
 
-    public AccountFragment(ArrayList<CategoryModel> list){
-        this.list = list;
+    // ✅ FIXED: Remove parameterized constructor
+    public AccountFragment() {
+        // Required empty public constructor
     }
+
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
@@ -44,10 +45,7 @@ public class AccountFragment extends Fragment {
         if (currentUser == null) {
             throw new IllegalStateException("No logged in user found in SharedPreferences");
         }
-
     }
-
-
 
     @Nullable
     @Override
@@ -57,42 +55,38 @@ public class AccountFragment extends Fragment {
 
         View v = inflater.inflate(R.layout.fragment_child_list, container, false);
 
-
-
         rv = v.findViewById(R.id.recyclerViewChild);
         rv.setLayoutManager(new LinearLayoutManager(requireContext()));
 
+        // ✅ Load data here instead of constructor
+        loadData();
+
         adapter = new CategoryAdapter(list, CategoryAdapter.TYPE_ACCOUNT);
+
+        // ✅ Set the action listener
+        adapter.setOnCategoryActionListener(new CategoryAdapter.OnCategoryActionListener() {
+            @Override
+            public void onDeleteCategory(String categoryName, int categoryId) {
+                Fragment parent = getParentFragment();
+                if (parent instanceof CategoriesFragment) {
+                    ((CategoriesFragment) parent).deleteCategoryDialog(categoryId, categoryName);
+                }
+            }
+
+            @Override
+            public void onEditCategory(String categoryName, int categoryId) {
+                Toast.makeText(requireContext(), "Edit: " + categoryName, Toast.LENGTH_SHORT).show();
+            }
+        });
+
         rv.setAdapter(adapter);
 
         return v;
     }
 
-    // Add new category from the Add Dialog
-    public void addCategory(CategoryModel category){
-        list.add(category);
-        adapter.notifyItemInserted(list.size() - 1);
-    }
-
-    // 🔥 Called when balance changes or records change
-    public void updateList(ArrayList<CategoryModel> newList) {
-        this.list = newList;            // update fragment's list
-        adapter.updateData(newList);     // update adapter
-    }
-    // 🔹 Reload account balances dynamically
-    public void reloadData() {
-        if (dbHelper == null) {
-            dbHelper = new DatabaseHelper(requireContext());
-        }
-
-        if (currentUser == null) {
-            SharedPreferences prefs = requireContext().getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
-            currentUser = prefs.getString("logged_in_user", null);
-            if (currentUser == null) return; // prevent crash if no logged-in user
-        }
-
+    // ✅ NEW: Load data method
+    private void loadData() {
         list.clear();
-
         Cursor cursor = dbHelper.getCategoriesByType(currentUser, "account");
         if(cursor != null && cursor.moveToFirst()){
             do {
@@ -105,11 +99,32 @@ public class AccountFragment extends Fragment {
             } while(cursor.moveToNext());
             cursor.close();
         }
+    }
+
+    public void addCategory(CategoryModel category){
+        list.add(category);
+        adapter.notifyItemInserted(list.size() - 1);
+    }
+
+    public void updateList(ArrayList<CategoryModel> newList) {
+        this.list = newList;
+        adapter.updateData(newList);
+    }
+
+    public void reloadData() {
+        if (dbHelper == null) {
+            dbHelper = new DatabaseHelper(requireContext());
+        }
+
+        if (currentUser == null) {
+            SharedPreferences prefs = requireContext().getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
+            currentUser = prefs.getString("logged_in_user", null);
+            if (currentUser == null) return;
+        }
+
+        loadData();
 
         if(adapter != null)
             adapter.notifyDataSetChanged();
-        requireActivity().runOnUiThread(() -> adapter.notifyDataSetChanged());
-
     }
-
 }

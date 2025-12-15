@@ -22,6 +22,7 @@ public class BudgetedAdapter extends RecyclerView.Adapter<BudgetedAdapter.ViewHo
     private Context context;
     private OnBudgetActionListener listener;
 
+
     // ✅ Interface for budget actions
     public interface OnBudgetActionListener {
         void onResetBudget(CategoryModel category, int position);
@@ -39,6 +40,8 @@ public class BudgetedAdapter extends RecyclerView.Adapter<BudgetedAdapter.ViewHo
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(context).inflate(R.layout.item_budgeted_category, parent, false);
         return new ViewHolder(v);
+
+
     }
 
     @Override
@@ -50,6 +53,12 @@ public class BudgetedAdapter extends RecyclerView.Adapter<BudgetedAdapter.ViewHo
         holder.spent.setText("Spent: ₱" + String.format("%.2f", model.getSpent()));
         holder.icon.setImageResource(model.getIcon());
 
+        // Calculate remaining
+        double remaining = model.getLimit() - model.getSpent();
+        if (remaining < 0) remaining = 0; // Don't show negative
+        holder.remaining.setText("Remaining: ₱" + String.format("%.2f", remaining));
+
+        // Set progress bar (spent % of limit)
         int percentage = 0;
         if (model.getLimit() > 0) {
             percentage = (int) ((model.getSpent() / model.getLimit()) * 100);
@@ -57,7 +66,7 @@ public class BudgetedAdapter extends RecyclerView.Adapter<BudgetedAdapter.ViewHo
         }
         holder.progressBar.setProgress(percentage);
 
-        // ✅ Three-dots menu click listener
+        // Three-dots menu
         holder.btnMore.setOnClickListener(v -> {
             PopupMenu popup = new PopupMenu(context, holder.btnMore);
             popup.inflate(R.menu.menu_budget_item);
@@ -82,6 +91,7 @@ public class BudgetedAdapter extends RecyclerView.Adapter<BudgetedAdapter.ViewHo
         });
     }
 
+
     @Override
     public int getItemCount() {
         return list.size();
@@ -93,7 +103,7 @@ public class BudgetedAdapter extends RecyclerView.Adapter<BudgetedAdapter.ViewHo
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView name, limit, spent;
+        TextView name, limit, spent,remaining;
         ImageView icon;
         ImageButton btnMore;
         ProgressBar progressBar;
@@ -104,6 +114,7 @@ public class BudgetedAdapter extends RecyclerView.Adapter<BudgetedAdapter.ViewHo
             limit = itemView.findViewById(R.id.catLimit);
             spent = itemView.findViewById(R.id.catSpent);
             icon = itemView.findViewById(R.id.catIcon);
+            remaining = itemView.findViewById(R.id.catRemaining);
             progressBar = itemView.findViewById(R.id.catProgress);
             btnMore = itemView.findViewById(R.id.btnMore);
         }

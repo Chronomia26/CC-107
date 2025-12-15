@@ -120,53 +120,68 @@
             android:gravity="center"
             android:padding="5dp"/>
 
-        <!-- SEGMENT: WEEK / MONTH / YEAR -->
         <LinearLayout
             android:id="@+id/segmentChartType"
             android:layout_width="match_parent"
-            android:layout_height="40dp"
+            android:layout_height="50dp"
             android:orientation="horizontal"
             android:background="@drawable/edittext_with_stroke"
             android:padding="4dp"
-            android:gravity="center">
+            android:gravity="center"
+            android:layout_marginTop="12dp">
 
-            <TextView
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/segWeekly"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:gravity="center"
-                android:background="@drawable/segment_unselected"
+                android:layout_marginHorizontal="4dp"
                 android:text="Weekly"
-                android:textColor="@color/textPrimary"/>
+                android:textColor="@color/primary_variant"
+                android:textStyle="bold"
+                android:textSize="14sp"
+                android:minHeight="40dp"
+                android:backgroundTint="@color/transparent"
+                app:strokeColor="@color/primary"
+                app:strokeWidth="2dp"
+                app:cornerRadius="12dp"/>
 
-            <TextView
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/segMonthly"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:gravity="center"
-                android:background="@drawable/segment_unselected"
+                android:layout_marginHorizontal="4dp"
                 android:text="Monthly"
-                android:textColor="@color/textPrimary"/>
+                android:textColor="@color/primary_variant"
+                android:textStyle="bold"
+                android:textSize="14sp"
+                android:minHeight="40dp"
+                android:backgroundTint="@color/transparent"
+                app:strokeColor="@color/primary"
+                app:strokeWidth="2dp"
+                app:cornerRadius="12dp"/>
 
-            <TextView
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/segYearly"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:gravity="center"
-                android:background="@drawable/segment_unselected"
+                android:layout_marginHorizontal="4dp"
                 android:text="Yearly"
-                android:textColor="@color/textPrimary"/>
+                android:textColor="@color/primary_variant"
+                android:textStyle="bold"
+                android:textSize="14sp"
+                android:minHeight="40dp"
+                android:backgroundTint="@color/transparent"
+                app:strokeColor="@color/primary"
+                app:strokeWidth="2dp"
+                app:cornerRadius="12dp"/>
         </LinearLayout>
 
-        <!-- BAR CHART -->
-        <com.github.mikephil.charting.charts.BarChart
-            android:id="@+id/barChart"
-            android:layout_width="match_parent"
-            android:layout_height="320dp"
-            android:layout_marginTop="16dp" />
+
+
+
 
         <!-- PIE TITLE -->
         <TextView
