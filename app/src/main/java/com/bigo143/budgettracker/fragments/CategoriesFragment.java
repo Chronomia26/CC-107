@@ -5,7 +5,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -64,7 +63,30 @@ public class CategoriesFragment extends Fragment implements OnCategoriesUpdatedL
             R.drawable.ic_food,
             R.drawable.ic_transport,
             R.drawable.ic_expense,
-            R.drawable.ic_default
+            R.drawable.ic_default,
+            R.drawable.airplane_travel,
+            R.drawable.baseball,
+            R.drawable.bachelor_hat_svgrepo_com,
+            R.drawable.basketball,
+            R.drawable.cash,
+            R.drawable.card_holder_svgrepo_com,
+            R.drawable.coins,
+            R.drawable.coffee_svgrepo_com,
+            R.drawable.coupons_svgrepo_com,
+            R.drawable.electricity,
+            R.drawable.gift_svgrepo_com,
+            R.drawable.healthcare_medical_,
+            R.drawable.house_svgrepo_com,
+            R.drawable.second_hand_housing_svgrepo_com,
+            R.drawable.ic_calendar,
+            R.drawable.ic_shopping,
+            R.drawable.medicines,
+            R.drawable.resource_package,
+            R.drawable.savings_svgrepo_com,
+            R.drawable.tips_svgrepo_com,
+            R.drawable.transportationvec,
+            R.drawable.volleyball,
+            R.drawable.wifi,
     };
 
     public CategoriesFragment() {
