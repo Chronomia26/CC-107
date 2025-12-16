@@ -226,13 +226,12 @@ public class calcu_add extends AppCompatActivity {
 
         builder.setView(dialogView)
                 .setTitle("Add New Account")
-                .setPositiveButton("Add", null) // Set null first to override default behavior
+                .setPositiveButton("Add", null)
                 .setNegativeButton("Cancel", null);
 
         AlertDialog dialog = builder.create();
         dialog.show();
 
-        // Override positive button to prevent auto-dismiss on validation error
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
             String accountName = etAccountName.getText().toString().trim();
             String balanceStr = etInitialBalance.getText().toString().trim();
@@ -242,7 +241,6 @@ public class calcu_add extends AppCompatActivity {
                 return;
             }
 
-// Require initial balance
             if (balanceStr.isEmpty()) {
                 Toast.makeText(this, "Please enter initial balance", Toast.LENGTH_SHORT).show();
                 return;
@@ -256,16 +254,25 @@ public class calcu_add extends AppCompatActivity {
                 return;
             }
 
-
-            // Insert account into database
+            // ✅ Insert account into database
             boolean success = db.insertCategory(loggedInUser, "account", accountName, selectedIconResource);
 
             if (success) {
-                // If initial balance > 0, add as income record
+                // ✅ IMMEDIATELY add initial balance record if balance > 0
                 if (initialBalance > 0) {
                     int accountId = db.getCategoryIdByName(loggedInUser, accountName, "account");
-                    String currentDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(calendar.getTime());
-                    db.insertRecord(loggedInUser, accountId, accountId, "income", initialBalance, currentDate, "Initial Balance");
+
+                    // ✅ CRITICAL FIX: Use a timestamp that's 1 minute BEFORE the current calendar time
+                    // This ensures initial balance is always BEFORE any transaction the user adds
+                    Calendar initialBalanceTime = (Calendar) calendar.clone();
+                    initialBalanceTime.add(Calendar.MINUTE, -1); // Subtract 1 minute
+
+                    String initialBalanceTimestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
+                            .format(initialBalanceTime.getTime());
+
+                    // Insert the initial balance as income
+                    db.insertRecord(loggedInUser, accountId, accountId, "income", initialBalance,
+                            initialBalanceTimestamp, "Initial Balance");
                 }
 
                 // Refresh the accounts list
@@ -292,24 +299,24 @@ public class calcu_add extends AppCompatActivity {
 
         EditText etCategoryName = dialogView.findViewById(R.id.etCategoryName);
         RadioGroup rgType = dialogView.findViewById(R.id.rgCategoryType);
-        RadioButton rbExpense = dialogView.findViewById(R.id.rbExpense);
-        RadioButton rbIncome = dialogView.findViewById(R.id.rbIncome);
         Button btnSelectIcon = dialogView.findViewById(R.id.btnSelectIcon);
 
-        selectedIconResource = R.drawable.ic_default;
+        // ✅ HIDE the radio button group
+        rgType.setVisibility(View.GONE);
 
-        // Pre-select type based on current transaction type
-        if (currentType == TxType.INCOME) {
-            rbIncome.setChecked(true);
-        } else {
-            rbExpense.setChecked(true);
+        // ✅ HIDE the "Category Type" label
+        TextView tvCategoryTypeLabel = dialogView.findViewById(R.id.CategoryType);
+        if (tvCategoryTypeLabel != null) {
+            tvCategoryTypeLabel.setVisibility(View.GONE);
         }
+
+        selectedIconResource = R.drawable.ic_default;
 
         btnSelectIcon.setOnClickListener(v -> showIconPickerDialog(btnSelectIcon));
 
         builder.setView(dialogView)
                 .setTitle("Add New Category")
-                .setPositiveButton("Add", null) // Set null first to override default behavior
+                .setPositiveButton("Add", null)
                 .setNegativeButton("Cancel", null);
 
         AlertDialog dialog = builder.create();
@@ -324,13 +331,12 @@ public class calcu_add extends AppCompatActivity {
                 return;
             }
 
-            // Determine type from radio button
+            // ✅ Determine type directly from currentType (no need to read radio buttons)
             String categoryType;
-            int selectedId = rgType.getCheckedRadioButtonId();
-            if (selectedId == R.id.rbExpense) {
-                categoryType = "expense";
-            } else {
+            if (currentType == TxType.INCOME) {
                 categoryType = "income";
+            } else {
+                categoryType = "expense";
             }
 
             // Insert category into database

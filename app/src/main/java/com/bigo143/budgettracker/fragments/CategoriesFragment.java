@@ -267,6 +267,16 @@ public class CategoriesFragment extends Fragment implements OnCategoriesUpdatedL
         EditText input = dialogView.findViewById(R.id.etCategoryName);
         Button btnSelectIcon = dialogView.findViewById(R.id.btnSelectIcon);
 
+        // ✅ HIDE the radio button group completely
+        android.widget.RadioGroup rgType = dialogView.findViewById(R.id.rgCategoryType);
+        rgType.setVisibility(View.GONE);
+
+        // ✅ HIDE the "Category Type" label as well
+        TextView tvCategoryTypeLabel = dialogView.findViewById(R.id.CategoryType);
+        if (tvCategoryTypeLabel != null) {
+            tvCategoryTypeLabel.setVisibility(View.GONE);
+        }
+
         // Reset to default icon
         selectedIconResource = R.drawable.ic_default;
 
@@ -274,13 +284,12 @@ public class CategoriesFragment extends Fragment implements OnCategoriesUpdatedL
 
         builder.setView(dialogView);
 
-        builder.setPositiveButton("Add", null); // Set null to override default behavior
+        builder.setPositiveButton("Add", null);
         builder.setNegativeButton("Cancel", null);
 
         AlertDialog dialog = builder.create();
         dialog.show();
 
-        // Override positive button to prevent auto-dismiss on validation error
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
             String name = input.getText().toString().trim();
 
@@ -289,6 +298,7 @@ public class CategoriesFragment extends Fragment implements OnCategoriesUpdatedL
                 return;
             }
 
+            // ✅ Simply use currentType (no need to read radio buttons)
             boolean ok = dbHelper.insertCategory(currentUser, currentType, name, selectedIconResource);
 
             if (ok) {
@@ -298,8 +308,6 @@ public class CategoriesFragment extends Fragment implements OnCategoriesUpdatedL
 
                 if (current instanceof IncomeFragment)
                     ((IncomeFragment) current).addCategory(newCat);
-                else if (current instanceof AccountFragment)
-                    ((AccountFragment) current).addCategory(newCat);
                 else if (current instanceof ExpenseFragment)
                     ((ExpenseFragment) current).addCategory(newCat);
 

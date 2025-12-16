@@ -120,6 +120,19 @@ public class RecordsFragment extends Fragment {
 
         List<Record> records = db.getAllTransactions(currentUser);
 
+        // ✅ ADD DEBUG LOGGING
+        android.util.Log.d("RecordsDebug", "========== ALL RECORDS FROM DB ==========");
+        for (int i = 0; i < records.size(); i++) {
+            Record r = records.get(i);
+            if (!r.isHeader()) {
+                android.util.Log.d("RecordsDebug",
+                        i + ": " + r.getCategory() + " | " +
+                                r.getAmount() + " | " +
+                                r.getDate() + " | Type=" + r.getType());
+            }
+        }
+        android.util.Log.d("RecordsDebug", "=========================================");
+
         fullList.clear();
 
         String lastDate = "";
@@ -131,6 +144,21 @@ public class RecordsFragment extends Fragment {
             }
             fullList.add(r);
         }
+
+        // ✅ ADD MORE DEBUG LOGGING
+        android.util.Log.d("RecordsDebug", "========== FULL LIST (with headers) ==========");
+        for (int i = 0; i < fullList.size(); i++) {
+            Record r = fullList.get(i);
+            if (r.isHeader()) {
+                android.util.Log.d("RecordsDebug", i + ": HEADER - " + r.getHeaderTitle());
+            } else {
+                android.util.Log.d("RecordsDebug",
+                        i + ": " + r.getCategory() + " | " +
+                                r.getAmount() + " | " +
+                                r.getDate());
+            }
+        }
+        android.util.Log.d("RecordsDebug", "==============================================");
 
         adapter.notifyDataSetChanged();
 
