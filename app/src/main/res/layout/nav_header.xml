@@ -6,7 +6,7 @@
     android:layout_height="200dp"
     android:padding="16dp"
     android:gravity="bottom"
-    android:background="@drawable/editedphoto"
+    android:background="@drawable/nav_header_bg"
     android:theme="@style/ThemeOverlay.Material3.Dark">
 
     <ImageView
@@ -33,9 +33,9 @@
         android:id="@+id/headerSubtitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="[ All Accounts ₱151.00 ]"
         android:textColor="@color/text_on_primary"
         android:textSize="12sp"
         android:layout_marginTop="4dp"/>
+<!--    gago ano ilalagay dito-->
 
 </LinearLayout>
