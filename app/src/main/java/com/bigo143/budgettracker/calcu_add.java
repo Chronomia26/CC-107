@@ -37,6 +37,7 @@ import com.google.android.material.textfield.TextInputLayout;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Stack;
@@ -73,6 +74,15 @@ public class calcu_add extends AppCompatActivity {
     public void setOnTransactionSavedListener(OnTransactionSavedListener listener) {
         this.listener = listener;
     }
+    // ✅ ADDED: For edit mode
+    private boolean isEditMode = false;
+    private int editRecordId = -1;
+    private String editRecordType = null;
+    // ✅ ADDED: For delayed setting after views are initialized
+    private String accountToSelect = null;
+    private String categoryToSelect = null;
+    private String noteToSet = null;
+    private double amountToSet = 0; // ✅ ADDED
 
     private int selectedIconResource = R.drawable.ic_default;
 
@@ -91,6 +101,16 @@ public class calcu_add extends AppCompatActivity {
 
         db = new DatabaseHelper(this);
 
+        // ✅ ADDED: Check if editing existing record
+        if (getIntent().hasExtra("EDIT_MODE")) {
+            isEditMode = true;
+            editRecordId = getIntent().getIntExtra("RECORD_ID", -1);
+            editRecordType = getIntent().getStringExtra("RECORD_TYPE");
+
+            // Load existing record data
+            loadRecordForEdit();
+        }
+
         initViews();
         setupInsets();
         loadData();
@@ -101,7 +121,59 @@ public class calcu_add extends AppCompatActivity {
         setupDateTimePickers();
         addInputWatchers();
     }
+    // ✅ ADDED: Load record data for editing
+    // ✅ FIXED: Load record data for editing
+    private void loadRecordForEdit() {
+        if (editRecordId == -1) return;
 
+        // Get record details from intent
+        double amount = getIntent().getDoubleExtra("AMOUNT", 0);
+        String accountName = getIntent().getStringExtra("ACCOUNT_NAME");
+        String categoryName = getIntent().getStringExtra("CATEGORY_NAME");
+        String note = getIntent().getStringExtra("NOTE");
+        String date = getIntent().getStringExtra("DATE");
+
+        // ✅ REMOVED: Don't set expression here
+        // expression.append(String.valueOf(amount));
+
+        // Set account and category
+        if (accountName != null) {
+            accountToSelect = accountName;
+        }
+        if (categoryName != null) {
+            categoryToSelect = categoryName;
+        }
+
+        // Set note
+        if (note != null) {
+            noteToSet = note;
+        }
+
+        // ✅ ADDED: Store amount to set later
+        amountToSet = amount;
+
+        // Parse and set date/time
+        if (date != null) {
+            try {
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
+                Date parsedDate = format.parse(date);
+                if (parsedDate != null) {
+                    calendar.setTime(parsedDate);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        // Set transaction type
+        if ("income".equalsIgnoreCase(editRecordType)) {
+            currentType = TxType.INCOME;
+        } else if ("expense".equalsIgnoreCase(editRecordType)) {
+            currentType = TxType.EXPENSE;
+        } else if ("transfer_in".equalsIgnoreCase(editRecordType)) {
+            currentType = TxType.TRANSFER;
+        }
+    }
     private void initViews() {
         tvResult = findViewById(R.id.result);
         etNotes = findViewById(R.id.notes_edittext);
@@ -118,6 +190,28 @@ public class calcu_add extends AppCompatActivity {
 
         tvDatePicker = findViewById(R.id.date_picker_text);
         tvTimePicker = findViewById(R.id.time_picker_text);
+
+        // ✅ ADDED: Set note if in edit mode (delayed until after view is initialized)
+        if (isEditMode && noteToSet != null) {
+            etNotes.post(() -> etNotes.setText(noteToSet));
+        }
+
+        // ✅ ADDED: Set amount if in edit mode
+        if (isEditMode && amountToSet > 0) {
+            tvResult.post(() -> {
+                // Format the amount properly (remove .0 if whole number)
+                String amountStr;
+                if (amountToSet == (long) amountToSet) {
+                    amountStr = String.valueOf((long) amountToSet);
+                } else {
+                    amountStr = String.format("%.2f", amountToSet);
+                }
+
+                expression.setLength(0); // Clear expression
+                expression.append(amountStr);
+                tvResult.setText(amountStr);
+            });
+        }
     }
 
     private void setupInsets() {
@@ -168,6 +262,14 @@ public class calcu_add extends AppCompatActivity {
         List<String> expenseCatsWithAdd = new ArrayList<>(expenseCats);
         expenseCatsWithAdd.add("➕ Add New Category...");
         setAdapter(ddCategory, expenseCatsWithAdd, false);
+        // ✅ ADDED: Set pre-selected values if in edit mode
+        if (isEditMode && accountToSelect != null) {
+            ddAccount.setText(accountToSelect, false);
+        }
+        if (isEditMode && categoryToSelect != null) {
+            ddCategory.setText(categoryToSelect, false);
+        }
+
     }
 
     private void setAdapter(AutoCompleteTextView view, List<String> list, boolean isAccountDropdown) {
@@ -408,7 +510,8 @@ public class calcu_add extends AppCompatActivity {
         tvTransfer.setOnClickListener(v -> switchType(TxType.TRANSFER));
         tvExpense.setOnClickListener(v -> switchType(TxType.EXPENSE));
 
-        switchType(TxType.EXPENSE);
+        // ✅ CHANGED: Use currentType (which may be set from edit mode)
+        switchType(currentType);
     }
 
     private void switchType(TxType type) {
@@ -481,6 +584,27 @@ public class calcu_add extends AppCompatActivity {
 
         boolean ok;
 
+        // ✅ CHANGED: If edit mode, update instead of insert
+        if (isEditMode) {
+            // Update existing record
+            if (editRecordType.equalsIgnoreCase("transfer_in")) {
+                ok = db.updateTransfer(editRecordId, amount, note);
+            } else {
+                ok = db.updateRecord(editRecordId, amount, note);
+            }
+
+            if (ok) {
+                Toast.makeText(this, "Transaction Updated!", Toast.LENGTH_SHORT).show();
+                if (listener != null) listener.onTransactionSaved();
+                if (staticListener != null) staticListener.onTransactionSaved();
+                finishWithUpdate();
+            } else {
+                Toast.makeText(this, "Update failed", Toast.LENGTH_SHORT).show();
+            }
+            return;
+        }
+
+        // ✅ Original insert logic for new transactions
         switch (currentType) {
             case INCOME:
                 int incId = db.getCategoryIdByName(loggedInUser, categoryOrTarget, "income");
@@ -507,7 +631,6 @@ public class calcu_add extends AppCompatActivity {
                     return;
                 }
 
-                // --- Check budget ---
                 double budgeted = db.getBudgetedAmount(loggedInUser, expId);
                 double spent = db.getTotalSpentForCategory(loggedInUser, expId);
                 if (budgeted > 0 && spent + amount > budgeted) {

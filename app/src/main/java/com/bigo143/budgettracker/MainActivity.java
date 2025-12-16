@@ -1,12 +1,16 @@
 package com.bigo143.budgettracker;
 
+import android.accounts.Account;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.ViewGroup;
@@ -36,11 +40,25 @@ import com.bigo143.budgettracker.fragments.ExpenseFragment;
 import com.bigo143.budgettracker.fragments.IncomeFragment;
 import com.bigo143.budgettracker.fragments.RecordsFragment;
 import com.bigo143.budgettracker.loginActivities.LoginActivity;
+import com.bigo143.budgettracker.models.CategoryModel;
+import com.bigo143.budgettracker.models.Record;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
     private RecordsFragment recordsFragment;
@@ -143,17 +161,14 @@ public class MainActivity extends AppCompatActivity {
 
         // Handle main navigation items
         if (id == R.id.nav_home) {
-            replaceFragment(recordsFragment);
-            bottomNavigationView.setSelectedItemId(R.id.records);
+            exportRecords();
+
         } else if (id == R.id.nav_charts) {
-            replaceFragment(chartsFragment);
-            bottomNavigationView.setSelectedItemId(R.id.charts);
+            backupAndRestore();
+
         } else if (id == R.id.nav_budget) {
-            replaceFragment(budgetFragment);
-            bottomNavigationView.setSelectedItemId(R.id.budget);
-        } else if (id == R.id.nav_categories) {
-            replaceFragment(categoriesFragment);
-            bottomNavigationView.setSelectedItemId(R.id.categories);
+            deleteAndReset();
+
         }
         // Handle preferences items
         else if (id == R.id.nav_theme_toggle) {
@@ -304,6 +319,206 @@ public class MainActivity extends AppCompatActivity {
             dialog.getWindow().setGravity(Gravity.BOTTOM);
         }
     }
+    private void exportRecords() {
+        // Database helper
+        DatabaseHelper db = new DatabaseHelper(this);
+        SharedPreferences prefs = this.getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
+        String currentUser = prefs.getString("logged_in_user", null);
+        List<Record> records = db.getAllTransactions(currentUser); // Returns List<Record>
+
+        if (records == null || records.isEmpty()) {
+            Toast.makeText(this, "No records to export", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        StringBuilder csv = new StringBuilder();
+        csv.append("ID,Category,Account,Amount,Type,Date,Note\n");
+
+        for (Record r : records) {
+            String typeStr;
+            switch (r.getType()) {
+                case Record.TYPE_INCOME: typeStr = "Income"; break;
+                case Record.TYPE_EXPENSE: typeStr = "Expense"; break;
+                case Record.TYPE_TRANSFER_IN: typeStr = "Transfer In"; break;
+                case Record.TYPE_TRANSFER_OUT: typeStr = "Transfer Out"; break;
+                default: typeStr = "Unknown"; break;
+            }
+
+            csv.append(r.getId()).append(",")
+                    .append(r.getCategory()).append(",")
+                    .append(r.getAccount()).append(",")
+                    .append(r.getAmount()).append(",")
+                    .append(typeStr).append(",")
+                    .append(r.getDate()).append(",")
+                    .append(r.getNote()).append("\n");
+        }
+
+        try {
+            // Get Downloads folder
+            File downloadsFolder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+            if (!downloadsFolder.exists()) {
+                downloadsFolder.mkdirs();
+            }
+
+            File file = new File(downloadsFolder, "records.csv");
+            FileWriter writer = new FileWriter(file);
+            writer.write(csv.toString());
+            writer.close();
+
+            Toast.makeText(this, "Records exported to Downloads", Toast.LENGTH_LONG).show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Error exporting records", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+
+
+    private void backupAndRestore() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Backup & Restore")
+                .setMessage("Choose an action")
+                .setPositiveButton("Backup", (dialog, which) -> performBackup())
+                .setNegativeButton("Restore", (dialog, which) -> performRestore())
+                .setNeutralButton("Cancel", (dialog, which) -> dialog.dismiss());
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        // Optional: customize button colors
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                .setTextColor(ContextCompat.getColor(this, R.color.primary));
+        dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
+                .setTextColor(ContextCompat.getColor(this, R.color.secondary));
+        dialog.getButton(AlertDialog.BUTTON_NEUTRAL)
+                .setTextColor(ContextCompat.getColor(this, R.color.grayLight));
+    }
+
+    private void performBackup() {
+        DatabaseHelper db = new DatabaseHelper(this);
+        BackupManager backupManager = new BackupManager(db);
+
+        SharedPreferences prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
+        String currentUser = prefs.getString("logged_in_user", null);
+
+        if (currentUser == null) {
+            Toast.makeText(this, "No logged-in user", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        List<Map<String, Object>> data = backupManager.exportRecords(currentUser);
+
+        if (data.isEmpty()) {
+            Toast.makeText(this, "No records to backup", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Save backup as JSON in Downloads folder
+        JSONArray jsonArray = new JSONArray();
+        for (Map<String, Object> record : data) {
+            JSONObject obj = new JSONObject(record);
+            jsonArray.put(obj);
+        }
+
+        try {
+            File downloadsFolder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+            if (!downloadsFolder.exists()) downloadsFolder.mkdirs();
+
+            File file = new File(downloadsFolder, "backup_" + currentUser + ".json");
+            FileWriter writer = new FileWriter(file);
+            writer.write(jsonArray.toString(4));
+            writer.close();
+
+            Toast.makeText(this, "Backup saved to Downloads", Toast.LENGTH_LONG).show();
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Backup failed", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void performRestore() {
+        DatabaseHelper db = new DatabaseHelper(this);
+        BackupManager backupManager = new BackupManager(db);
+
+        SharedPreferences prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
+        String currentUser = prefs.getString("logged_in_user", null);
+
+        if (currentUser == null) {
+            Toast.makeText(this, "No logged-in user", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        File file = new File(
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                "backup_" + currentUser + ".json"
+        );
+
+        if (!file.exists()) {
+            Toast.makeText(this, "No backup file found", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(file));
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) sb.append(line);
+            reader.close();
+
+            JSONArray jsonArray = new JSONArray(sb.toString());
+            List<Map<String, Object>> records = new ArrayList<>();
+
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject obj = jsonArray.getJSONObject(i);
+
+                Map<String, Object> map = new HashMap<>();
+                map.put("category", obj.getString("category"));     // FIXED
+                map.put("account", obj.getString("account"));       // FIXED
+                map.put("type", obj.getString("type"));             // FIXED (String, not int)
+                map.put("amount", obj.getDouble("amount"));
+                map.put("date", obj.getString("date"));
+                map.put("note", obj.optString("note", ""));
+
+                records.add(map);
+            }
+
+            boolean success = backupManager.importRecords(currentUser, records);
+            if (success) {
+                Toast.makeText(this, "Restore completed", Toast.LENGTH_SHORT).show();
+                refreshAllData();
+            } else {
+                Toast.makeText(this, "Restore failed", Toast.LENGTH_SHORT).show();
+            }
+
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Restore failed", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+
+
+
+
+
+
+    private void deleteAndReset() {
+        // You can delete database entries or reset app
+        new AlertDialog.Builder(this)
+                .setTitle("Delete & Reset")
+                .setMessage("Are you sure you want to delete all records and reset?")
+                .setPositiveButton("Yes", (dialog, which) -> {
+                    DatabaseHelper db = new DatabaseHelper(this);
+                    SQLiteDatabase database = db.getWritableDatabase();
+                    database.delete("records", null, null);
+                    database.delete("budgets", null, null);
+                    database.delete("categories", null, null);
+                    Toast.makeText(this, "App reset successfully", Toast.LENGTH_SHORT).show();
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
 
     private void refreshAllData() {
         Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.frame_layout);

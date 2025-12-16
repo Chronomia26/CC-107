@@ -11,6 +11,7 @@ public class Record {
     private boolean isHeader;
     private String headerTitle;
 
+    private int id; // ✅ ADDED: record ID
     private String category;
     private String account;
     private double amount;
@@ -29,11 +30,11 @@ public class Record {
         return r;
     }
 
-    // ✅ UPDATED: Item constructor with accountName parameter
     public Record(int id, int categoryId, String categoryName, String typeStr,
                   double amount, String date, String note, int icon, String accountName) {
 
         this.isHeader = false;
+        this.id = id; // ✅ ADDED
         this.category = categoryName;
         this.account = accountName;
         this.amount = amount;
@@ -41,7 +42,6 @@ public class Record {
         this.note = note;
         this.icon = icon;
 
-        // ✅ UPDATED: Handle transfer types
         if (typeStr.equalsIgnoreCase("income")) {
             this.type = TYPE_INCOME;
         } else if (typeStr.equalsIgnoreCase("expense")) {
@@ -51,11 +51,10 @@ public class Record {
         } else if (typeStr.equalsIgnoreCase("transfer_in")) {
             this.type = TYPE_TRANSFER_IN;
         } else {
-            this.type = TYPE_INCOME; // default
+            this.type = TYPE_INCOME;
         }
     }
 
-    // ✅ ADDED: Simple constructor for basic transactions (if you need it elsewhere)
     public Record(String categoryName, String accountName, double amount, String date, String note) {
         this.category = categoryName;
         this.account = accountName;
@@ -67,6 +66,7 @@ public class Record {
     // Getters
     public boolean isHeader() { return isHeader; }
     public String getHeaderTitle() { return headerTitle; }
+    public int getId() { return id; } // ✅ ADDED
     public String getCategory() { return category; }
     public String getAccount() { return account; }
     public double getAmount() { return amount; }

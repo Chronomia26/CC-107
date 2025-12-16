@@ -7,23 +7,20 @@
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/nav_home"
-            android:icon="@drawable/ic_records"
-            android:title="Records" />
+            android:icon="@drawable/records"
+            android:title="Export Records" />
 
         <item
             android:id="@+id/nav_charts"
-            android:icon="@drawable/ic_chart"
-            android:title="Charts" />
+            android:icon="@drawable/recycle"
+            android:title="Backup &amp; Restore" />
 
         <item
             android:id="@+id/nav_budget"
-            android:icon="@drawable/ic_budget"
-            android:title="Budget" />
+            android:icon="@drawable/trashcan"
+            android:title="Delete &amp; Reset" />
 
-        <item
-            android:id="@+id/nav_categories"
-            android:icon="@drawable/ic_categories"
-            android:title="Categories" />
+
     </group>
 
     <!-- Preferences Section -->
