@@ -77,9 +77,6 @@ public class ChartsFragment extends Fragment {
         tvExpense = view.findViewById(R.id.tvExpense);
         tvTotal = view.findViewById(R.id.tvTotal);
 
-
-
-        setupPie(view);
         //setupBar(view);
         MaterialButton segWeekly = view.findViewById(R.id.segWeekly);
         MaterialButton segMonthly = view.findViewById(R.id.segMonthly);
@@ -108,6 +105,11 @@ public class ChartsFragment extends Fragment {
 
 
         return view;
+    }
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        updateCharts();
     }
 
     // --------------------------

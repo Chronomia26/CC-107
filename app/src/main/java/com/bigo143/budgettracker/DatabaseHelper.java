@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import com.bigo143.budgettracker.models.CategoryModel;
 import com.bigo143.budgettracker.models.Record;
 
 import java.util.ArrayList;
@@ -207,10 +208,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 
 
-public boolean updateCategory(int id, String newName) {
+    public boolean updateCategory(int id, String newName, int newIcon) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COL_CATEGORY_NAME, newName);
+        values.put(COL_CATEGORY_ICON, newIcon);
 
         try {
             int rows = db.update(TABLE_CATEGORIES, values, COL_CATEGORY_ID + " = ?", new String[]{String.valueOf(id)});
@@ -220,6 +222,7 @@ public boolean updateCategory(int id, String newName) {
             return false;
         }
     }
+
 
     public boolean deleteCategory(int id) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -1014,6 +1017,29 @@ public boolean updateCategory(int id, String newName) {
             return false;
         }
     }
+    // Get full category details by ID using your CategoryModel
+    public CategoryModel getCategoryById(int categoryId, String username) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        CategoryModel category = null;
+
+        Cursor cursor = db.rawQuery(
+                "SELECT name, icon FROM " + TABLE_CATEGORIES + " WHERE id = ? AND username = ?",
+                new String[]{String.valueOf(categoryId), username}
+        );
+
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                String name = cursor.getString(cursor.getColumnIndexOrThrow(COL_CATEGORY_NAME));
+                int icon = cursor.getInt(cursor.getColumnIndexOrThrow(COL_CATEGORY_ICON));
+
+                category = new CategoryModel(name, icon); // use the simple constructor
+            }
+            cursor.close();
+        }
+
+        return category;
+    }
+
 
 
 
