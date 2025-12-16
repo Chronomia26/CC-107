@@ -5,7 +5,8 @@ public class Record {
     public static final int TYPE_HEADER = -1;
     public static final int TYPE_EXPENSE = 0;
     public static final int TYPE_INCOME = 1;
-    public static final int TYPE_TRANSFER = 2;
+    public static final int TYPE_TRANSFER_OUT = 2;
+    public static final int TYPE_TRANSFER_IN = 3;
 
     private boolean isHeader;
     private String headerTitle;
@@ -34,15 +35,24 @@ public class Record {
 
         this.isHeader = false;
         this.category = categoryName;
-        this.account = accountName; // ✅ NOW USES THE ACCOUNT NAME
+        this.account = accountName;
         this.amount = amount;
         this.date = date;
         this.note = note;
         this.icon = icon;
 
-        if (typeStr.equalsIgnoreCase("income")) this.type = TYPE_INCOME;
-        else if (typeStr.equalsIgnoreCase("expense")) this.type = TYPE_EXPENSE;
-        else this.type = TYPE_TRANSFER;
+        // ✅ UPDATED: Handle transfer types
+        if (typeStr.equalsIgnoreCase("income")) {
+            this.type = TYPE_INCOME;
+        } else if (typeStr.equalsIgnoreCase("expense")) {
+            this.type = TYPE_EXPENSE;
+        } else if (typeStr.equalsIgnoreCase("transfer_out")) {
+            this.type = TYPE_TRANSFER_OUT;
+        } else if (typeStr.equalsIgnoreCase("transfer_in")) {
+            this.type = TYPE_TRANSFER_IN;
+        } else {
+            this.type = TYPE_INCOME; // default
+        }
     }
 
     // ✅ ADDED: Simple constructor for basic transactions (if you need it elsewhere)

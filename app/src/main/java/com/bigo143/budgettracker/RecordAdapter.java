@@ -74,20 +74,39 @@ public class RecordAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
         ItemHolder item = (ItemHolder) holder;
 
-        item.tvCategory.setText(r.getCategory());
-        item.tvAccount.setText(r.getAccount());
-
-        // format amount and set color
-        if (r.getType() == Record.TYPE_EXPENSE) {
-            item.tvAmount.setText("-₱" + r.getAmount());
+        // ✅ HANDLE TRANSFERS DIFFERENTLY
+        if (r.getType() == Record.TYPE_TRANSFER_OUT) {
+            // Transfer OUT: "From AccountA → To AccountB"
+            item.tvCategory.setText("Transfer to " + r.getCategory());
+            item.tvAccount.setText("From: " + r.getAccount());
+            item.tvAmount.setText("-₱" + String.format("%.2f", r.getAmount()));
             item.tvAmount.setTextColor(item.tvAmount.getResources().getColor(R.color.expenseRed));
-        } else {
-            item.tvAmount.setText("+₱" + r.getAmount());
-            item.tvAmount.setTextColor(item.tvAmount.getResources().getColor(R.color.incomeValue));
-        }
+            item.iconCategory.setImageResource(R.drawable.transfer_icon); // ✅ CHANGED to ic_transfer
 
-        // Set actual icon from database
-        item.iconCategory.setImageResource(r.getIcon());
+        } else if (r.getType() == Record.TYPE_TRANSFER_IN) {
+            // Transfer IN: "From AccountA → To AccountB"
+            item.tvCategory.setText("Transfer from " + r.getCategory());
+            item.tvAccount.setText("To: " + r.getAccount());
+            item.tvAmount.setText("+₱" + String.format("%.2f", r.getAmount()));
+            item.tvAmount.setTextColor(item.tvAmount.getResources().getColor(R.color.incomeValue));
+            item.iconCategory.setImageResource(R.drawable.transfer_icon); // ✅ CHANGED to ic_transfer
+
+        } else if (r.getType() == Record.TYPE_EXPENSE) {
+            // Regular expense
+            item.tvCategory.setText(r.getCategory());
+            item.tvAccount.setText(r.getAccount());
+            item.tvAmount.setText("-₱" + String.format("%.2f", r.getAmount()));
+            item.tvAmount.setTextColor(item.tvAmount.getResources().getColor(R.color.expenseRed));
+            item.iconCategory.setImageResource(r.getIcon());
+
+        } else {
+            // Regular income
+            item.tvCategory.setText(r.getCategory());
+            item.tvAccount.setText(r.getAccount());
+            item.tvAmount.setText("+₱" + String.format("%.2f", r.getAmount()));
+            item.tvAmount.setTextColor(item.tvAmount.getResources().getColor(R.color.incomeValue));
+            item.iconCategory.setImageResource(r.getIcon());
+        }
     }
 
 

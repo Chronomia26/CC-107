@@ -359,6 +359,8 @@ public boolean updateCategory(int id, String newName) {
     }
 
     // ---------------- Transfer management ----------------
+    // ---------------- Transfer management ----------------
+    // ---------------- Transfer management ----------------
     public boolean insertTransfer(String username, int fromAccountId, int toAccountId, double amount, String timestamp, String note) {
         SQLiteDatabase db = this.getWritableDatabase();
         db.beginTransaction();
@@ -372,27 +374,30 @@ public boolean updateCategory(int id, String newName) {
 
             // --- 2. Insert transfer_out record for source account ---
             ContentValues cvOut = new ContentValues();
-            cvOut.put("username", username);
-            cvOut.put("category_id", fromAccountId);
-            cvOut.put("type", "transfer_out");
-            cvOut.put("amount", amount);
-            cvOut.put("timestamp", timestamp);
-            cvOut.put("note", note);
+            cvOut.put(COL_RECORD_USER, username);
+            cvOut.put(COL_RECORD_CATEGORY, toAccountId);    // ✅ CHANGED: Store destination account in category
+            cvOut.put(COL_RECORD_ACCOUNT, fromAccountId);   // ✅ Store source account in account_id
+            cvOut.put(COL_RECORD_TYPE, "transfer_out");
+            cvOut.put(COL_RECORD_AMOUNT, amount);
+            cvOut.put(COL_RECORD_DATE, timestamp);
+            cvOut.put(COL_RECORD_NOTE, note);
             db.insert(TABLE_RECORDS, null, cvOut);
 
-            // --- 3. Insert income record for target account ---
+            // --- 3. Insert transfer_in record for target account ---
             ContentValues cvIn = new ContentValues();
-            cvIn.put("username", username);
-            cvIn.put("category_id", toAccountId);
-            cvIn.put("type", "income");
-            cvIn.put("amount", amount);
-            cvIn.put("timestamp", timestamp);
-            cvIn.put("note", note);
+            cvIn.put(COL_RECORD_USER, username);
+            cvIn.put(COL_RECORD_CATEGORY, fromAccountId);   // ✅ CHANGED: Store source account in category
+            cvIn.put(COL_RECORD_ACCOUNT, toAccountId);      // ✅ Store destination account in account_id
+            cvIn.put(COL_RECORD_TYPE, "transfer_in");
+            cvIn.put(COL_RECORD_AMOUNT, amount);
+            cvIn.put(COL_RECORD_DATE, timestamp);
+            cvIn.put(COL_RECORD_NOTE, note);
             db.insert(TABLE_RECORDS, null, cvIn);
 
             db.setTransactionSuccessful();
             return true;
         } catch (Exception e) {
+            Log.e(TAG, "Error inserting transfer: " + e.getMessage());
             e.printStackTrace();
             return false;
         } finally {
@@ -433,7 +438,7 @@ public boolean updateCategory(int id, String newName) {
                         "ON r." + COL_RECORD_CATEGORY + " = c." + COL_CATEGORY_ID +
                         " LEFT JOIN " + TABLE_CATEGORIES + " acc " +
                         "ON r." + COL_RECORD_ACCOUNT + " = acc." + COL_CATEGORY_ID +
-                        " WHERE r." + COL_RECORD_USER + " = ? " +
+                        " WHERE r." + COL_RECORD_USER + " = ? AND r." + COL_RECORD_TYPE + " != 'transfer_out' " + // ✅ EXCLUDE transfer_out
                         "ORDER BY r." + COL_RECORD_DATE + " DESC",
                 new String[]{username}
         );
