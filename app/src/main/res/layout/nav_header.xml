@@ -7,10 +7,10 @@
     android:padding="16dp"
     android:gravity="bottom"
     android:background="@drawable/nav_header_bg"
+    android:backgroundTint="@color/primary"
     android:theme="@style/ThemeOverlay.Material3.Dark">
 
     <ImageView
-        android:id="@+id/headerIcon"
         android:layout_width="94dp"
         android:layout_height="75dp"
         android:layout_marginBottom="8dp"
@@ -20,7 +20,6 @@
         android:src="@drawable/ic_launcher_foreground" />
 
     <TextView
-        android:id="@+id/headerTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/app_name"
@@ -30,7 +29,6 @@
         android:paddingBottom="20dp"/>
 
     <TextView
-        android:id="@+id/headerSubtitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="@color/text_on_primary"

@@ -92,7 +92,6 @@
 
         <!-- BUDGETED LABEL -->
         <TextView
-            android:id="@+id/tvBudgetedLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/budgeted_categories"
@@ -113,7 +112,6 @@
 
         <!-- NOT BUDGETED LABEL -->
         <TextView
-            android:id="@+id/tvNotBudgetedLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/not_budgeted"

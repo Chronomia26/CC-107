@@ -141,22 +141,8 @@ public class MainActivity extends AppCompatActivity {
     private void handleNavigationItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        // Handle main navigation items
-        if (id == R.id.nav_home) {
-            replaceFragment(recordsFragment);
-            bottomNavigationView.setSelectedItemId(R.id.records);
-        } else if (id == R.id.nav_charts) {
-            replaceFragment(chartsFragment);
-            bottomNavigationView.setSelectedItemId(R.id.charts);
-        } else if (id == R.id.nav_budget) {
-            replaceFragment(budgetFragment);
-            bottomNavigationView.setSelectedItemId(R.id.budget);
-        } else if (id == R.id.nav_categories) {
-            replaceFragment(categoriesFragment);
-            bottomNavigationView.setSelectedItemId(R.id.categories);
-        }
         // Handle preferences items
-        else if (id == R.id.nav_theme_toggle) {
+        if (id == R.id.nav_theme_toggle) {
             toggleTheme();
         } else if (id == R.id.nav_share) {
             shareApp();
