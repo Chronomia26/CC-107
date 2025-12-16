@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import com.bigo143.budgettracker.models.CategoryModel;
 import com.bigo143.budgettracker.models.Record;
 
 import java.util.ArrayList;
@@ -207,10 +208,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 
 
-public boolean updateCategory(int id, String newName) {
+    public boolean updateCategory(int id, String newName, int newIcon) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COL_CATEGORY_NAME, newName);
+        values.put(COL_CATEGORY_ICON, newIcon);
 
         try {
             int rows = db.update(TABLE_CATEGORIES, values, COL_CATEGORY_ID + " = ?", new String[]{String.valueOf(id)});
@@ -220,6 +222,7 @@ public boolean updateCategory(int id, String newName) {
             return false;
         }
     }
+
 
     public boolean deleteCategory(int id) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -1013,6 +1016,235 @@ public boolean updateCategory(int id, String newName) {
             Log.e("DB", "Delete category error: " + e.getMessage());
             return false;
         }
+    }
+    // Get full category details by ID using your CategoryModel
+    public CategoryModel getCategoryById(int categoryId, String username) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        CategoryModel category = null;
+
+        Cursor cursor = db.rawQuery(
+                "SELECT name, icon FROM " + TABLE_CATEGORIES + " WHERE id = ? AND username = ?",
+                new String[]{String.valueOf(categoryId), username}
+        );
+
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                String name = cursor.getString(cursor.getColumnIndexOrThrow(COL_CATEGORY_NAME));
+                int icon = cursor.getInt(cursor.getColumnIndexOrThrow(COL_CATEGORY_ICON));
+
+                category = new CategoryModel(name, icon); // use the simple constructor
+            }
+            cursor.close();
+        }
+
+        return category;
+    }// Add these methods to DatabaseHelper.java
+
+    // Update a record
+    public boolean updateRecord(int recordId, double newAmount, String newNote) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COL_RECORD_AMOUNT, newAmount);
+        values.put(COL_RECORD_NOTE, newNote);
+
+        try {
+            int rows = db.update(TABLE_RECORDS, values, COL_RECORD_ID + " = ?",
+                    new String[]{String.valueOf(recordId)});
+            return rows > 0;
+        } catch (Exception e) {
+            Log.e(TAG, "Error updating record: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // Delete a record
+    public boolean deleteRecord(int recordId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        try {
+            int rows = db.delete(TABLE_RECORDS, COL_RECORD_ID + " = ?",
+                    new String[]{String.valueOf(recordId)});
+            return rows > 0;
+        } catch (Exception e) {
+            Log.e(TAG, "Error deleting record: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // Get record type by ID (to check if it's a transfer)
+    public String getRecordType(int recordId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        String type = null;
+        try {
+            cursor = db.rawQuery("SELECT " + COL_RECORD_TYPE + " FROM " + TABLE_RECORDS +
+                            " WHERE " + COL_RECORD_ID + " = ?",
+                    new String[]{String.valueOf(recordId)});
+            if (cursor != null && cursor.moveToFirst()) {
+                type = cursor.getString(cursor.getColumnIndexOrThrow(COL_RECORD_TYPE));
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error getting record type: " + e.getMessage());
+        } finally {
+            if (cursor != null) cursor.close();
+        }
+        return type;
+    }
+
+    // Update transfer (both transfer_in and corresponding transfer_out)
+    public boolean updateTransfer(int transferInId, double newAmount, String newNote) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.beginTransaction();
+        try {
+            // Get the transfer_in record details
+            Cursor cursor = db.rawQuery(
+                    "SELECT " + COL_RECORD_DATE + ", " + COL_RECORD_CATEGORY + ", " + COL_RECORD_ACCOUNT +
+                            " FROM " + TABLE_RECORDS + " WHERE " + COL_RECORD_ID + " = ?",
+                    new String[]{String.valueOf(transferInId)}
+            );
+
+            if (cursor == null || !cursor.moveToFirst()) {
+                cursor.close();
+                return false;
+            }
+
+            String date = cursor.getString(cursor.getColumnIndexOrThrow(COL_RECORD_DATE));
+            int fromAccountId = cursor.getInt(cursor.getColumnIndexOrThrow(COL_RECORD_CATEGORY));
+            int toAccountId = cursor.getInt(cursor.getColumnIndexOrThrow(COL_RECORD_ACCOUNT));
+            cursor.close();
+
+            // Update the transfer_in record
+            ContentValues cvIn = new ContentValues();
+            cvIn.put(COL_RECORD_AMOUNT, newAmount);
+            cvIn.put(COL_RECORD_NOTE, newNote);
+            db.update(TABLE_RECORDS, cvIn, COL_RECORD_ID + " = ?",
+                    new String[]{String.valueOf(transferInId)});
+
+            // Find and update the corresponding transfer_out record
+            cursor = db.rawQuery(
+                    "SELECT " + COL_RECORD_ID + " FROM " + TABLE_RECORDS +
+                            " WHERE " + COL_RECORD_TYPE + " = 'transfer_out' AND " +
+                            COL_RECORD_DATE + " = ? AND " +
+                            COL_RECORD_CATEGORY + " = ? AND " +
+                            COL_RECORD_ACCOUNT + " = ?",
+                    new String[]{date, String.valueOf(toAccountId), String.valueOf(fromAccountId)}
+            );
+
+            if (cursor != null && cursor.moveToFirst()) {
+                int transferOutId = cursor.getInt(cursor.getColumnIndexOrThrow(COL_RECORD_ID));
+                ContentValues cvOut = new ContentValues();
+                cvOut.put(COL_RECORD_AMOUNT, newAmount);
+                cvOut.put(COL_RECORD_NOTE, newNote);
+                db.update(TABLE_RECORDS, cvOut, COL_RECORD_ID + " = ?",
+                        new String[]{String.valueOf(transferOutId)});
+            }
+            cursor.close();
+
+            db.setTransactionSuccessful();
+            return true;
+        } catch (Exception e) {
+            Log.e(TAG, "Error updating transfer: " + e.getMessage());
+            return false;
+        } finally {
+            db.endTransaction();
+        }
+    }
+
+    // Delete transfer (both transfer_in and corresponding transfer_out)
+    public boolean deleteTransfer(int transferInId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.beginTransaction();
+        try {
+            // Get the transfer_in record details
+            Cursor cursor = db.rawQuery(
+                    "SELECT " + COL_RECORD_DATE + ", " + COL_RECORD_CATEGORY + ", " + COL_RECORD_ACCOUNT +
+                            " FROM " + TABLE_RECORDS + " WHERE " + COL_RECORD_ID + " = ?",
+                    new String[]{String.valueOf(transferInId)}
+            );
+
+            if (cursor == null || !cursor.moveToFirst()) {
+                cursor.close();
+                return false;
+            }
+
+            String date = cursor.getString(cursor.getColumnIndexOrThrow(COL_RECORD_DATE));
+            int fromAccountId = cursor.getInt(cursor.getColumnIndexOrThrow(COL_RECORD_CATEGORY));
+            int toAccountId = cursor.getInt(cursor.getColumnIndexOrThrow(COL_RECORD_ACCOUNT));
+            cursor.close();
+
+            // Delete the transfer_in record
+            db.delete(TABLE_RECORDS, COL_RECORD_ID + " = ?",
+                    new String[]{String.valueOf(transferInId)});
+
+            // Find and delete the corresponding transfer_out record
+            cursor = db.rawQuery(
+                    "SELECT " + COL_RECORD_ID + " FROM " + TABLE_RECORDS +
+                            " WHERE " + COL_RECORD_TYPE + " = 'transfer_out' AND " +
+                            COL_RECORD_DATE + " = ? AND " +
+                            COL_RECORD_CATEGORY + " = ? AND " +
+                            COL_RECORD_ACCOUNT + " = ?",
+                    new String[]{date, String.valueOf(toAccountId), String.valueOf(fromAccountId)}
+            );
+
+            if (cursor != null && cursor.moveToFirst()) {
+                int transferOutId = cursor.getInt(cursor.getColumnIndexOrThrow(COL_RECORD_ID));
+                db.delete(TABLE_RECORDS, COL_RECORD_ID + " = ?",
+                        new String[]{String.valueOf(transferOutId)});
+            }
+            cursor.close();
+
+            db.setTransactionSuccessful();
+            return true;
+        } catch (Exception e) {
+            Log.e(TAG, "Error deleting transfer: " + e.getMessage());
+            return false;
+        } finally {
+            db.endTransaction();
+        }
+    }
+//    public int ensureAccountExists(String username, String accountName) {
+//        int id = getAccountIdByName(username, accountName);
+//        if (id != -1) return id;
+//
+//        // Default values for restored accounts
+//        insertAccount(username, accountName, 0.0);
+//        return getAccountIdByName(username, accountName);
+//    }
+//
+//    public int ensureCategoryExists(String username, String categoryName, String type) {
+//        int id = getCategoryIdByName(username, categoryName, type);
+//        if (id != -1) return id;
+//
+//        insertCategory(username, categoryName, type);
+//        return getCategoryIdByName(username, categoryName, type);
+//    }
+
+
+    public int createAccountIfNotExists(String username, String accountName) {
+        int id = getAccountIdByName(username, accountName);
+        if (id != -1) return id;
+
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("username", username);
+        values.put("name", accountName);
+        values.put("balance", 0);
+
+        long newId = db.insert("accounts", null, values);
+        return newId == -1 ? -1 : (int) newId;
+    }
+
+    public int createCategoryIfNotExists(String username, String categoryName, String type) {
+        int id = getCategoryIdByName(username, categoryName, type);
+        if (id != -1) return id;
+
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("username", username);
+        values.put("name", categoryName);
+        values.put("type", type);
+
+        long newId = db.insert("categories", null, values);
+        return newId == -1 ? -1 : (int) newId;
     }
 
 

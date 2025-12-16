@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -12,9 +13,12 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -87,6 +91,7 @@ public class CategoriesFragment extends Fragment implements OnCategoriesUpdatedL
             R.drawable.transportationvec,
             R.drawable.volleyball,
             R.drawable.wifi,
+            R.drawable.water_faucet
     };
 
     public CategoriesFragment() {
@@ -482,6 +487,111 @@ public class CategoriesFragment extends Fragment implements OnCategoriesUpdatedL
                 .setNegativeButton("Cancel", null)
                 .show();
     }
+    // Inside your Activity or Fragment
+    public void showEditCategoryDialog(int categoryId, String currentName, int currentIcon) {
+        Context context = requireContext();
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle("Edit " + currentName);
+
+        // Create a vertical layout for EditText + Icon selection
+        LinearLayout layout = new LinearLayout(context);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(50, 40, 50, 10);
+
+        // --- Name input ---
+        final EditText input = new EditText(context);
+        input.setText(currentName);
+        input.setSelection(currentName.length());
+        layout.addView(input);
+
+        // --- Icon selection label ---
+        TextView iconLabel = new TextView(context);
+        iconLabel.setText("Select an icon:");
+        iconLabel.setPadding(0, 30, 0, 10);
+        layout.addView(iconLabel);
+
+        // --- Icon GridView ---
+        GridView gridView = new GridView(context);
+        gridView.setNumColumns(5);
+        gridView.setHorizontalSpacing(10);
+        gridView.setVerticalSpacing(10);
+
+
+
+        final int[] selectedIcon = {currentIcon}; // store selected icon
+
+        gridView.setAdapter(new BaseAdapter() {
+            @Override
+            public int getCount() {
+                return availableIcons.length;
+            }
+
+            @Override
+            public Object getItem(int position) {
+                return availableIcons[position];
+            }
+
+            @Override
+            public long getItemId(int position) {
+                return position;
+            }
+
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                ImageView imageView;
+                if (convertView == null) {
+                    imageView = new ImageView(context);
+                    imageView.setLayoutParams(new GridView.LayoutParams(100, 100));
+                    imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+                    imageView.setPadding(8, 8, 8, 8);
+                } else {
+                    imageView = (ImageView) convertView;
+                }
+                imageView.setImageResource(availableIcons[position]);
+                if (availableIcons[position] == selectedIcon[0]) {
+                    imageView.setBackgroundColor(Color.LTGRAY); // highlight selected
+                } else {
+                    imageView.setBackgroundColor(Color.TRANSPARENT);
+                }
+                return imageView;
+            }
+        });
+
+        gridView.setOnItemClickListener((parentGrid, view, position, id) -> {
+            selectedIcon[0] = availableIcons[position];
+            ((BaseAdapter) gridView.getAdapter()).notifyDataSetChanged(); // refresh highlight
+        });
+
+        layout.addView(gridView);
+
+        builder.setView(layout);
+
+        // --- Save button ---
+        builder.setPositiveButton("Save", (dialog, which) -> {
+            String newName = input.getText().toString().trim();
+            if (newName.isEmpty()) {
+                Toast.makeText(context, "Name cannot be empty", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            boolean success = dbHelper.updateCategory(categoryId, newName, selectedIcon[0]);
+            if (success) {
+                Toast.makeText(context, "Category updated", Toast.LENGTH_SHORT).show();
+                reloadData(); // refresh ALL fragments and totals
+            } else {
+                Toast.makeText(context, "Failed to update category", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        builder.setNegativeButton("Cancel", null);
+
+        builder.show();
+    }
+
+
+
+
+
 
 
 

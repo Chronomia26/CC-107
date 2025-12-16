@@ -18,13 +18,24 @@ public class RecordAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     private final Context context;
     private final List<Record> list;
+    private OnRecordClickListener clickListener; // ✅ CHANGED from LongClick to Click
 
     private static final int VIEW_TYPE_HEADER = 0;
     private static final int VIEW_TYPE_ITEM = 1;
 
+    // ✅ CHANGED: Interface for regular click callback
+    public interface OnRecordClickListener {
+        void onRecordClick(Record record);
+    }
+
     public RecordAdapter(Context context, List<Record> list) {
         this.context = context;
         this.list = list;
+    }
+
+    // ✅ CHANGED: Setter for click listener
+    public void setOnRecordClickListener(OnRecordClickListener listener) {
+        this.clickListener = listener;
     }
 
     @Override
@@ -37,9 +48,6 @@ public class RecordAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         return list.size();
     }
 
-    // ------------------------------
-    // CREATE VIEW HOLDERS
-    // ------------------------------
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(
@@ -57,9 +65,6 @@ public class RecordAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         return new ItemHolder(v);
     }
 
-    // ------------------------------
-    // BIND VALUES
-    // ------------------------------
     @Override
     public void onBindViewHolder(
             @NonNull RecyclerView.ViewHolder holder,
@@ -74,25 +79,28 @@ public class RecordAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
         ItemHolder item = (ItemHolder) holder;
 
-        // ✅ HANDLE TRANSFERS DIFFERENTLY
+        // ✅ CHANGED: Set regular click listener instead of long-click
+        item.itemView.setOnClickListener(v -> {
+            if (clickListener != null && !r.isHeader()) {
+                clickListener.onRecordClick(r);
+            }
+        });
+
         if (r.getType() == Record.TYPE_TRANSFER_OUT) {
-            // Transfer OUT: "From AccountA → To AccountB"
             item.tvCategory.setText("Transfer to " + r.getCategory());
             item.tvAccount.setText("From: " + r.getAccount());
             item.tvAmount.setText("-₱" + String.format("%.2f", r.getAmount()));
             item.tvAmount.setTextColor(item.tvAmount.getResources().getColor(R.color.expenseRed));
-            item.iconCategory.setImageResource(R.drawable.transfer_icon); // ✅ CHANGED to ic_transfer
+            item.iconCategory.setImageResource(R.drawable.ic_transfer);
 
         } else if (r.getType() == Record.TYPE_TRANSFER_IN) {
-            // Transfer IN: "From AccountA → To AccountB"
             item.tvCategory.setText("Transfer from " + r.getCategory());
             item.tvAccount.setText("To: " + r.getAccount());
             item.tvAmount.setText("+₱" + String.format("%.2f", r.getAmount()));
             item.tvAmount.setTextColor(item.tvAmount.getResources().getColor(R.color.incomeValue));
-            item.iconCategory.setImageResource(R.drawable.transfer_icon); // ✅ CHANGED to ic_transfer
+            item.iconCategory.setImageResource(R.drawable.ic_transfer);
 
         } else if (r.getType() == Record.TYPE_EXPENSE) {
-            // Regular expense
             item.tvCategory.setText(r.getCategory());
             item.tvAccount.setText(r.getAccount());
             item.tvAmount.setText("-₱" + String.format("%.2f", r.getAmount()));
@@ -100,7 +108,6 @@ public class RecordAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             item.iconCategory.setImageResource(r.getIcon());
 
         } else {
-            // Regular income
             item.tvCategory.setText(r.getCategory());
             item.tvAccount.setText(r.getAccount());
             item.tvAmount.setText("+₱" + String.format("%.2f", r.getAmount()));
@@ -109,10 +116,6 @@ public class RecordAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         }
     }
 
-
-    // ------------------------------
-    // HEADER HOLDER
-    // ------------------------------
     static class HeaderHolder extends RecyclerView.ViewHolder {
         TextView tvHeader;
 
@@ -122,9 +125,6 @@ public class RecordAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         }
     }
 
-    // ------------------------------
-    // ITEM HOLDER
-    // ------------------------------
     static class ItemHolder extends RecyclerView.ViewHolder {
 
         ImageView iconCategory;

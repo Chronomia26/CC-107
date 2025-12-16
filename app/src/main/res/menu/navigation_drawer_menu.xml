@@ -3,6 +3,25 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="navigation_view">
 
+    <!-- Main Navigation Items -->
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_home"
+            android:icon="@drawable/records"
+            android:title="Export Records" />
+
+        <item
+            android:id="@+id/nav_charts"
+            android:icon="@drawable/recycle"
+            android:title="Backup &amp; Restore" />
+
+        <item
+            android:id="@+id/nav_budget"
+            android:icon="@drawable/trashcan"
+            android:title="Delete &amp; Reset" />
+
+
+    </group>
 
     <!-- Preferences Section -->
     <item android:title="Preferences">

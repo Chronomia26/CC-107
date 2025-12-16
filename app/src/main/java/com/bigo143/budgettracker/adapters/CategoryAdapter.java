@@ -184,6 +184,7 @@ public class CategoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 .show();
     }
 
+
     // VIEW HOLDERS
     static class IncomeVH extends RecyclerView.ViewHolder {
         ImageView icon, more;

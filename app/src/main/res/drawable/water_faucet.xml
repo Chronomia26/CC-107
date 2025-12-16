@@ -1,0 +1,21 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="64"
+    android:viewportHeight="64">
+
+    <!-- Faucet body -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M48,16h-8v-8c0-2.2-1.8-4-4-4H20c-2.2,0-4,1.8-4,4v24h4v-24h16v8h-8c-2.2,0-4,1.8-4,4v16c0,2.2,1.8,4,4,4h16c2.2,0,4-1.8,4-4V20C52,17.8,50.2,16,48,16z"/>
+
+    <!-- Faucet spout -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M24,44v8c0,2.2,1.8,4,4,4h8c2.2,0,4-1.8,4-4v-8H24z"/>
+
+    <!-- Water drop -->
+    <path
+        android:fillColor="#2196F3"
+        android:pathData="M32,60c-2.2,0-4-1.8-4-4c0-2.2,4-8,4-8s4,5.8,4,8C36,58.2,34.2,60,32,60z"/>
+</vector>

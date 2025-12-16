@@ -75,7 +75,11 @@ public class ExpenseFragment extends Fragment {
 
             @Override
             public void onEditCategory(String categoryName, int categoryId) {
-                Toast.makeText(requireContext(), "Edit: " + categoryName, Toast.LENGTH_SHORT).show();
+                Fragment parent = getParentFragment();
+                if (parent instanceof CategoriesFragment) {
+                    CategoryModel cat = dbHelper.getCategoryById(categoryId, currentUser);
+                    ((CategoriesFragment) parent).showEditCategoryDialog(categoryId, cat.getName(), cat.getIcon());
+                }
             }
         });
 
