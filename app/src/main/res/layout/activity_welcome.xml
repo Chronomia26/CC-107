@@ -8,7 +8,6 @@
     android:background="@color/background_secondary">
 
     <TextView
-        android:id="@+id/tvTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="@color/primary"
@@ -18,7 +17,6 @@
         android:layout_marginBottom="12dp"/>
 
     <TextView
-        android:id="@+id/tvSubtitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Personal expense tracker with charts"

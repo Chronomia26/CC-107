@@ -96,7 +96,6 @@
 
     <!-- Recycler -->
     <View
-        android:id="@+id/divider"
         android:layout_width="360dp"
         android:layout_height="4dp"
         android:paddingBottom="40dp"

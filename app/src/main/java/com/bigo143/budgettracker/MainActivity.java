@@ -171,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
 
         }
         // Handle preferences items
-        else if (id == R.id.nav_theme_toggle) {
+        if (id == R.id.nav_theme_toggle) {
             toggleTheme();
         } else if (id == R.id.nav_share) {
             shareApp();

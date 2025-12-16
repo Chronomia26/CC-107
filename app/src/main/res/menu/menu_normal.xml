@@ -14,12 +14,4 @@
 <!--        android:icon="@drawable/ic_filter"-->
 <!--        app:showAsAction="always" />-->
 
-    <item
-        android:id="@+id/action_search"
-        android:title="Search"
-        android:icon="@drawable/ic_search"
-        app:showAsAction="always" />
-
-
-
 </menu>
