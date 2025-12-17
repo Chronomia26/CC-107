@@ -472,7 +472,6 @@ public class MainActivity extends AppCompatActivity {
      */
     private void restoreFromUri(Uri uri) {
         try {
-            // Open InputStream from the Uri
             InputStream is = getContentResolver().openInputStream(uri);
             if (is == null) {
                 Toast.makeText(this, "Failed to open backup file", Toast.LENGTH_SHORT).show();
@@ -487,9 +486,7 @@ public class MainActivity extends AppCompatActivity {
 
             JSONObject jsonObject = new JSONObject(sb.toString());
 
-            // Convert JSONObject to Map for BackupManager
             Map<String, Object> backupData = new HashMap<>();
-            backupData.put("username", jsonObject.getString("username"));
             backupData.put("backup_version", jsonObject.getString("backup_version"));
 
             // Accounts
@@ -517,7 +514,7 @@ public class MainActivity extends AppCompatActivity {
             }
             backupData.put("categories", categories);
 
-            // Budgets
+            // Budgets (if any)
             if (jsonObject.has("budgets")) {
                 JSONArray budgetsArray = jsonObject.getJSONArray("budgets");
                 List<Map<String, Object>> budgets = new ArrayList<>();
@@ -548,20 +545,21 @@ public class MainActivity extends AppCompatActivity {
             }
             backupData.put("records", records);
 
-            // Perform restore
-            DatabaseHelper dbHelper = new DatabaseHelper(this);
-            BackupManager backupManager = new BackupManager(dbHelper);
-            boolean success = backupManager.importAllData(backupData);
+            // Restore for current user
+            SharedPreferences prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
+            String currentUser = prefs.getString("logged_in_user", null);
+            BackupManager backupManager = new BackupManager(new DatabaseHelper(this));
+            boolean success = backupManager.importAllData(currentUser, backupData);
 
             if (success) {
                 int budgetCount = jsonObject.has("budgets") ? jsonObject.getJSONArray("budgets").length() : 0;
-                Toast.makeText(this, "✅ Restore completed successfully!\n" +
+                Toast.makeText(this, "✅ Restore completed!\n" +
                         accounts.size() + " accounts, " +
                         categories.size() + " categories, " +
                         budgetCount + " budgets, " +
                         records.size() + " records restored", Toast.LENGTH_LONG).show();
             } else {
-                Toast.makeText(this, "⚠️ Restore completed with errors. Check Logcat for details.", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "⚠️ Restore completed with errors. Check Logcat.", Toast.LENGTH_LONG).show();
             }
 
             refreshAllData();
@@ -571,6 +569,7 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "❌ Restore failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
+
 
 
     // ✅ ADDED: Separate method to restore from selected file
@@ -647,7 +646,8 @@ public class MainActivity extends AppCompatActivity {
 
             // Import all data
             // Import all data
-            boolean success = backupManager.importAllData(backupData);
+
+            boolean success = backupManager.importAllData(currentUser,backupData);
 
             if (success) {
                 int budgetCount = jsonObject.has("budgets") ? jsonObject.getJSONArray("budgets").length() : 0;
