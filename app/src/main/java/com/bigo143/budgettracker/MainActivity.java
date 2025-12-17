@@ -406,30 +406,32 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        List<Map<String, Object>> data = backupManager.exportRecords(currentUser);
+        // ✅ Export all data (accounts, categories, budgets, records)
+        Map<String, Object> allData = backupManager.exportAllData(currentUser);
 
-        if (data.isEmpty()) {
-            Toast.makeText(this, "No records to backup", Toast.LENGTH_SHORT).show();
+        if (allData.isEmpty()) {
+            Toast.makeText(this, "No data to backup", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Save backup as JSON in Downloads folder
-        JSONArray jsonArray = new JSONArray();
-        for (Map<String, Object> record : data) {
-            JSONObject obj = new JSONObject(record);
-            jsonArray.put(obj);
-        }
+        // ✅ IMPROVED: Add timestamp to filename
+        String timestamp = new java.text.SimpleDateFormat("yyyyMMdd_HHmmss", java.util.Locale.US)
+                .format(new java.util.Date());
+        String fileName = "backup_" + currentUser + "_" + timestamp + ".json";
 
+        // Save complete backup as JSON
         try {
+            JSONObject jsonObject = new JSONObject(allData);
+
             File downloadsFolder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
             if (!downloadsFolder.exists()) downloadsFolder.mkdirs();
 
-            File file = new File(downloadsFolder, "backup_" + currentUser + ".json");
+            File file = new File(downloadsFolder, fileName);
             FileWriter writer = new FileWriter(file);
-            writer.write(jsonArray.toString(4));
+            writer.write(jsonObject.toString(4));
             writer.close();
 
-            Toast.makeText(this, "Backup saved to Downloads", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "✅ Backup saved!\n" + fileName, Toast.LENGTH_LONG).show();
         } catch (IOException | JSONException e) {
             e.printStackTrace();
             Toast.makeText(this, "Backup failed", Toast.LENGTH_SHORT).show();
@@ -448,16 +450,65 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        File file = new File(
-                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-                "backup_" + currentUser + ".json"
-        );
+        // ✅ IMPROVED: Show list of available backups
+        File downloadsFolder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        File[] allFiles = downloadsFolder.listFiles();
 
-        if (!file.exists()) {
-            Toast.makeText(this, "No backup file found", Toast.LENGTH_SHORT).show();
+        if (allFiles == null || allFiles.length == 0) {
+            Toast.makeText(this, "No backup files found", Toast.LENGTH_SHORT).show();
             return;
         }
 
+        // Find all backup files for current user
+        final List<File> backupFiles = new ArrayList<>();
+        for (File f : allFiles) {
+            if (f.getName().startsWith("backup_" + currentUser + "_") && f.getName().endsWith(".json")) {
+                backupFiles.add(f);
+            }
+        }
+
+        if (backupFiles.isEmpty()) {
+            Toast.makeText(this, "No backup files found for user: " + currentUser, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // ✅ IMPROVED: Sort by date (newest first)
+        java.util.Collections.sort(backupFiles, (f1, f2) -> Long.compare(f2.lastModified(), f1.lastModified()));
+
+        // ✅ IMPROVED: Show selection dialog
+        String[] fileNames = new String[backupFiles.size()];
+        for (int i = 0; i < backupFiles.size(); i++) {
+            String name = backupFiles.get(i).getName();
+            // Extract timestamp from filename
+            String displayName = name;
+            try {
+                // Convert filename like "backup_user_20241217_093045.json" to readable format
+                String[] parts = name.replace("backup_", "").replace(".json", "").split("_");
+                if (parts.length >= 3) {
+                    String date = parts[1]; // 20241217
+                    String time = parts[2]; // 093045
+                    String formattedDate = date.substring(0, 4) + "-" + date.substring(4, 6) + "-" + date.substring(6, 8);
+                    String formattedTime = time.substring(0, 2) + ":" + time.substring(2, 4) + ":" + time.substring(4, 6);
+                    displayName = formattedDate + " " + formattedTime;
+                }
+            } catch (Exception e) {
+                // If parsing fails, use original name
+            }
+            fileNames[i] = displayName;
+        }
+
+        new AlertDialog.Builder(this)
+                .setTitle("Select Backup to Restore")
+                .setItems(fileNames, (dialog, which) -> {
+                    File selectedFile = backupFiles.get(which);
+                    restoreFromFile(selectedFile, backupManager, currentUser);
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    // ✅ ADDED: Separate method to restore from selected file
+    private void restoreFromFile(File file, BackupManager backupManager, String currentUser) {
         try {
             BufferedReader reader = new BufferedReader(new FileReader(file));
             StringBuilder sb = new StringBuilder();
@@ -465,34 +516,88 @@ public class MainActivity extends AppCompatActivity {
             while ((line = reader.readLine()) != null) sb.append(line);
             reader.close();
 
-            JSONArray jsonArray = new JSONArray(sb.toString());
-            List<Map<String, Object>> records = new ArrayList<>();
+            JSONObject jsonObject = new JSONObject(sb.toString());
 
-            for (int i = 0; i < jsonArray.length(); i++) {
-                JSONObject obj = jsonArray.getJSONObject(i);
+            // Convert JSONObject to Map
+            Map<String, Object> backupData = new HashMap<>();
+            backupData.put("username", jsonObject.getString("username"));
+            backupData.put("backup_version", jsonObject.getString("backup_version"));
 
+            // Convert accounts
+            JSONArray accountsArray = jsonObject.getJSONArray("accounts");
+            List<Map<String, Object>> accounts = new ArrayList<>();
+            for (int i = 0; i < accountsArray.length(); i++) {
+                JSONObject obj = accountsArray.getJSONObject(i);
                 Map<String, Object> map = new HashMap<>();
-                map.put("category", obj.getString("category"));     // FIXED
-                map.put("account", obj.getString("account"));       // FIXED
-                map.put("type", obj.getString("type"));             // FIXED (String, not int)
+                map.put("name", obj.getString("name"));
+                map.put("icon", obj.getInt("icon"));
+                accounts.add(map);
+            }
+            backupData.put("accounts", accounts);
+
+            // Convert categories
+            JSONArray categoriesArray = jsonObject.getJSONArray("categories");
+            List<Map<String, Object>> categories = new ArrayList<>();
+            for (int i = 0; i < categoriesArray.length(); i++) {
+                JSONObject obj = categoriesArray.getJSONObject(i);
+                Map<String, Object> map = new HashMap<>();
+                map.put("name", obj.getString("name"));
+                map.put("type", obj.getString("type"));
+                map.put("icon", obj.getInt("icon"));
+                categories.add(map);
+            }
+            backupData.put("categories", categories);
+
+            // Convert budgets
+            if (jsonObject.has("budgets")) {
+                JSONArray budgetsArray = jsonObject.getJSONArray("budgets");
+                List<Map<String, Object>> budgets = new ArrayList<>();
+                for (int i = 0; i < budgetsArray.length(); i++) {
+                    JSONObject obj = budgetsArray.getJSONObject(i);
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("category_name", obj.getString("category_name"));
+                    map.put("category_type", obj.getString("category_type"));
+                    map.put("amount", obj.getDouble("amount"));
+                    budgets.add(map);
+                }
+                backupData.put("budgets", budgets);
+            }
+
+            // Convert records
+            JSONArray recordsArray = jsonObject.getJSONArray("records");
+            List<Map<String, Object>> records = new ArrayList<>();
+            for (int i = 0; i < recordsArray.length(); i++) {
+                JSONObject obj = recordsArray.getJSONObject(i);
+                Map<String, Object> map = new HashMap<>();
+                map.put("category", obj.getString("category"));
+                map.put("account", obj.getString("account"));
+                map.put("type", obj.getString("type"));
                 map.put("amount", obj.getDouble("amount"));
                 map.put("date", obj.getString("date"));
                 map.put("note", obj.optString("note", ""));
-
                 records.add(map);
             }
+            backupData.put("records", records);
 
-            boolean success = backupManager.importRecords(currentUser, records);
+            // Import all data
+            boolean success = backupManager.importAllData(currentUser, backupData);
+
             if (success) {
-                Toast.makeText(this, "Restore completed", Toast.LENGTH_SHORT).show();
-                refreshAllData();
+                int budgetCount = jsonObject.has("budgets") ? jsonObject.getJSONArray("budgets").length() : 0;
+                Toast.makeText(this, "✅ Restore completed successfully!\n" +
+                        accounts.size() + " accounts, " +
+                        categories.size() + " categories, " +
+                        budgetCount + " budgets, " +
+                        records.size() + " records restored", Toast.LENGTH_LONG).show();
             } else {
-                Toast.makeText(this, "Restore failed", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "⚠️ Restore completed with errors. Check Logcat for details.", Toast.LENGTH_LONG).show();
             }
+
+            refreshAllData();
 
         } catch (IOException | JSONException e) {
             e.printStackTrace();
-            Toast.makeText(this, "Restore failed", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "❌ Restore failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -503,17 +608,23 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void deleteAndReset() {
-        // You can delete database entries or reset app
+        SharedPreferences prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
+        String currentUser = prefs.getString("logged_in_user", null);
+
         new AlertDialog.Builder(this)
                 .setTitle("Delete & Reset")
-                .setMessage("Are you sure you want to delete all records and reset?")
-                .setPositiveButton("Yes", (dialog, which) -> {
+                .setMessage("Are you sure you want to delete ALL data for user " + currentUser + "? This cannot be undone unless you have a backup!")
+                .setPositiveButton("Yes, Delete Everything", (dialog, which) -> {
                     DatabaseHelper db = new DatabaseHelper(this);
-                    SQLiteDatabase database = db.getWritableDatabase();
-                    database.delete("records", null, null);
-                    database.delete("budgets", null, null);
-                    database.delete("categories", null, null);
-                    Toast.makeText(this, "App reset successfully", Toast.LENGTH_SHORT).show();
+                    android.database.sqlite.SQLiteDatabase database = db.getWritableDatabase();
+
+                    // Delete only the current user's data
+                    database.delete("records", "username = ?", new String[]{currentUser});
+                    database.delete("budgets", "username = ?", new String[]{currentUser});
+                    database.delete("categories", "username = ?", new String[]{currentUser});
+
+                    Toast.makeText(this, "All data deleted for " + currentUser, Toast.LENGTH_LONG).show();
+                    refreshAllData();
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
