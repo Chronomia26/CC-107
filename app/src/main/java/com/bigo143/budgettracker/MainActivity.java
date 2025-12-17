@@ -365,7 +365,9 @@ public class MainActivity extends AppCompatActivity {
                 downloadsFolder.mkdirs();
             }
 
-            File file = new File(downloadsFolder, "records.csv");
+            String timestamp = new java.text.SimpleDateFormat("yyyyMMdd_HHmmss", java.util.Locale.US)
+                    .format(new java.util.Date());
+            File file = new File(downloadsFolder, "records_" + timestamp + ".csv");
             FileWriter writer = new FileWriter(file);
             writer.write(csv.toString());
             writer.close();
