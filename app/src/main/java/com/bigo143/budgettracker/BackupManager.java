@@ -30,7 +30,7 @@ public class BackupManager {
         backup.put("budgets", exportBudgets(username));
         backup.put("records", exportRecords(username));
 
-        backup.put("username", username);
+        //backup.put("username", username);
         backup.put("backup_version", "1.0");
 
         return backup;
@@ -125,32 +125,25 @@ public class BackupManager {
      * IMPORT
      * --------------------------------------------------------- */
 
-    public boolean importAllData(Map<String, Object> backupData) {
-        if (!backupData.containsKey("username")) {
-            Log.e(TAG, "Backup missing username field");
-            return false;
-        }
-
-        String username = (String) backupData.get("username");
-
+    public boolean importAllData(String currentUser, Map<String, Object> backupData) {
         boolean success = true;
 
         try {
             @SuppressWarnings("unchecked")
             List<Map<String, Object>> accounts = (List<Map<String, Object>>) backupData.get("accounts");
-            if (accounts != null) importAccounts(username, accounts);
+            if (accounts != null) importAccounts(currentUser, accounts);
 
             @SuppressWarnings("unchecked")
             List<Map<String, Object>> categories = (List<Map<String, Object>>) backupData.get("categories");
-            if (categories != null) importCategories(username, categories);
+            if (categories != null) importCategories(currentUser, categories);
 
             @SuppressWarnings("unchecked")
             List<Map<String, Object>> budgets = (List<Map<String, Object>>) backupData.get("budgets");
-            if (budgets != null) importBudgets(username, budgets);
+            if (budgets != null) importBudgets(currentUser, budgets);
 
             @SuppressWarnings("unchecked")
             List<Map<String, Object>> records = (List<Map<String, Object>>) backupData.get("records");
-            if (records != null) importRecords(username, records);
+            if (records != null) importRecords(currentUser, records);
 
         } catch (Exception e) {
             Log.e(TAG, "Error during import: " + e.getMessage(), e);
@@ -159,6 +152,7 @@ public class BackupManager {
 
         return success;
     }
+
 
     private void importAccounts(String username, List<Map<String, Object>> accounts) {
         for (Map<String, Object> account : accounts) {
