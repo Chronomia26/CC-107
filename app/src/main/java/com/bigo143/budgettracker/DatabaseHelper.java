@@ -1219,32 +1219,38 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 //    }
 
 
-    public int createAccountIfNotExists(String username, String accountName) {
-        int id = getAccountIdByName(username, accountName);
-        if (id != -1) return id;
 
-        SQLiteDatabase db = getWritableDatabase();
+    public boolean upsertBudget(String username, int categoryId, double amount) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        // 1. Check if budget already exists
+        Cursor cursor = db.rawQuery(
+                "SELECT id FROM budgets WHERE username = ? AND category_id = ?",
+                new String[]{username, String.valueOf(categoryId)}
+        );
+
+        boolean exists = cursor.moveToFirst();
+        cursor.close();
+
         ContentValues values = new ContentValues();
         values.put("username", username);
-        values.put("name", accountName);
-        values.put("balance", 0);
+        values.put("category_id", categoryId);
+        values.put("amount", amount);
 
-        long newId = db.insert("accounts", null, values);
-        return newId == -1 ? -1 : (int) newId;
-    }
-
-    public int createCategoryIfNotExists(String username, String categoryName, String type) {
-        int id = getCategoryIdByName(username, categoryName, type);
-        if (id != -1) return id;
-
-        SQLiteDatabase db = getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put("username", username);
-        values.put("name", categoryName);
-        values.put("type", type);
-
-        long newId = db.insert("categories", null, values);
-        return newId == -1 ? -1 : (int) newId;
+        if (exists) {
+            // 2. Update existing budget
+            int rows = db.update(
+                    "budgets",
+                    values,
+                    "username = ? AND category_id = ?",
+                    new String[]{username, String.valueOf(categoryId)}
+            );
+            return rows > 0;
+        } else {
+            // 3. Insert new budget
+            long id = db.insert("budgets", null, values);
+            return id != -1;
+        }
     }
 
 

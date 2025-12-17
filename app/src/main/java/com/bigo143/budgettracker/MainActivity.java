@@ -55,6 +55,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -438,74 +440,135 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private static final int REQUEST_CODE_PICK_BACKUP = 1001;
+
     private void performRestore() {
-        DatabaseHelper db = new DatabaseHelper(this);
-        BackupManager backupManager = new BackupManager(db);
-
-        SharedPreferences prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
-        String currentUser = prefs.getString("logged_in_user", null);
-
-        if (currentUser == null) {
-            Toast.makeText(this, "No logged-in user", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        // ✅ IMPROVED: Show list of available backups
-        File downloadsFolder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-        File[] allFiles = downloadsFolder.listFiles();
-
-        if (allFiles == null || allFiles.length == 0) {
-            Toast.makeText(this, "No backup files found", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        // Find all backup files for current user
-        final List<File> backupFiles = new ArrayList<>();
-        for (File f : allFiles) {
-            if (f.getName().startsWith("backup_" + currentUser + "_") && f.getName().endsWith(".json")) {
-                backupFiles.add(f);
-            }
-        }
-
-        if (backupFiles.isEmpty()) {
-            Toast.makeText(this, "No backup files found for user: " + currentUser, Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        // ✅ IMPROVED: Sort by date (newest first)
-        java.util.Collections.sort(backupFiles, (f1, f2) -> Long.compare(f2.lastModified(), f1.lastModified()));
-
-        // ✅ IMPROVED: Show selection dialog
-        String[] fileNames = new String[backupFiles.size()];
-        for (int i = 0; i < backupFiles.size(); i++) {
-            String name = backupFiles.get(i).getName();
-            // Extract timestamp from filename
-            String displayName = name;
-            try {
-                // Convert filename like "backup_user_20241217_093045.json" to readable format
-                String[] parts = name.replace("backup_", "").replace(".json", "").split("_");
-                if (parts.length >= 3) {
-                    String date = parts[1]; // 20241217
-                    String time = parts[2]; // 093045
-                    String formattedDate = date.substring(0, 4) + "-" + date.substring(4, 6) + "-" + date.substring(6, 8);
-                    String formattedTime = time.substring(0, 2) + ":" + time.substring(2, 4) + ":" + time.substring(4, 6);
-                    displayName = formattedDate + " " + formattedTime;
-                }
-            } catch (Exception e) {
-                // If parsing fails, use original name
-            }
-            fileNames[i] = displayName;
-        }
-
-        new AlertDialog.Builder(this)
-                .setTitle("Select Backup to Restore")
-                .setItems(fileNames, (dialog, which) -> {
-                    File selectedFile = backupFiles.get(which);
-                    restoreFromFile(selectedFile, backupManager, currentUser);
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
+        // Launch file picker to select backup JSON
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("application/json");
+        startActivityForResult(intent, REQUEST_CODE_PICK_BACKUP);
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == REQUEST_CODE_PICK_BACKUP && resultCode == RESULT_OK && data != null) {
+            Uri uri = data.getData();
+            if (uri != null) {
+                restoreFromUri(uri);
+            } else {
+                Toast.makeText(this, "No file selected", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    /**
+     * Restore backup from a Uri returned by the SAF file picker
+     */
+    private void restoreFromUri(Uri uri) {
+        try {
+            // Open InputStream from the Uri
+            InputStream is = getContentResolver().openInputStream(uri);
+            if (is == null) {
+                Toast.makeText(this, "Failed to open backup file", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) sb.append(line);
+            reader.close();
+
+            JSONObject jsonObject = new JSONObject(sb.toString());
+
+            // Convert JSONObject to Map for BackupManager
+            Map<String, Object> backupData = new HashMap<>();
+            backupData.put("username", jsonObject.getString("username"));
+            backupData.put("backup_version", jsonObject.getString("backup_version"));
+
+            // Accounts
+            JSONArray accountsArray = jsonObject.getJSONArray("accounts");
+            List<Map<String, Object>> accounts = new ArrayList<>();
+            for (int i = 0; i < accountsArray.length(); i++) {
+                JSONObject obj = accountsArray.getJSONObject(i);
+                Map<String, Object> map = new HashMap<>();
+                map.put("name", obj.getString("name"));
+                map.put("icon", obj.getInt("icon"));
+                accounts.add(map);
+            }
+            backupData.put("accounts", accounts);
+
+            // Categories
+            JSONArray categoriesArray = jsonObject.getJSONArray("categories");
+            List<Map<String, Object>> categories = new ArrayList<>();
+            for (int i = 0; i < categoriesArray.length(); i++) {
+                JSONObject obj = categoriesArray.getJSONObject(i);
+                Map<String, Object> map = new HashMap<>();
+                map.put("name", obj.getString("name"));
+                map.put("type", obj.getString("type"));
+                map.put("icon", obj.getInt("icon"));
+                categories.add(map);
+            }
+            backupData.put("categories", categories);
+
+            // Budgets
+            if (jsonObject.has("budgets")) {
+                JSONArray budgetsArray = jsonObject.getJSONArray("budgets");
+                List<Map<String, Object>> budgets = new ArrayList<>();
+                for (int i = 0; i < budgetsArray.length(); i++) {
+                    JSONObject obj = budgetsArray.getJSONObject(i);
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("category_name", obj.getString("category_name"));
+                    map.put("category_type", obj.getString("category_type"));
+                    map.put("amount", obj.getDouble("amount"));
+                    budgets.add(map);
+                }
+                backupData.put("budgets", budgets);
+            }
+
+            // Records
+            JSONArray recordsArray = jsonObject.getJSONArray("records");
+            List<Map<String, Object>> records = new ArrayList<>();
+            for (int i = 0; i < recordsArray.length(); i++) {
+                JSONObject obj = recordsArray.getJSONObject(i);
+                Map<String, Object> map = new HashMap<>();
+                map.put("category", obj.getString("category"));
+                map.put("account", obj.getString("account"));
+                map.put("type", obj.getString("type"));
+                map.put("amount", obj.getDouble("amount"));
+                map.put("date", obj.getString("date"));
+                map.put("note", obj.optString("note", ""));
+                records.add(map);
+            }
+            backupData.put("records", records);
+
+            // Perform restore
+            DatabaseHelper dbHelper = new DatabaseHelper(this);
+            BackupManager backupManager = new BackupManager(dbHelper);
+            boolean success = backupManager.importAllData(backupData);
+
+            if (success) {
+                int budgetCount = jsonObject.has("budgets") ? jsonObject.getJSONArray("budgets").length() : 0;
+                Toast.makeText(this, "✅ Restore completed successfully!\n" +
+                        accounts.size() + " accounts, " +
+                        categories.size() + " categories, " +
+                        budgetCount + " budgets, " +
+                        records.size() + " records restored", Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(this, "⚠️ Restore completed with errors. Check Logcat for details.", Toast.LENGTH_LONG).show();
+            }
+
+            refreshAllData();
+
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+            Toast.makeText(this, "❌ Restore failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+    }
+
 
     // ✅ ADDED: Separate method to restore from selected file
     private void restoreFromFile(File file, BackupManager backupManager, String currentUser) {
@@ -580,7 +643,8 @@ public class MainActivity extends AppCompatActivity {
             backupData.put("records", records);
 
             // Import all data
-            boolean success = backupManager.importAllData(currentUser, backupData);
+            // Import all data
+            boolean success = backupManager.importAllData(backupData);
 
             if (success) {
                 int budgetCount = jsonObject.has("budgets") ? jsonObject.getJSONArray("budgets").length() : 0;
@@ -592,6 +656,7 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 Toast.makeText(this, "⚠️ Restore completed with errors. Check Logcat for details.", Toast.LENGTH_LONG).show();
             }
+
 
             refreshAllData();
 
