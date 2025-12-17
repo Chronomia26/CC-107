@@ -171,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
 
         }
         // Handle preferences items
-        else if (id == R.id.nav_theme_toggle) {
+        if (id == R.id.nav_theme_toggle) {
             toggleTheme();
         } else if (id == R.id.nav_share) {
             shareApp();
@@ -391,7 +391,7 @@ public class MainActivity extends AppCompatActivity {
         dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
                 .setTextColor(ContextCompat.getColor(this, R.color.secondary));
         dialog.getButton(AlertDialog.BUTTON_NEUTRAL)
-                .setTextColor(ContextCompat.getColor(this, R.color.grayLight));
+                .setTextColor(ContextCompat.getColor(this, R.color.black));
     }
 
     private void performBackup() {
