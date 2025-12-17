@@ -40,6 +40,11 @@ public class LoginActivity extends AppCompatActivity {
 
             boolean valid = dbHelper.loginUser(username, password);
             if (valid) {
+                // Save the logged-in user in SharedPreferences
+                getSharedPreferences("MyAppPrefs", MODE_PRIVATE)
+                        .edit()
+                        .putString("logged_in_user", username)
+                        .apply();
                 Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show();
                 startActivity(new Intent(this, MainActivity.class));
                 finish(); // close login so user can’t go back

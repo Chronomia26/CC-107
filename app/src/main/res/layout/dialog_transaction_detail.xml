@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/bg_card_neumorphic"
+    android:padding="0dp">
+
+    <!-- Header with close, delete, edit buttons -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:background="@color/incomeValue">
+
+        <!-- Close button (X) -->
+        <ImageView
+            android:id="@+id/btnClose"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_alignParentStart="true"
+            android:src="@android:drawable/ic_menu_close_clear_cancel"
+            android:padding="4dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:tint="@android:color/white" />
+
+        <!-- Delete button -->
+        <ImageView
+            android:id="@+id/btnDelete"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_toStartOf="@id/btnEdit"
+            android:layout_marginEnd="8dp"
+            android:src="@android:drawable/ic_menu_delete"
+            android:padding="4dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:tint="@android:color/white" />
+
+        <!-- Edit button -->
+        <ImageView
+            android:id="@+id/btnEdit"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_alignParentEnd="true"
+            android:src="@android:drawable/ic_menu_edit"
+            android:padding="4dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:tint="@android:color/white" />
+
+        <!-- Transaction Type (INCOME/EXPENSE/TRANSFER) -->
+        <TextView
+            android:id="@+id/tvTransactionType"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/btnClose"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="16dp"
+            android:text="INCOME"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <!-- Amount -->
+        <TextView
+            android:id="@+id/tvAmount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tvTransactionType"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="8dp"
+            android:text="₱80.00"
+            android:textColor="@android:color/white"
+            android:textSize="42sp"
+            android:textStyle="bold" />
+
+        <!-- Date and Time -->
+        <TextView
+            android:id="@+id/tvDateTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tvAmount"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="16dp"
+            android:text="Dec 16, 2025 11:17 PM"
+            android:textColor="@android:color/white"
+            android:textSize="14sp" />
+    </RelativeLayout>
+
+    <!-- Account Section -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:text="Account"
+            android:textSize="16sp"
+            android:textColor="@color/textPrimary" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:padding="12dp"
+            android:background="@drawable/bg_button_outline">
+
+            <ImageView
+                android:id="@+id/imgAccountIcon"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_wallet"
+                android:layout_marginEnd="8dp" />
+
+            <TextView
+                android:id="@+id/tvAccountName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Savings"
+                android:textSize="16sp"
+                android:textColor="@color/textPrimary"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Category Section -->
+    <LinearLayout
+        android:id="@+id/layoutCategory"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:text="Category"
+            android:textSize="16sp"
+            android:textColor="@color/textPrimary" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:padding="12dp"
+            android:background="@drawable/bg_button_outline">
+
+            <ImageView
+                android:id="@+id/imgCategoryIcon"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_income"
+                android:layout_marginEnd="8dp" />
+
+            <TextView
+                android:id="@+id/tvCategoryName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Awards"
+                android:textSize="16sp"
+                android:textColor="@color/textPrimary"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Note Section -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="note"
+            android:textSize="14sp"
+            android:textColor="@color/textSecondary"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/tvNote"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="No note"
+            android:textSize="16sp"
+            android:textColor="@color/textPrimary"
+            android:minHeight="48dp"
+            android:padding="12dp"
+            android:background="@drawable/bg_button_outline" />
+    </LinearLayout>
+
+</LinearLayout>

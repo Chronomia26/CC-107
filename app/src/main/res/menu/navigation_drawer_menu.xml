@@ -1,42 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:showIn = "navigation_view">
+    tools:showIn="navigation_view">
 
-    <group
-        android:checkableBehavior="single">
-
+    <!-- Main Navigation Items -->
+    <group android:checkableBehavior="single">
         <item
             android:id="@+id/nav_home"
-            android:icon="@drawable/ic_records"
-            android:title="Records"/>
+            android:icon="@drawable/records"
+            android:title="Export Records" />
 
         <item
-            android:id="@+id/nav_settings"
-            android:icon="@drawable/baseline_settings_24"
-            android:title="@string/placeholder"/>
+            android:id="@+id/nav_charts"
+            android:icon="@drawable/recycle"
+            android:title="Backup &amp; Restore" />
 
         <item
-            android:id="@+id/nav_share"
-            android:icon="@drawable/baseline_share_24"
-            android:title="@string/placeholder"/>
+            android:id="@+id/nav_budget"
+            android:icon="@drawable/trashcan"
+            android:title="Delete &amp; Reset" />
 
-        <item
-            android:id="@+id/nav_about"
-            android:icon="@drawable/baseline_info_24"
-            android:title="@string/placeholder"/>
+
     </group>
-    <item
-        android:title="">
 
+    <!-- Preferences Section -->
+    <item android:title="Preferences">
         <menu>
-            <item
-                android:id="@+id/nav_logout"
-                android:icon="@drawable/baseline_exit_to_app_24"
-                android:title="@string/placeholder"/>
-        </menu>
+            <group android:checkableBehavior="none">
+                <item
+                    android:id="@+id/nav_theme_toggle"
+                    android:icon="@drawable/baseline_settings_24"
+                    android:title="Toggle Theme" />
 
+                <item
+                    android:id="@+id/nav_share"
+                    android:icon="@drawable/baseline_share_24"
+                    android:title="Share App" />
+
+                <item
+                    android:id="@+id/nav_about"
+                    android:icon="@drawable/baseline_info_24"
+                    android:title="About" />
+            </group>
+        </menu>
     </item>
 
+    <!-- Logout Section -->
+    <item android:title="Account">
+        <menu>
+            <group android:checkableBehavior="none">
+                <item
+                    android:id="@+id/nav_logout"
+                    android:icon="@drawable/baseline_exit_to_app_24"
+                    android:title="Logout" />
+            </group>
+        </menu>
+    </item>
 </menu>

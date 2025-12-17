@@ -4,38 +4,42 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bigo143.budgettracker.R;
 import com.bigo143.budgettracker.models.Record;
 
 import java.util.List;
 
-/**
- * CLEAN + FIXED + WORKING RecordAdapter
- * Supports:
- *  - Date Header Rows
- *  - Transaction Rows (Income, Expense, Transfer)
- */
 public class RecordAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private final Context context;
     private final List<Record> list;
+    private OnRecordClickListener clickListener; // ✅ CHANGED from LongClick to Click
 
     private static final int VIEW_TYPE_HEADER = 0;
     private static final int VIEW_TYPE_ITEM = 1;
+
+    // ✅ CHANGED: Interface for regular click callback
+    public interface OnRecordClickListener {
+        void onRecordClick(Record record);
+    }
 
     public RecordAdapter(Context context, List<Record> list) {
         this.context = context;
         this.list = list;
     }
 
+    // ✅ CHANGED: Setter for click listener
+    public void setOnRecordClickListener(OnRecordClickListener listener) {
+        this.clickListener = listener;
+    }
+
     @Override
     public int getItemViewType(int position) {
-        // if Record.isHeader() == true → header row
         return list.get(position).isHeader() ? VIEW_TYPE_HEADER : VIEW_TYPE_ITEM;
     }
 
@@ -44,9 +48,6 @@ public class RecordAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         return list.size();
     }
 
-    // ------------------------------
-    // CREATE VIEW HOLDER
-    // ------------------------------
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(
@@ -64,9 +65,6 @@ public class RecordAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         return new ItemHolder(v);
     }
 
-    // ------------------------------
-    // BIND DATA TO VIEW HOLDER
-    // ------------------------------
     @Override
     public void onBindViewHolder(
             @NonNull RecyclerView.ViewHolder holder,
@@ -79,27 +77,45 @@ public class RecordAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             return;
         }
 
-        // ITEM ROW
         ItemHolder item = (ItemHolder) holder;
 
-        item.tvCategory.setText(r.getCategory());
-        item.tvAccount.setText(r.getAccount());
+        // ✅ CHANGED: Set regular click listener instead of long-click
+        item.itemView.setOnClickListener(v -> {
+            if (clickListener != null && !r.isHeader()) {
+                clickListener.onRecordClick(r);
+            }
+        });
 
-        // Format amount (expense = negative / income = positive)
-        String amountText =
-                (r.getType() == Record.TYPE_EXPENSE)
-                        ? "-₱" + r.getAmount()
-                        : "₱" + r.getAmount();
+        if (r.getType() == Record.TYPE_TRANSFER_OUT) {
+            item.tvCategory.setText("Transfer to " + r.getCategory());
+            item.tvAccount.setText("From: " + r.getAccount());
+            item.tvAmount.setText("-₱" + String.format("%.2f", r.getAmount()));
+            item.tvAmount.setTextColor(item.tvAmount.getResources().getColor(R.color.expenseRed));
+            item.iconCategory.setImageResource(R.drawable.transfer_icon);
 
-        item.tvAmount.setText(amountText);
+        } else if (r.getType() == Record.TYPE_TRANSFER_IN) {
+            item.tvCategory.setText("Transfer from " + r.getCategory());
+            item.tvAccount.setText("To: " + r.getAccount());
+            item.tvAmount.setText("+₱" + String.format("%.2f", r.getAmount()));
+            item.tvAmount.setTextColor(item.tvAmount.getResources().getColor(R.color.incomeValue));
+            item.iconCategory.setImageResource(R.drawable.transfer_icon);
 
-        // icon name stored as "ic_food", "ic_salary" etc.
-        item.iconCategory.setText(r.getIconName());
+        } else if (r.getType() == Record.TYPE_EXPENSE) {
+            item.tvCategory.setText(r.getCategory());
+            item.tvAccount.setText(r.getAccount());
+            item.tvAmount.setText("-₱" + String.format("%.2f", r.getAmount()));
+            item.tvAmount.setTextColor(item.tvAmount.getResources().getColor(R.color.expenseRed));
+            item.iconCategory.setImageResource(r.getIcon());
+
+        } else {
+            item.tvCategory.setText(r.getCategory());
+            item.tvAccount.setText(r.getAccount());
+            item.tvAmount.setText("+₱" + String.format("%.2f", r.getAmount()));
+            item.tvAmount.setTextColor(item.tvAmount.getResources().getColor(R.color.incomeValue));
+            item.iconCategory.setImageResource(r.getIcon());
+        }
     }
 
-    // ------------------------------
-    // HEADER HOLDER
-    // ------------------------------
     static class HeaderHolder extends RecyclerView.ViewHolder {
         TextView tvHeader;
 
@@ -109,12 +125,9 @@ public class RecordAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         }
     }
 
-    // ------------------------------
-    // ITEM HOLDER
-    // ------------------------------
     static class ItemHolder extends RecyclerView.ViewHolder {
 
-        TextView iconCategory;
+        ImageView iconCategory;
         TextView tvCategory, tvAccount, tvAmount;
 
         public ItemHolder(@NonNull View itemView) {

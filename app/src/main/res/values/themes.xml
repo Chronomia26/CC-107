@@ -1,33 +1,37 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Light Theme -->
+    <style name="Base.Theme.BudgetTracker" parent="Theme.Material3.Light.NoActionBar">
+        <!-- Primary Colors -->
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryVariant">@color/primary_dark</item>
+        <item name="colorOnPrimary">@color/text_on_primary</item>
 
-    <style name="Theme.BudgetBuddy.Theme" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Dynamic color usage is automatic when launched on Android 12+ if you call MaterialComponents dynamic color APIs.
-             The static fallbacks are provided in colors.xml -->
-        <item name="android:windowBackground">@color/surface</item>
-        <item name="materialButtonStyle">@style/Widget.BB.MaterialButton</item>
-    </style>
+        <!-- Secondary Colors -->
+        <item name="colorSecondary">@color/secondary</item>
+        <item name="colorSecondaryVariant">@color/secondary_dark</item>
+        <item name="colorOnSecondary">@color/text_on_secondary</item>
 
-    <style name="Theme.BudgetTracker" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="colorPrimary">@color/primaryBlue</item>
-        <item name="colorPrimaryVariant">@color/primaryDark</item>
-        <item name="colorSecondary">@color/tealAccent</item>
-        <item name="android:statusBarColor">?attr/colorPrimary</item>
-        <item name="android:navigationBarColor">@color/backgroundLight</item>
-        <item name="android:windowBackground">@color/backgroundLight</item>
-        <item name="android:textColorPrimary">@color/textPrimary</item>
-        <item name="android:textColorSecondary">@color/textSecondary</item>
-        <item name="android:windowLightStatusBar">true</item>
-    </style>
+        <!-- Background Colors -->
+        <item name="android:colorBackground">@color/background</item>
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnSurface">@color/text_primary</item>
 
-    <style name="Theme.BudgetTracker.Dark" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="colorPrimary">@color/primaryBlue</item>
-        <item name="colorSecondary">@color/tealAccent</item>
-        <item name="android:statusBarColor">@color/backgroundDark</item>
-        <item name="android:navigationBarColor">@color/backgroundDark</item>
-        <item name="android:windowBackground">@color/backgroundDark</item>
-        <item name="android:textColorPrimary">@color/white</item>
-        <item name="android:textColorSecondary">@color/tealAccent</item>
+        <!-- Status Bar -->
+        <item name="android:statusBarColor">@color/primary</item>
         <item name="android:windowLightStatusBar">false</item>
+
+        <!-- Navigation Bar -->
+        <item name="android:navigationBarColor">@color/background</item>
+        <item name="android:windowLightNavigationBar">true</item>
+
+        <!-- Text Colors -->
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+
+        <!-- Other -->
+        <item name="android:windowBackground">@color/background</item>
+        <item name="colorError">@color/error</item>
     </style>
 
+    <style name="Theme.BudgetTracker" parent="Base.Theme.BudgetTracker" />
 </resources>

@@ -5,34 +5,35 @@
     android:orientation="vertical"
     android:padding="6dp">
 
-    <!-- Date Header -->
-    <TextView
-        android:id="@+id/tvDateHeader"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Oct 14, Tuesday"
-        android:textSize="13sp"
-        android:textStyle="bold"
-        android:textColor="@color/textPrimary"
-        android:padding="4dp" />
+<!--    &lt;!&ndash; Date Header &ndash;&gt;-->
+<!--    <TextView-->
+<!--        android:id="@+id/tvDateHeader"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:text="Oct 14, Tuesday"-->
+<!--        android:textSize="13sp"-->
+<!--        android:textStyle="bold"-->
+<!--        android:textColor="@color/textPrimary"-->
+<!--        android:padding="4dp" />-->
 
     <!-- Transaction Card -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/gradient_background"
+        android:background="@drawable/bg_shape_bordered"
         android:padding="12dp"
         android:orientation="horizontal">
 
         <!-- ICON (Unicode Material Symbol) -->
-        <TextView
+
+        <ImageView
             android:id="@+id/iconCategory"
             android:layout_width="36dp"
             android:layout_height="36dp"
             android:gravity="center"
-            android:textSize="28sp"
             android:textColor="@color/textPrimary"
-            android:fontFamily="@font/material_symbols_outlined" />
+            android:textSize="28sp"/>
+        <!--            android:fontFamily="@font/material_symbols_outlined"-->
 
         <LinearLayout
             android:layout_width="0dp"
@@ -53,8 +54,8 @@
                 android:id="@+id/tvAccount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="₱Cash"
-                android:textColor="@color/textSecondary" />
+
+                android:textColor="@color/black" />
         </LinearLayout>
 
         <TextView
@@ -64,6 +65,6 @@
             android:text="-₱50.00"
             android:textSize="15sp"
             android:textStyle="bold"
-            android:textColor="@color/expenseRed" />
+             />
     </LinearLayout>
 </LinearLayout>

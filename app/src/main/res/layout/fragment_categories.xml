@@ -1,17 +1,176 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-<!--    tools:context=".fragments.CategoriesFragment">-->
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="@color/background_secondary">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <LinearLayout
+        android:orientation="vertical"
+        android:padding="16dp"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Categories"
-        android:gravity="center"
-        android:textSize="30sp"
-        android:textColor="@color/third"/>
+        android:layout_height="wrap_content">
 
-</FrameLayout>
+        <!-- ===== ALL ACCOUNTS ===== -->
+        <TextView
+            android:id="@+id/tvAllAccounts"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:paddingTop="4dp"
+            android:paddingBottom="6dp"
+            android:text="[ All Accounts ₱ 0.00 ]"
+            android:textColor="@color/textSecondary"
+            android:textStyle="bold"
+            android:textSize="16sp" />
+
+        <!-- ===== INCOME / EXPENSE SUMMARY ===== -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingVertical="8dp"
+            android:weightSum="2">
+
+            <!-- INCOME -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="INCOME SO FAR"
+                    android:textColor="@color/textSecondary"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvIncomeValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="₱ 0"
+                    android:textSize="16sp"
+                    android:textColor="@color/incomeValue"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="40dp"
+                android:background="@color/divider"/>
+
+            <!-- EXPENSE -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="EXPENSE SO FAR"
+                    android:textStyle="bold"
+                    android:textSize="14sp"
+                    android:textColor="@color/textSecondary"/>
+
+                <TextView
+                    android:id="@+id/tvExpenseValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="₱ 0"
+                    android:textColor="@color/expenseValue"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- ===== CATEGORY BUTTONS ===== -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:weightSum="3"
+            android:layout_marginTop="12dp">
+
+            <!-- INCOME BUTTON -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnIncome"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="44dp"
+                android:text="INCOME"
+                android:textColor="@color/textPrimary"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                app:cornerRadius="8dp"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAccount"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="44dp"
+                android:layout_marginHorizontal="8dp"
+                android:layout_weight="1"
+                android:text="ACCOUNT"
+                android:textColor="@color/textPrimary"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                app:cornerRadius="8dp"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnExpense"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="44dp"
+                android:text="EXPENSE"
+                android:textColor="@color/textPrimary"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                app:cornerRadius="8dp"/>
+
+        </LinearLayout>
+
+
+
+        <!-- CHILD FRAGMENT CONTAINER -->
+        <LinearLayout
+            android:id="@+id/categoryContentContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="12dp"/>
+
+
+        <!-- FIXED ADD CATEGORY BUTTON -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:paddingTop="16dp"
+            android:paddingBottom="40dp">
+
+            <Button
+                android:id="@+id/btnOpenCategoryAdd"
+                android:layout_width="160dp"
+                android:layout_height="50dp"
+                android:background="@drawable/bg_button_filled"
+                android:text="Add Account"
+                android:textColor="@color/white"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.core.widget.NestedScrollView>

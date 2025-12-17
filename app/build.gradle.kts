@@ -6,6 +6,11 @@ android {
     namespace = "com.bigo143.budgettracker"
     compileSdk = 36
 
+
+    buildFeatures {
+        viewBinding = true
+    }
+
     defaultConfig {
         applicationId = "com.bigo143.budgettracker"
         minSdk = 31

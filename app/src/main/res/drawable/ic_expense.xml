@@ -1,0 +1,17 @@
+<!--
+  This vector drawable represents "Expense".
+  It uses a banknote symbol with a minus sign, clearly indicating a deduction of money.
+  The `android:tint` attribute is used for theme-aware coloring.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24.0"
+    android:viewportHeight="24.0"
+    android:tint="?attr/colorControlNormal">
+
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M20,4H4C2.89,4 2,4.89 2,6v12c0,1.11 0.89,2 2,2h16c1.11,0 2,-0.89 2,-2V6c0,-1.11 -0.89,-2 -2,-2zM12,14c-1.1,0 -2,-0.9 -2,-2s0.9,-2 2,-2s2,0.9 2,2s-0.9,2 -2,2zM17,13H7v-2h10v2z"/>
+
+</vector>
