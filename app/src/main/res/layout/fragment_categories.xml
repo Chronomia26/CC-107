@@ -5,10 +5,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="@drawable/bg_card_neumorphic">
+    android:background="@color/background_secondary">
 
     <LinearLayout
-        android:id="@+id/fragmentCategoriesRoot"
         android:orientation="vertical"
         android:padding="16dp"
         android:layout_width="match_parent"
@@ -44,7 +43,6 @@
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/tvIncomeLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="INCOME SO FAR"
@@ -76,7 +74,6 @@
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/tvExpenseLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="EXPENSE SO FAR"
@@ -98,7 +95,6 @@
 
         <!-- ===== CATEGORY BUTTONS ===== -->
         <LinearLayout
-            android:id="@+id/categoryButtons"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"

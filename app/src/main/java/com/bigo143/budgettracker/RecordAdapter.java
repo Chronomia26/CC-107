@@ -91,14 +91,14 @@ public class RecordAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             item.tvAccount.setText("From: " + r.getAccount());
             item.tvAmount.setText("-₱" + String.format("%.2f", r.getAmount()));
             item.tvAmount.setTextColor(item.tvAmount.getResources().getColor(R.color.expenseRed));
-            item.iconCategory.setImageResource(R.drawable.ic_transfer);
+            item.iconCategory.setImageResource(R.drawable.transfer_icon);
 
         } else if (r.getType() == Record.TYPE_TRANSFER_IN) {
             item.tvCategory.setText("Transfer from " + r.getCategory());
             item.tvAccount.setText("To: " + r.getAccount());
             item.tvAmount.setText("+₱" + String.format("%.2f", r.getAmount()));
             item.tvAmount.setTextColor(item.tvAmount.getResources().getColor(R.color.incomeValue));
-            item.iconCategory.setImageResource(R.drawable.ic_transfer);
+            item.iconCategory.setImageResource(R.drawable.transfer_icon);
 
         } else if (r.getType() == Record.TYPE_EXPENSE) {
             item.tvCategory.setText(r.getCategory());

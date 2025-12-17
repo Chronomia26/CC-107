@@ -127,12 +127,6 @@ public class CategoriesFragment extends Fragment implements OnCategoriesUpdatedL
 //        } else if (id == R.id.action_filter) {
 //            // open filter modal
 //            return true;         } else
-
-        if (id == R.id.action_search) {
-            // open search UI
-            return true;
-        }
-
         return super.onOptionsItemSelected(item);
     }
 

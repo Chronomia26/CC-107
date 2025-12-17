@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_card_neumorphic"
+    android:background="@color/background_secondary"
     android:padding="8dp">
 
     <!-- Summary Row -->
@@ -96,8 +96,7 @@
 
     <!-- Recycler -->
     <View
-        android:id="@+id/divider"
-        android:layout_width="360dp"
+        android:layout_width="match_parent"
         android:layout_height="4dp"
         android:paddingBottom="40dp"
 
