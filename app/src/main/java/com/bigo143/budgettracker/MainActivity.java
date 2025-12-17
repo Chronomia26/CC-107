@@ -84,6 +84,9 @@ public class MainActivity extends AppCompatActivity {
     private static final String THEME_PREFS = "ThemePrefs";
     private static final String KEY_DARK_MODE = "dark_mode";
 
+    private long backPressedTime;
+    private Toast backToast;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         // ✅ Load saved theme before calling super.onCreate()
@@ -540,6 +543,22 @@ public class MainActivity extends AppCompatActivity {
             ((ChartsFragment) currentFragment).reloadData();
     }
 
-    // ✅ Handle back button to close drawer if open
-
+    @Override
+    //this works, palitan pag nakahanap ng better
+    public void onBackPressed() {
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            drawerLayout.closeDrawer(GravityCompat.START);
+        } else {
+            if (backPressedTime + 2000 > System.currentTimeMillis()) {
+                if (backToast != null) {
+                    backToast.cancel();
+                }
+                super.onBackPressed();
+                return;
+            }
+            backToast = Toast.makeText(this, "Back again to exit", Toast.LENGTH_SHORT);
+            backToast.show();
+            backPressedTime = System.currentTimeMillis();
+        }
+    }
 }

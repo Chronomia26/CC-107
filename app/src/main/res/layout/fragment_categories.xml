@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="@drawable/bg_card_neumorphic">
+    android:background="@color/background_secondary">
 
     <LinearLayout
         android:orientation="vertical"

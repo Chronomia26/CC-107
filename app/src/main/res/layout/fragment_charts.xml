@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:padding="12dp"
-    android:background="@drawable/bg_card_neumorphic">
+    android:background="@color/background_secondary">
 
     <LinearLayout
         android:orientation="vertical"

@@ -8,7 +8,7 @@
 
     <LinearLayout
         android:orientation="vertical"
-        android:background="@drawable/bg_card_neumorphic"
+        android:background="@color/background_secondary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="16dp"
@@ -19,7 +19,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            app:cardBackgroundColor="@color/primary_variant"
+            app:cardBackgroundColor="@color/primary"
             app:cardCornerRadius="12dp"
             app:cardElevation="0dp">
 

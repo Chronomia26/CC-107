@@ -61,4 +61,5 @@
     <color name="text_main">@color/text_primary</color>
     <color name="calcu_stroke">#BDBDBD</color>
     <color name="expenseRed">#F44336</color>
+    <color name="grayLight">#A19C9B</color>
 </resources>
