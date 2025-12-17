@@ -1,6 +1,42 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Dark Theme -->
     <style name="Base.Theme.BudgetTracker" parent="Theme.Material3.Dark.NoActionBar">
+<!--        &lt;!&ndash; Primary Colors &ndash;&gt;-->
+<!--        <item name="colorPrimary">@color/primary</item>-->
+<!--        <item name="colorPrimaryVariant">@color/primary_light</item>-->
+<!--        <item name="colorOnPrimary">@color/text_on_primary</item>-->
+
+<!--        &lt;!&ndash; Secondary Colors &ndash;&gt;-->
+<!--        <item name="colorSecondary">@color/secondary</item>-->
+<!--        <item name="colorSecondaryVariant">@color/secondary_light</item>-->
+<!--        <item name="colorOnSecondary">@color/text_on_secondary</item>-->
+
+<!--        &lt;!&ndash; Background Colors &ndash;&gt;-->
+<!--        <item name="android:colorBackground">@color/background</item>-->
+<!--        <item name="colorSurface">@color/surface</item>-->
+<!--        <item name="colorOnSurface">@color/text_primary</item>-->
+
+<!--        &lt;!&ndash; Status Bar &ndash;&gt;-->
+<!--        <item name="android:statusBarColor">@color/primary_dark</item>-->
+<!--        <item name="android:windowLightStatusBar">false</item>-->
+
+<!--        &lt;!&ndash; Navigation Bar &ndash;&gt;-->
+<!--        <item name="android:navigationBarColor">@color/background</item>-->
+<!--        <item name="android:windowLightNavigationBar">false</item>-->
+
+<!--        &lt;!&ndash; Text Colors &ndash;&gt;-->
+<!--        <item name="android:textColorPrimary">@color/text_primary</item>-->
+<!--        <item name="android:textColorSecondary">@color/text_secondary</item>-->
+
+<!--        &lt;!&ndash; Other &ndash;&gt;-->
+<!--        <item name="android:windowBackground">@color/background</item>-->
+<!--        <item name="colorError">@color/error</item>-->
+<!--    </style>-->
+
+<!--    <style name="Theme.BudgetTracker" parent="Base.Theme.BudgetTracker" />-->
+
+<!--    &lt;!&ndash; Base Dark Theme &ndash;&gt;-->
+<!--    <style name="Base.Theme.BudgetTracker" parent="Theme.Material3.Dark.NoActionBar">-->
         <!-- Primary Colors -->
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryVariant">@color/primary_light</item>

@@ -1,5 +1,34 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Light Theme -->
+
+<!--    <style name="Theme.BudgetTracker" parent="Theme.MaterialComponents.Light.NoActionBar">-->
+<!--        <item name="colorPrimary">@color/primary</item>-->
+<!--        <item name="colorPrimaryVariant">@color/primary_variant</item>-->
+<!--        <item name="colorSecondary">@color/secondary</item>-->
+<!--        <item name="android:statusBarColor">@color/primary</item>-->
+<!--        <item name="android:windowLightStatusBar">false</item>-->
+<!--        <item name="android:colorBackground">@color/background_primary</item>-->
+<!--        <item name="colorSurface">@color/surface</item>-->
+
+<!--        &lt;!&ndash; Text Attributes &ndash;&gt;-->
+<!--        <item name="android:textColorPrimary">@color/textPrimary</item>-->
+<!--        <item name="android:textColorSecondary">@color/textSecondary</item>-->
+
+<!--        &lt;!&ndash; Custom Attributes &ndash;&gt;-->
+<!--        <item name="backgroundPrimary">@color/background_primary</item>-->
+<!--        <item name="backgroundSecondary">@color/background_secondary</item>-->
+<!--        <item name="dividerColor">@color/divider</item>-->
+<!--        <item name="calculatorSurface">@color/calculator_surface</item>-->
+<!--        <item name="calculatorButton">@color/calculator_button</item>-->
+<!--        <item name="calculatorText">@color/calculator_text</item>-->
+
+<!--        &lt;!&ndash; Material Components &ndash;&gt;-->
+<!--        <item name="materialButtonStyle">@style/Widget.App.Button</item>-->
+<!--        <item name="textInputStyle">@style/Widget.App.TextInputLayout</item>-->
+<!--    </style>-->
+
+<!--    &lt;!&ndash; Dark Theme &ndash;&gt;-->
+    <!-- Base Light Theme -->
     <style name="Base.Theme.BudgetTracker" parent="Theme.Material3.Light.NoActionBar">
         <!-- Primary Colors -->
         <item name="colorPrimary">@color/primary</item>

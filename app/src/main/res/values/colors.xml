@@ -1,65 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Primary Colors - Blue Shades -->
-    <color name="primary">#2F4578</color>
-    <color name="primary_light">#4A6199</color>
-    <color name="primary_dark">#1E2F51</color>
+    <color name="primary">#4A6FA5</color>
+    <color name="primary_light">#5A7FC7</color>
+    <color name="primary_dark">#3D5A8C</color>
     <color name="primary_variant">#3D5A8C</color>
-
-    <!-- Alias for Material / camelCase references -->
+    <color name="primaryBlue">#4A6FA5</color>
 
     <!-- Secondary Colors - Orange Shades -->
-    <color name="secondary">#FF8C42</color>
-    <color name="secondary_light">#FFA666</color>
+    <color name="secondary">#FF9F45</color>
+    <color name="secondary_light">#FFB366</color>
     <color name="secondary_dark">#E67A32</color>
     <color name="secondary_variant">#FF9D5C</color>
 
-    <!-- Accent Colors - Cream Shades -->
+    <!-- Accent Colors -->
     <color name="accent">#F5E6D3</color>
-    #
 
-    <!-- Background Colors -->
-    <color name="background">#FFFFFF</color>
-    <color name="background_secondary">#F8F9FA</color>
+    <!-- Background Colors (Light Mode) -->
+    <color name="background">#F5F7FA</color>
+    <color name="background_primary">#F5F7FA</color>
+    <color name="background_secondary">#FFFFFF</color>
     <color name="surface">#FFFFFF</color>
+    <color name="card_background">#FFFFFF</color>
 
-    <!-- Text Colors -->
-    <color name="text_primary">#000000</color>
+    <!-- Text Colors (Light Mode) -->
+    <color name="text_primary">#212121</color>
     <color name="text_secondary">#757575</color>
     <color name="text_on_primary">#FFFFFF</color>
     <color name="text_on_secondary">#FFFFFF</color>
+    <color name="textPrimary">#212121</color>
+    <color name="textSecondary">#757575</color>
 
-    <!-- Income/Expense Colors -->
-
-    <!-- UI Element Colors -->
-    <color name="divider">#E0E0E0</color>
-
-    <!-- Card Colors -->
-    <color name="card_background">#FFFFFF</color>
-
-    <!-- Status Colors -->
+    <!-- Semantic Colors (Same for both themes) -->
+    <color name="incomeValue">#4CAF50</color>
+    <color name="incomeGreen">#4CAF50</color>
+    <color name="expenseValue">#F44336</color>
+    <color name="expenseRed">#F44336</color>
     <color name="error">#F44336</color>
 
-    <!-- Transparent Colors -->
-    <color name="transparent">#00000000</color>
-
-    <!-- Legacy/Compatibility Colors -->
+    <!-- UI Elements (Light Mode) -->
+    <color name="divider">#E0E0E0</color>
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
-    <color name="primaryBlue">#2F4578</color>
-    <color name="textPrimary">#000000</color>
-    <color name="textSecondary">#757575</color>
-    <color name="incomeValue">#4CAF50</color>
-    <color name="expenseValue">#F44336</color>
+    <color name="transparent">#00000000</color>
+    <color name="grayLight">#BDBDBD</color>
 
-    <!-- Missing / Alias Colors to fix linking errors -->
-    <color name="navBackground">@color/background_secondary</color>
-    <color name="neumorphic_shadow_dark">#404040</color>
-    <color name="neumorphic_highlight_light">#F5F5F5</color>
-    <color name="neumorphic_surface">@color/surface</color>
-    <color name="fifth">#FFA666</color>
-    <color name="text_main">@color/text_primary</color>
+    <!-- Calculator & Calcu Add Expense/Income Colors (Light Mode) -->
+    <color name="text_main">#212121</color>
     <color name="calcu_stroke">#BDBDBD</color>
-    <color name="expenseRed">#F44336</color>
-    <color name="grayLight">#A19C9B</color>
+
+    <!-- Navigation -->
+    <color name="navBackground">#FFFFFF</color>
+
+    <!-- Neumorphic Effects (Light Mode) -->
+    <color name="neumorphic_shadow_dark">#D1D9E6</color>
+    <color name="neumorphic_highlight_light">#FFFFFF</color>
+    <color name="neumorphic_surface">#E5EBF5</color>
+
+    <!-- Legacy -->
+    <color name="fifth">#FFA666</color>
+
+    <!-- Shadow Colors for Elevation -->
+    <color name="shadow_light">#1A000000</color>
+    <color name="shadow_medium">#33000000</color>
 </resources>

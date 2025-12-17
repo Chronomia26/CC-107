@@ -31,5 +31,29 @@
     <string name="close_nav">Close Navigation Drawer</string>
     <string name="placeholder">Placeholder</string>
 
+    <string name="tagline">Personal expense tracker with charts</string>
+
+    <!-- Welcome Screen -->
+    <string name="create_account">Create a new account</string>
+    <string name="log_in">Log in</string>
+    <string name="secure_private">Secure • Private • Easy to use</string>
+
+    <!-- Login Screen -->
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="login_button">Log In</string>
+    <string name="or_divider">OR</string>
+    <string name="no_account">Don\'t have an account? Sign Up</string>
+
+    <!-- Signup Screen -->
+    <string name="name">Name</string>
+    <string name="email">Email</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="signup_button">Sign Up</string>
+    <string name="have_account">Already have an account? Log In</string>
+
+    <!-- Common -->
+    <string name="version">v1.0.0</string>
+
     <!-- Login Activity -->
 </resources>
