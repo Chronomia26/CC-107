@@ -1252,9 +1252,537 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             return id != -1;
         }
     }
+    // Get income/expense for specific month
+    public double getIncomeForMonth(String username, int year, int month) {
+        SQLiteDatabase db = getReadableDatabase();
+        String query = "SELECT SUM(amount) FROM records " +
+                "WHERE username=? AND type='income' " +
+                "AND strftime('%Y', date) = ? " +
+                "AND strftime('%m', date) = ?";
 
+        Cursor cursor = db.rawQuery(query, new String[]{
+                username,
+                String.valueOf(year),
+                String.format("%02d", month)
+        });
 
+        double sum = 0;
+        if (cursor.moveToFirst()) sum = cursor.getDouble(0);
+        cursor.close();
+        return sum;
+    }
 
+    public double getExpenseForMonth(String username, int year, int month) {
+        SQLiteDatabase db = getReadableDatabase();
+        String query = "SELECT SUM(amount) FROM records " +
+                "WHERE username=? AND type='expense' " +
+                "AND strftime('%Y', date) = ? " +
+                "AND strftime('%m', date) = ?";
+
+        Cursor cursor = db.rawQuery(query, new String[]{
+                username,
+                String.valueOf(year),
+                String.format("%02d", month)
+        });
+
+        double sum = 0;
+        if (cursor.moveToFirst()) sum = cursor.getDouble(0);
+        cursor.close();
+        return sum;
+    }
+
+    public double getIncomeForYear(String username, int year) {
+        SQLiteDatabase db = getReadableDatabase();
+        String query = "SELECT SUM(amount) FROM records " +
+                "WHERE username=? AND type='income' " +
+                "AND strftime('%Y', date) = ?";
+
+        Cursor cursor = db.rawQuery(query, new String[]{username, String.valueOf(year)});
+        double sum = 0;
+        if (cursor.moveToFirst()) sum = cursor.getDouble(0);
+        cursor.close();
+        return sum;
+    }
+
+    public double getExpenseForYear(String username, int year) {
+        SQLiteDatabase db = getReadableDatabase();
+        String query = "SELECT SUM(amount) FROM records " +
+                "WHERE username=? AND type='expense' " +
+                "AND strftime('%Y', date) = ?";
+
+        Cursor cursor = db.rawQuery(query, new String[]{username, String.valueOf(year)});
+        double sum = 0;
+        if (cursor.moveToFirst()) sum = cursor.getDouble(0);
+        cursor.close();
+        return sum;
+    }
+
+    // Get category percentages for specific month
+    public Map<String, Double> getExpensePercentageByCategoryForMonth(String username, int year, int month) {
+        Map<String, Double> percentages = new HashMap<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String totalQuery = "SELECT SUM(amount) FROM records " +
+                "WHERE username=? AND type='expense' " +
+                "AND strftime('%Y', date) = ? " +
+                "AND strftime('%m', date) = ?";
+
+        Cursor totalCursor = db.rawQuery(totalQuery, new String[]{
+                username,
+                String.valueOf(year),
+                String.format("%02d", month)
+        });
+
+        double total = 0;
+        if (totalCursor.moveToFirst()) total = totalCursor.getDouble(0);
+        totalCursor.close();
+        if (total == 0) return percentages;
+
+        String query = "SELECT c.name, SUM(r.amount) AS total " +
+                "FROM records r " +
+                "LEFT JOIN categories c ON r.category_id = c.id " +
+                "WHERE r.username=? AND r.type='expense' " +
+                "AND strftime('%Y', r.date) = ? " +
+                "AND strftime('%m', r.date) = ? " +
+                "GROUP BY r.category_id";
+
+        Cursor cursor = db.rawQuery(query, new String[]{
+                username,
+                String.valueOf(year),
+                String.format("%02d", month)
+        });
+
+        while (cursor.moveToNext()) {
+            String categoryName = cursor.getString(cursor.getColumnIndexOrThrow("name"));
+            double amount = cursor.getDouble(cursor.getColumnIndexOrThrow("total"));
+            percentages.put(categoryName, (amount / total) * 100);
+        }
+        cursor.close();
+
+        return percentages;
+    }
+
+    public Map<String, Double> getIncomePercentageByCategoryForMonth(String username, int year, int month) {
+        Map<String, Double> percentages = new HashMap<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String totalQuery = "SELECT SUM(amount) FROM records " +
+                "WHERE username=? AND type='income' " +
+                "AND strftime('%Y', date) = ? " +
+                "AND strftime('%m', date) = ?";
+
+        Cursor totalCursor = db.rawQuery(totalQuery, new String[]{
+                username,
+                String.valueOf(year),
+                String.format("%02d", month)
+        });
+
+        double total = 0;
+        if (totalCursor.moveToFirst()) total = totalCursor.getDouble(0);
+        totalCursor.close();
+        if (total == 0) return percentages;
+
+        String query = "SELECT c.name, SUM(r.amount) AS total " +
+                "FROM records r " +
+                "LEFT JOIN categories c ON r.category_id = c.id " +
+                "WHERE r.username=? AND r.type='income' " +
+                "AND strftime('%Y', r.date) = ? " +
+                "AND strftime('%m', r.date) = ? " +
+                "GROUP BY r.category_id";
+
+        Cursor cursor = db.rawQuery(query, new String[]{
+                username,
+                String.valueOf(year),
+                String.format("%02d", month)
+        });
+
+        while (cursor.moveToNext()) {
+            String categoryName = cursor.getString(cursor.getColumnIndexOrThrow("name"));
+            double amount = cursor.getDouble(cursor.getColumnIndexOrThrow("total"));
+            percentages.put(categoryName, (amount / total) * 100);
+        }
+        cursor.close();
+
+        return percentages;
+    }
+
+    public Map<String, Double> getExpensePercentageByCategoryForYear(String username, int year) {
+        Map<String, Double> percentages = new HashMap<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String totalQuery = "SELECT SUM(amount) FROM records " +
+                "WHERE username=? AND type='expense' " +
+                "AND strftime('%Y', date) = ?";
+
+        Cursor totalCursor = db.rawQuery(totalQuery, new String[]{username, String.valueOf(year)});
+        double total = 0;
+        if (totalCursor.moveToFirst()) total = totalCursor.getDouble(0);
+        totalCursor.close();
+        if (total == 0) return percentages;
+
+        String query = "SELECT c.name, SUM(r.amount) AS total " +
+                "FROM records r " +
+                "LEFT JOIN categories c ON r.category_id = c.id " +
+                "WHERE r.username=? AND r.type='expense' " +
+                "AND strftime('%Y', r.date) = ? " +
+                "GROUP BY r.category_id";
+
+        Cursor cursor = db.rawQuery(query, new String[]{username, String.valueOf(year)});
+        while (cursor.moveToNext()) {
+            String categoryName = cursor.getString(cursor.getColumnIndexOrThrow("name"));
+            double amount = cursor.getDouble(cursor.getColumnIndexOrThrow("total"));
+            percentages.put(categoryName, (amount / total) * 100);
+        }
+        cursor.close();
+
+        return percentages;
+    }
+
+// Get category amounts (not percentages) for breakdown display
+
+    public Map<String, Double> getExpenseAmountByCategoryForMonth(String username, int year, int month) {
+        Map<String, Double> amounts = new HashMap<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String query = "SELECT c.name, SUM(r.amount) AS total " +
+                "FROM records r " +
+                "LEFT JOIN categories c ON r.category_id = c.id " +
+                "WHERE r.username=? AND r.type='expense' " +
+                "AND strftime('%Y', r.date) = ? " +
+                "AND strftime('%m', r.date) = ? " +
+                "GROUP BY r.category_id";
+
+        Cursor cursor = db.rawQuery(query, new String[]{
+                username,
+                String.valueOf(year),
+                String.format("%02d", month)
+        });
+
+        while (cursor.moveToNext()) {
+            String categoryName = cursor.getString(cursor.getColumnIndexOrThrow("name"));
+            double amount = cursor.getDouble(cursor.getColumnIndexOrThrow("total"));
+            amounts.put(categoryName, amount);
+        }
+        cursor.close();
+
+        return amounts;
+    }
+
+    public Map<String, Double> getIncomeAmountByCategoryForMonth(String username, int year, int month) {
+        Map<String, Double> amounts = new HashMap<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String query = "SELECT c.name, SUM(r.amount) AS total " +
+                "FROM records r " +
+                "LEFT JOIN categories c ON r.category_id = c.id " +
+                "WHERE r.username=? AND r.type='income' " +
+                "AND strftime('%Y', r.date) = ? " +
+                "AND strftime('%m', r.date) = ? " +
+                "GROUP BY r.category_id";
+
+        Cursor cursor = db.rawQuery(query, new String[]{
+                username,
+                String.valueOf(year),
+                String.format("%02d", month)
+        });
+
+        while (cursor.moveToNext()) {
+            String categoryName = cursor.getString(cursor.getColumnIndexOrThrow("name"));
+            double amount = cursor.getDouble(cursor.getColumnIndexOrThrow("total"));
+            amounts.put(categoryName, amount);
+        }
+        cursor.close();
+
+        return amounts;
+    }
+
+    public Map<String, Double> getExpenseAmountByCategoryForYear(String username, int year) {
+        Map<String, Double> amounts = new HashMap<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String query = "SELECT c.name, SUM(r.amount) AS total " +
+                "FROM records r " +
+                "LEFT JOIN categories c ON r.category_id = c.id " +
+                "WHERE r.username=? AND r.type='expense' " +
+                "AND strftime('%Y', r.date) = ? " +
+                "GROUP BY r.category_id";
+
+        Cursor cursor = db.rawQuery(query, new String[]{username, String.valueOf(year)});
+        while (cursor.moveToNext()) {
+            String categoryName = cursor.getString(cursor.getColumnIndexOrThrow("name"));
+            double amount = cursor.getDouble(cursor.getColumnIndexOrThrow("total"));
+            amounts.put(categoryName, amount);
+        }
+        cursor.close();
+
+        return amounts;
+    }
+
+    public Map<String, Double> getIncomeAmountByCategoryForYear(String username, int year) {
+        Map<String, Double> amounts = new HashMap<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String query = "SELECT c.name, SUM(r.amount) AS total " +
+                "FROM records r " +
+                "LEFT JOIN categories c ON r.category_id = c.id " +
+                "WHERE r.username=? AND r.type='income' " +
+                "AND strftime('%Y', r.date) = ? " +
+                "GROUP BY r.category_id";
+
+        Cursor cursor = db.rawQuery(query, new String[]{username, String.valueOf(year)});
+        while (cursor.moveToNext()) {
+            String categoryName = cursor.getString(cursor.getColumnIndexOrThrow("name"));
+            double amount = cursor.getDouble(cursor.getColumnIndexOrThrow("total"));
+            amounts.put(categoryName, amount);
+        }
+        cursor.close();
+
+        return amounts;
+    }
+
+    public Map<String, Double> getExpenseAmountByCategoryLastDays(String username, int days) {
+        Map<String, Double> amounts = new HashMap<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String query = "SELECT c.name, SUM(r.amount) AS total " +
+                "FROM records r " +
+                "LEFT JOIN categories c ON r.category_id = c.id " +
+                "WHERE r.username=? AND r.type='expense' " +
+                "AND r.date >= date('now', ? || ' days') " +
+                "GROUP BY r.category_id";
+
+        Cursor cursor = db.rawQuery(query, new String[]{username, "-" + days});
+        while (cursor.moveToNext()) {
+            String categoryName = cursor.getString(cursor.getColumnIndexOrThrow("name"));
+            double amount = cursor.getDouble(cursor.getColumnIndexOrThrow("total"));
+            amounts.put(categoryName, amount);
+        }
+        cursor.close();
+
+        return amounts;
+    }
+
+    public Map<String, Double> getIncomeAmountByCategoryLastDays(String username, int days) {
+        Map<String, Double> amounts = new HashMap<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String query = "SELECT c.name, SUM(r.amount) AS total " +
+                "FROM records r " +
+                "LEFT JOIN categories c ON r.category_id = c.id " +
+                "WHERE r.username=? AND r.type='income' " +
+                "AND r.date >= date('now', ? || ' days') " +
+                "GROUP BY r.category_id";
+
+        Cursor cursor = db.rawQuery(query, new String[]{username, "-" + days});
+        while (cursor.moveToNext()) {
+            String categoryName = cursor.getString(cursor.getColumnIndexOrThrow("name"));
+            double amount = cursor.getDouble(cursor.getColumnIndexOrThrow("total"));
+            amounts.put(categoryName, amount);
+        }
+        cursor.close();
+
+        return amounts;
+    }
+    // Add income percentage methods for pie chart
+    public Map<String, Double> getIncomePercentageByCategoryLastDays(String username, int days) {
+        Map<String, Double> percentages = new HashMap<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String totalQuery = "SELECT SUM(amount) FROM records " +
+                "WHERE username=? AND type='income' AND date >= date('now', ? || ' days')";
+        Cursor totalCursor = db.rawQuery(totalQuery, new String[]{username, "-" + days});
+        double total = 0;
+        if (totalCursor.moveToFirst()) total = totalCursor.getDouble(0);
+        totalCursor.close();
+        if (total == 0) return percentages;
+
+        String query = "SELECT c.name, SUM(r.amount) AS total " +
+                "FROM records r " +
+                "LEFT JOIN categories c ON r.category_id = c.id " +
+                "WHERE r.username=? AND r.type='income' AND r.date >= date('now', ? || ' days') " +
+                "GROUP BY r.category_id";
+
+        Cursor cursor = db.rawQuery(query, new String[]{username, "-" + days});
+        while (cursor.moveToNext()) {
+            String categoryName = cursor.getString(cursor.getColumnIndexOrThrow("name"));
+            double amount = cursor.getDouble(cursor.getColumnIndexOrThrow("total"));
+            percentages.put(categoryName, (amount / total) * 100);
+        }
+        cursor.close();
+
+        return percentages;
+    }
+
+    public Map<String, Double> getIncomePercentageByCategoryForYear(String username, int year) {
+        Map<String, Double> percentages = new HashMap<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String totalQuery = "SELECT SUM(amount) FROM records " +
+                "WHERE username=? AND type='income' " +
+                "AND strftime('%Y', date) = ?";
+
+        Cursor totalCursor = db.rawQuery(totalQuery, new String[]{username, String.valueOf(year)});
+        double total = 0;
+        if (totalCursor.moveToFirst()) total = totalCursor.getDouble(0);
+        totalCursor.close();
+        if (total == 0) return percentages;
+
+        String query = "SELECT c.name, SUM(r.amount) AS total " +
+                "FROM records r " +
+                "LEFT JOIN categories c ON r.category_id = c.id " +
+                "WHERE r.username=? AND r.type='income' " +
+                "AND strftime('%Y', r.date) = ? " +
+                "GROUP BY r.category_id";
+
+        Cursor cursor = db.rawQuery(query, new String[]{username, String.valueOf(year)});
+        while (cursor.moveToNext()) {
+            String categoryName = cursor.getString(cursor.getColumnIndexOrThrow("name"));
+            double amount = cursor.getDouble(cursor.getColumnIndexOrThrow("total"));
+            percentages.put(categoryName, (amount / total) * 100);
+        }
+        cursor.close();
+
+        return percentages;
+    }
+
+// ---------------- WEEKLY / DATE RANGE QUERIES ----------------
+
+    /**
+     * Get total expense between two dates (inclusive) for a user.
+     */
+    public double getExpenseBetweenDates(String username, long startMillis, long endMillis) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        double total = 0;
+
+        String query = "SELECT SUM(" + COL_RECORD_AMOUNT + ") as total " +
+                "FROM " + TABLE_RECORDS + " r " +
+                "INNER JOIN " + TABLE_CATEGORIES + " c ON r." + COL_RECORD_CATEGORY + " = c." + COL_CATEGORY_ID + " " +
+                "WHERE r." + COL_RECORD_USER + " = ? " +
+                "AND r." + COL_RECORD_TYPE + " = 'expense' " +
+                "AND date(r." + COL_RECORD_DATE + ") BETWEEN date(?) AND date(?)";
+
+        Cursor cursor = db.rawQuery(query, new String[]{
+                username,
+                String.valueOf(startMillis),
+                String.valueOf(endMillis)
+        });
+
+        if (cursor.moveToFirst()) {
+            total = cursor.getDouble(cursor.getColumnIndexOrThrow("total"));
+        }
+
+        cursor.close();
+        return total;
+    }
+
+    /**
+     * Get total income between two dates (inclusive) for a user.
+     */
+    public double getIncomeBetweenDates(String username, long startMillis, long endMillis) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        double total = 0;
+
+        String query = "SELECT SUM(" + COL_RECORD_AMOUNT + ") as total " +
+                "FROM " + TABLE_RECORDS + " r " +
+                "INNER JOIN " + TABLE_CATEGORIES + " c ON r." + COL_RECORD_CATEGORY + " = c." + COL_CATEGORY_ID + " " +
+                "WHERE r." + COL_RECORD_USER + " = ? " +
+                "AND r." + COL_RECORD_TYPE + " = 'income' " +
+                "AND date(r." + COL_RECORD_DATE + ") BETWEEN date(?) AND date(?)";
+
+        Cursor cursor = db.rawQuery(query, new String[]{
+                username,
+                String.valueOf(startMillis),
+                String.valueOf(endMillis)
+        });
+
+        if (cursor.moveToFirst()) {
+            total = cursor.getDouble(cursor.getColumnIndexOrThrow("total"));
+        }
+
+        cursor.close();
+        return total;
+    }
+
+    /**
+     * Get expense amount grouped by category between two dates.
+     */
+    public Map<String, Double> getExpenseAmountByCategoryBetweenDates(String username, long startMillis, long endMillis) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Map<String, Double> map = new HashMap<>();
+
+        String query = "SELECT c." + COL_CATEGORY_NAME + ", SUM(r." + COL_RECORD_AMOUNT + ") as total " +
+                "FROM " + TABLE_RECORDS + " r " +
+                "INNER JOIN " + TABLE_CATEGORIES + " c ON r." + COL_RECORD_CATEGORY + " = c." + COL_CATEGORY_ID + " " +
+                "WHERE r." + COL_RECORD_USER + " = ? " +
+                "AND r." + COL_RECORD_TYPE + " = 'expense' " +
+                "AND date(r." + COL_RECORD_DATE + ") BETWEEN date(?) AND date(?) " +
+                "GROUP BY c." + COL_CATEGORY_NAME;
+
+        Cursor cursor = db.rawQuery(query, new String[]{
+                username,
+                String.valueOf(startMillis),
+                String.valueOf(endMillis)
+        });
+
+        while (cursor.moveToNext()) {
+            String category = cursor.getString(cursor.getColumnIndexOrThrow(COL_CATEGORY_NAME));
+            double amount = cursor.getDouble(cursor.getColumnIndexOrThrow("total"));
+            map.put(category, amount);
+        }
+
+        cursor.close();
+        return map;
+    }
+
+    /**
+     * Get income amount grouped by category between two dates.
+     */
+    public Map<String, Double> getIncomeAmountByCategoryBetweenDates(String username, long startMillis, long endMillis) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Map<String, Double> map = new HashMap<>();
+
+        String query = "SELECT c." + COL_CATEGORY_NAME + ", SUM(r." + COL_RECORD_AMOUNT + ") as total " +
+                "FROM " + TABLE_RECORDS + " r " +
+                "INNER JOIN " + TABLE_CATEGORIES + " c ON r." + COL_RECORD_CATEGORY + " = c." + COL_CATEGORY_ID + " " +
+                "WHERE r." + COL_RECORD_USER + " = ? " +
+                "AND r." + COL_RECORD_TYPE + " = 'income' " +
+                "AND date(r." + COL_RECORD_DATE + ") BETWEEN date(?) AND date(?) " +
+                "GROUP BY c." + COL_CATEGORY_NAME;
+
+        Cursor cursor = db.rawQuery(query, new String[]{
+                username,
+                String.valueOf(startMillis),
+                String.valueOf(endMillis)
+        });
+
+        while (cursor.moveToNext()) {
+            String category = cursor.getString(cursor.getColumnIndexOrThrow(COL_CATEGORY_NAME));
+            double amount = cursor.getDouble(cursor.getColumnIndexOrThrow("total"));
+            map.put(category, amount);
+        }
+
+        cursor.close();
+        return map;
+    }
+    public Map<String, Double> getExpensePercentageByCategoryBetweenDates(String username, long startMillis, long endMillis) {
+        Map<String, Double> data = getExpenseAmountByCategoryBetweenDates(username, startMillis, endMillis);
+        double total = getExpenseBetweenDates(username, startMillis, endMillis);
+        Map<String, Double> percentages = new HashMap<>();
+        for (String k : data.keySet()) {
+            percentages.put(k, (data.get(k) / total) * 100);
+        }
+        return percentages;
+    }
+
+    public Map<String, Double> getIncomePercentageByCategoryBetweenDates(String username, long startMillis, long endMillis) {
+        Map<String, Double> data = getIncomeAmountByCategoryBetweenDates(username, startMillis, endMillis);
+        double total = getIncomeBetweenDates(username, startMillis, endMillis);
+        Map<String, Double> percentages = new HashMap<>();
+        for (String k : data.keySet()) {
+            percentages.put(k, (data.get(k) / total) * 100);
+        }
+        return percentages;
+    }
 
 
 }
