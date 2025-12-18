@@ -31,9 +31,11 @@
             android:exported="false" /> <!-- Login & Auth Activities -->
         <activity
             android:name=".loginActivities.LoginActivity"
+            android:theme="@style/Theme.BudgetTracker"
             android:exported="false" />
         <activity
             android:name=".loginActivities.SignupActivity"
+            android:theme="@style/Theme.BudgetTracker"
             android:exported="false" />
     </application>
 

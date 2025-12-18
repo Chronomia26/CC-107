@@ -1,66 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Primary Colors - Blue Shades (Brighter in dark mode) -->
+    <!-- ==================== PRIMARY COLORS (Lighter for dark mode) ==================== -->
     <color name="primary">#5A7FC7</color>
     <color name="primary_light">#6A8FD7</color>
     <color name="primary_dark">#4A6FA5</color>
     <color name="primary_variant">#4A6FA5</color>
     <color name="primaryBlue">#5A7FC7</color>
 
-    <!-- Secondary Colors - Orange Shades (Brighter in dark mode) -->
+    <!-- ==================== SECONDARY COLORS (Lighter for dark mode) ==================== -->
     <color name="secondary">#FFB366</color>
-    <color name="secondary_light">#FFC480</color>
+    <color name="secondary_light">#FFC280</color>
     <color name="secondary_dark">#FF9F45</color>
-    <color name="secondary_variant">#FFAD5C</color>
+    <color name="secondary_variant">#FFB366</color>
 
-    <!-- Accent Colors -->
-    <color name="accent">#F5E6D3</color>
+    <!-- ==================== ACCENT COLORS ==================== -->
+    <color name="accent">#E6D7C3</color>
+    <color name="fifth">#FFB366</color>
 
-    <!-- Background Colors (Dark Mode) -->
+    <!-- ==================== BACKGROUND COLORS (Dark) ==================== -->
     <color name="background">#1E1E1E</color>
     <color name="background_primary">#1E1E1E</color>
     <color name="background_secondary">#2D2D2D</color>
     <color name="surface">#2D2D2D</color>
     <color name="card_background">#2D2D2D</color>
+    <color name="navBackground">#2D2D2D</color>
 
-    <!-- Text Colors (Dark Mode) -->
+    <!-- ==================== TEXT COLORS (Light for dark bg) ==================== -->
     <color name="text_primary">#E5E5E5</color>
     <color name="text_secondary">#B0B0B0</color>
     <color name="text_on_primary">#FFFFFF</color>
     <color name="text_on_secondary">#000000</color>
+    <color name="text_main">#E5E5E5</color>
     <color name="textPrimary">#E5E5E5</color>
     <color name="textSecondary">#B0B0B0</color>
 
-    <!-- Semantic Colors (Same for both themes) -->
+    <!-- ==================== INCOME/EXPENSE COLORS (Same) ==================== -->
     <color name="incomeValue">#4CAF50</color>
-    <color name="incomeGreen">#4CAF50</color>
     <color name="expenseValue">#F44336</color>
     <color name="expenseRed">#F44336</color>
+
+    <!-- ==================== UI ELEMENT COLORS ==================== -->
+    <color name="divider">#424242</color>
+    <color name="statusBar">#1E1E1E</color>
     <color name="error">#F44336</color>
 
-    <!-- UI Elements (Dark Mode) -->
-    <color name="divider">#424242</color>
+    <!-- ==================== NEUMORPHIC COLORS (Dark) ==================== -->
+    <color name="neumorphic_shadow_dark">#000000</color>
+    <color name="neumorphic_highlight_light">#3A3A3A</color>
+    <color name="neumorphic_surface">#2D2D2D</color>
+
+    <!-- ==================== CALCULATOR COLORS ==================== -->
+    <color name="calcu_stroke">#424242</color>
+    <color name="calcu_button_bg">#3A3A3A</color>
+
+    <!-- ==================== GRAYS ==================== -->
+    <color name="grayLight">#6A6A6A</color>
+
+    <!-- ==================== BASIC COLORS ==================== -->
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
     <color name="transparent">#00000000</color>
-    <color name="grayLight">#616161</color>
-
-    <!-- Calculator & Calcu Add Expense/Income Colors (Dark Mode) -->
-    <color name="text_main">#E5E5E5</color>
-    <color name="calcu_stroke">#616161</color>
-
-    <!-- Navigation -->
-    <color name="navBackground">#2D2D2D</color>
-
-    <!-- Neumorphic Effects (Dark Mode) -->
-    <color name="neumorphic_shadow_dark">#0F0F0F</color>
-    <color name="neumorphic_highlight_light">#3D3D3D</color>
-    <color name="neumorphic_surface">#2D2D2D</color>
-
-    <!-- Legacy -->
-    <color name="fifth">#FFB366</color>
-
-    <!-- Shadow Colors for Elevation -->
-    <color name="shadow_light">#40000000</color>
-    <color name="shadow_medium">#60000000</color>
 </resources>
