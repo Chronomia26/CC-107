@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="12dp"
-    android:background="@drawable/bg_card_neumorphic">
+    android:background="@color/background_primary">
 
     <LinearLayout
 
@@ -12,237 +12,238 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-
-        <!-- Month Navigation -->
-        <LinearLayout
+        <!-- Summary Card -->
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center"
-            android:padding="8dp">
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="@color/surface"
+            android:layout_marginBottom="16dp">
 
-            <ImageView
-                android:id="@+id/btnPrevMonth"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:src="@drawable/ic_arrow_left"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:padding="8dp"/>
-
-            <TextView
-                android:id="@+id/tvMonthYear"
-                android:layout_width="0dp"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="December, 2025"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:textColor="@color/textPrimary"
-                android:gravity="center"/>
+                android:orientation="horizontal"
+                android:weightSum="3"
+                android:gravity="center"
+                android:padding="16dp">
 
-            <ImageView
-                android:id="@+id/btnNextMonth"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:src="@drawable/ic_arrow_right"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:padding="8dp"/>
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnPeriodMenu"
-                style="?attr/materialIconButtonStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:icon="@drawable/ic_filter" />
+                <!-- Income -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
 
-        </LinearLayout>
+                    <TextView
+                        android:text="INCOME"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textStyle="bold"
+                        android:textSize="11sp"
+                        android:textColor="@color/textSecondary"
+                        android:letterSpacing="0.05" />
 
-        <!-- Summary Section -->
-        <LinearLayout
-            android:id="@+id/summaryRow"
+                    <TextView
+                        android:id="@+id/tvIncome"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="₱0.00"
+                        android:textColor="@color/incomeValue"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="4dp"/>
+                </LinearLayout>
+
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="40dp"
+                    android:background="@color/divider"
+                    android:layout_marginHorizontal="8dp"/>
+
+                <!-- Total -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="TOTAL"
+                        android:textStyle="bold"
+                        android:textSize="11sp"
+                        android:textColor="@color/textSecondary"
+                        android:letterSpacing="0.05" />
+
+                    <TextView
+                        android:id="@+id/tvTotal"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="₱0.00"
+                        android:textColor="@color/primaryBlue"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="4dp"/>
+                </LinearLayout>
+
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="40dp"
+                    android:background="@color/divider"
+                    android:layout_marginHorizontal="8dp"/>
+
+                <!-- Expense -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="EXPENSE"
+                        android:textStyle="bold"
+                        android:textSize="11sp"
+                        android:textColor="@color/textSecondary"
+                        android:letterSpacing="0.05" />
+
+                    <TextView
+                        android:id="@+id/tvExpense"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="₱0.00"
+                        android:textColor="@color/expenseRed"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="4dp"/>
+                </LinearLayout>
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Expense Overview Card -->
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:weightSum="3"
-            android:gravity="center"
-            android:padding="11dp">
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="@color/surface"
+            android:layout_marginBottom="16dp">
 
             <LinearLayout
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:padding="16dp">
 
+                <!-- Title -->
                 <TextView
-                    android:text="EXPENSE"
-                    android:layout_width="wrap_content"
+                    android:text="Expense Overview"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:textSize="18sp"
                     android:textStyle="bold"
-                    android:textSize="12sp" />
+                    android:textColor="@color/textPrimary"
+                    android:gravity="center"
+                    android:paddingBottom="12dp"/>
 
-                <TextView
-                    android:id="@+id/tvExpense"
-                    android:layout_width="wrap_content"
+                <!-- Segmented Control -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="₱0.00"
-                    android:textColor="@color/expenseRed"
-                    android:textSize="16sp"
-                    android:textStyle="bold"/>
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="0dp"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="@color/divider">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:orientation="horizontal"
+                        android:padding="4dp"
+                        android:gravity="center">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/segWeekly"
+                            style="@style/Widget.Material3.Button.TextButton"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:layout_marginHorizontal="2dp"
+                            android:text="Weekly"
+                            android:textSize="13sp"
+                            android:textStyle="bold"
+                            app:cornerRadius="8dp"/>
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/segMonthly"
+                            style="@style/Widget.Material3.Button.TextButton"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:layout_marginHorizontal="2dp"
+                            android:text="Monthly"
+                            android:textSize="13sp"
+                            android:textStyle="bold"
+                            app:cornerRadius="8dp"/>
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/segYearly"
+                            style="@style/Widget.Material3.Button.TextButton"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:layout_marginHorizontal="2dp"
+                            android:text="Yearly"
+                            android:textSize="13sp"
+                            android:textStyle="bold"
+                            app:cornerRadius="8dp"/>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
             </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="INCOME"
-                    android:textStyle="bold"
-                    android:textSize="12sp" />
-
-                <TextView
-                    android:id="@+id/tvIncome"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="₱0.00"
-                    android:textColor="@color/incomeValue"
-                    android:textSize="16sp"
-                    android:textStyle="bold"/>
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="TOTAL"
-                    android:textStyle="bold"
-                    android:textSize="12sp" />
-
-                <TextView
-                    android:id="@+id/tvTotal"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="₱0.00"
-                    android:textColor="@color/primaryBlue"
-                    android:textSize="16sp"
-                    android:textStyle="bold"/>
-            </LinearLayout>
-
-        </LinearLayout>
-
-
-        <!-- Overview Selector Button -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnSelectOverview"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:text="EXPENSE OVERVIEW"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            app:icon="@drawable/ic_arrow_down"
-            app:iconGravity="end"
-            app:strokeColor="@color/primary"
-            app:strokeWidth="2dp"
-            app:cornerRadius="8dp"
-            android:backgroundTint="@android:color/transparent"
-            android:textColor="@color/textPrimary"
-            android:layout_marginTop="8dp"/>
-
-
-        <!-- Category Breakdown RecyclerView (Always Visible if has data) -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerCategoryBreakdown"
+        <!-- Chart Card -->
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:visibility="gone"/>
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="@color/surface">
 
-<!--        &lt;!&ndash; Period Selection &ndash;&gt;-->
-<!--        <TextView-->
-<!--            android:text="Category Breakdown"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:textSize="20sp"-->
-<!--            android:textStyle="bold"-->
-<!--            android:textColor="@color/textPrimary"-->
-<!--            android:gravity="center"-->
-<!--            android:padding="5dp"-->
-<!--            android:layout_marginTop="16dp"/>-->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
 
-<!--        <LinearLayout-->
-<!--            android:id="@+id/segmentChartType"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="50dp"-->
-<!--            android:orientation="horizontal"-->
-<!--            android:background="@drawable/edittext_with_stroke"-->
-<!--            android:padding="4dp"-->
-<!--            android:gravity="center"-->
-<!--            android:layout_marginTop="12dp">-->
+                <!-- Chart Title -->
+                <TextView
+                    android:text="Category Breakdown"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/textPrimary"
+                    android:gravity="center"
+                    android:paddingBottom="8dp"/>
 
-<!--            <com.google.android.material.button.MaterialButton-->
-<!--                android:id="@+id/segWeekly"-->
-<!--                android:layout_width="0dp"-->
-<!--                android:layout_height="match_parent"-->
-<!--                android:layout_weight="1"-->
-<!--                android:layout_marginHorizontal="4dp"-->
-<!--                android:text="Weekly"-->
-<!--                android:textColor="@color/primary_variant"-->
-<!--                android:textStyle="bold"-->
-<!--                android:textSize="14sp"-->
-<!--                android:minHeight="40dp"-->
-<!--                android:backgroundTint="@color/transparent"-->
-<!--                app:strokeColor="@color/primary"-->
-<!--                app:strokeWidth="2dp"-->
-<!--                app:cornerRadius="12dp"/>-->
+                <!-- Pie Chart -->
+                <com.github.mikephil.charting.charts.PieChart
+                    android:id="@+id/pieChart"
+                    android:layout_width="match_parent"
+                    android:layout_height="280dp" />
 
-<!--            <com.google.android.material.button.MaterialButton-->
-<!--                android:id="@+id/segMonthly"-->
-<!--                android:layout_width="0dp"-->
-<!--                android:layout_height="match_parent"-->
-<!--                android:layout_weight="1"-->
-<!--                android:layout_marginHorizontal="4dp"-->
-<!--                android:text="Monthly"-->
-<!--                android:textColor="@color/primary_variant"-->
-<!--                android:textStyle="bold"-->
-<!--                android:textSize="14sp"-->
-<!--                android:minHeight="40dp"-->
-<!--                android:backgroundTint="@color/transparent"-->
-<!--                app:strokeColor="@color/primary"-->
-<!--                app:strokeWidth="2dp"-->
-<!--                app:cornerRadius="12dp"/>-->
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
-<!--            <com.google.android.material.button.MaterialButton-->
-<!--                android:id="@+id/segYearly"-->
-<!--                android:layout_width="0dp"-->
-<!--                android:layout_height="match_parent"-->
-<!--                android:layout_weight="1"-->
-<!--                android:layout_marginHorizontal="4dp"-->
-<!--                android:text="Yearly"-->
-<!--                android:textColor="@color/primary_variant"-->
-<!--                android:textStyle="bold"-->
-<!--                android:textSize="14sp"-->
-<!--                android:minHeight="40dp"-->
-<!--                android:backgroundTint="@color/transparent"-->
-<!--                app:strokeColor="@color/primary"-->
-<!--                app:strokeWidth="2dp"-->
-<!--                app:cornerRadius="12dp"/>-->
-<!--        </LinearLayout>-->
-
-        <!-- Pie Chart -->
-        <com.github.mikephil.charting.charts.PieChart
-            android:id="@+id/pieChart"
-            android:layout_width="match_parent"
-            android:layout_height="300dp"
-            android:layout_marginTop="8dp" />
     </LinearLayout>
 </ScrollView>
