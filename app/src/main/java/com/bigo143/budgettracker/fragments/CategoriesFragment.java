@@ -59,7 +59,9 @@ public class CategoriesFragment extends Fragment implements OnCategoriesUpdatedL
 
     private int selectedIconResource = R.drawable.ic_default;
 
+    // ✅ UPDATED: Complete 79 icons from your drawable folder
     private int[] availableIcons = new int[]{
+            // Original icons (32)
             R.drawable.ic_salary,
             R.drawable.ic_income,
             R.drawable.ic_wallet,
@@ -91,7 +93,63 @@ public class CategoriesFragment extends Fragment implements OnCategoriesUpdatedL
             R.drawable.transportationvec,
             R.drawable.volleyball,
             R.drawable.wifi,
-            R.drawable.water_faucet
+            R.drawable.water_faucet,
+
+            // ✅ NEW ICONS: Money & Currency (15)
+            R.drawable.money,
+            R.drawable.money_,
+            R.drawable.money_s,
+            R.drawable.money2,
+            R.drawable.dollar_circle_list,
+            R.drawable.finance_currency_dollar,
+            R.drawable.finance_currency_euro,
+            R.drawable.finance_currency_pound,
+            R.drawable.finance_currency_rouble,
+            R.drawable.finance_currency_yen,
+            R.drawable.moneybox,
+            R.drawable.money_lock,
+            R.drawable.money_on_a_monitor,
+            R.drawable.money_gear,
+            R.drawable.price_tag,
+
+            // ✅ NEW ICONS: Charts & Reports (12)
+            R.drawable.chart_bar,
+            R.drawable.chart_column_low,
+            R.drawable.chart_line,
+            R.drawable.chart_pie,
+            R.drawable.chart_pie_,
+            R.drawable.chart_pie_s,
+            R.drawable.chart2,
+            R.drawable.money_pie_chart,
+            R.drawable.assessment,
+            R.drawable.financial,
+
+            // ✅ NEW ICONS: Budget Management (10)
+            R.drawable.budget_alt,
+            R.drawable.budget_alt2,
+            R.drawable.badget_check_alt,
+            R.drawable.budget_management,
+            R.drawable.management_money,
+            R.drawable.settings_money,
+            R.drawable.business_finance_corporate,
+            R.drawable.business_finance_corporate_,
+            R.drawable.business_finance_corporate_2,
+
+            // ✅ NEW ICONS: Banking & Savings (10)
+            R.drawable.badge_dollar,
+            R.drawable.badge_check,
+            R.drawable.badge_percent,
+            R.drawable.discount,
+            R.drawable.save,
+            R.drawable.savings_save_money_manage_money_budget,
+            R.drawable.checkbox,
+            R.drawable.cloudbit,
+            R.drawable.comment_dots,
+            R.drawable.first_laurel,
+
+            // ✅ NEW ICONS: Shopping & Travel (2)
+            R.drawable.backpack_travel,
+            R.drawable.aerlingus
     };
 
     public CategoriesFragment() {
@@ -414,7 +472,7 @@ public class CategoriesFragment extends Fragment implements OnCategoriesUpdatedL
         // Set other buttons as outlined
         for (MaterialButton b : others) {
             b.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), android.R.color.transparent))); // transparent fill
-            b.setTextColor(ContextCompat.getColor(requireContext(), R.color.textPrimary));
+            b.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_primary));
             b.setStrokeColor(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.primary))); // outline color
             b.setStrokeWidth(2); // outline width
         }
@@ -587,18 +645,4 @@ public class CategoriesFragment extends Fragment implements OnCategoriesUpdatedL
 
         builder.show();
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
