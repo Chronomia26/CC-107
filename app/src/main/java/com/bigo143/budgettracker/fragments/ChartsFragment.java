@@ -507,21 +507,22 @@ public class ChartsFragment extends Fragment {
         PieChart pieChart = requireView().findViewById(R.id.pieChart);
         Map<String, Double> percentages;
 
-        // ✅ UPDATED: Pie chart now follows the selected overview type (INCOME or EXPENSE)
+        // Get percentages based on current overview type and period
         if (currentOverview == OverviewType.EXPENSE) {
             switch (currentPeriod) {
+                case DAILY: {
+                    int daysAgo = daysFromToday(selectedDate) + 1;
+                    percentages = db.getExpensePercentageByCategoryLastDays(currentUser, daysAgo);
+                    break;
+                }
 
                 case WEEKLY:
                     Calendar[] weekRange = getWeekStartEnd(selectedDate);
-                    if (currentOverview == OverviewType.EXPENSE) {
-                        percentages = db.getExpensePercentageByCategoryBetweenDates(
-                                currentUser, weekRange[0].getTimeInMillis(), weekRange[1].getTimeInMillis()
-                        );
-                    } else {
-                        percentages = db.getIncomePercentageByCategoryBetweenDates(
-                                currentUser, weekRange[0].getTimeInMillis(), weekRange[1].getTimeInMillis()
-                        );
-                    }
+                    percentages = db.getExpensePercentageByCategoryBetweenDates(
+                            currentUser,
+                            weekRange[0].getTimeInMillis(),
+                            weekRange[1].getTimeInMillis()
+                    );
                     break;
 
                 case MONTHLY:
@@ -529,28 +530,44 @@ public class ChartsFragment extends Fragment {
                             selectedDate.get(Calendar.YEAR),
                             selectedDate.get(Calendar.MONTH) + 1);
                     break;
+
                 case YEARLY:
                     percentages = db.getExpensePercentageByCategoryForYear(currentUser,
                             selectedDate.get(Calendar.YEAR));
                     break;
+
                 default:
                     percentages = new HashMap<>();
             }
         } else {
-            // ✅ ADDED: Income pie chart percentages
+            // Income overview
             switch (currentPeriod) {
-                case WEEKLY:
-                    percentages = db.getIncomePercentageByCategoryLastDays(currentUser, 7);
+                case DAILY: {
+                    int daysAgo = daysFromToday(selectedDate) + 1;
+                    percentages = db.getIncomePercentageByCategoryLastDays(currentUser, daysAgo);
                     break;
+                }
+
+                case WEEKLY:
+                    Calendar[] weekRange = getWeekStartEnd(selectedDate);
+                    percentages = db.getIncomePercentageByCategoryBetweenDates(
+                            currentUser,
+                            weekRange[0].getTimeInMillis(),
+                            weekRange[1].getTimeInMillis()
+                    );
+                    break;
+
                 case MONTHLY:
                     percentages = db.getIncomePercentageByCategoryForMonth(currentUser,
                             selectedDate.get(Calendar.YEAR),
                             selectedDate.get(Calendar.MONTH) + 1);
                     break;
+
                 case YEARLY:
                     percentages = db.getIncomePercentageByCategoryForYear(currentUser,
                             selectedDate.get(Calendar.YEAR));
                     break;
+
                 default:
                     percentages = new HashMap<>();
             }
@@ -565,7 +582,7 @@ public class ChartsFragment extends Fragment {
             colors.add(getColorForCategory(cat, categoryNames));
         }
 
-        // ✅ UPDATED: Pie chart title changes based on overview type
+        // Update chart title based on overview type
         String chartTitle = (currentOverview == OverviewType.EXPENSE) ?
                 "Expense Categories" : "Income Categories";
 
