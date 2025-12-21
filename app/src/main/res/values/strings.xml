@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Budget Tracker</string>
+    <string name="app_name">Budget Buddy</string>
 
     <!-- General UI -->
     <string name="cancel">Cancel</string>
