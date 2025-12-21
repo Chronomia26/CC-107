@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Custom Theme Attributes -->
+    <attr name="backgroundPrimary" format="color" />
+    <attr name="backgroundSecondary" format="color" />
+    <attr name="dividerColor" format="color" />
+    <attr name="calculatorSurface" format="color" />
+    <attr name="calculatorButton" format="color" />
+    <attr name="calculatorText" format="color" />
+</resources>

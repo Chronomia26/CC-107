@@ -1,0 +1,17 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <!-- Refresh / Sync Icon -->
+    <path
+        android:fillColor="#4CAF50"
+        android:pathData="M17.65,6.35
+                          C16.2,4.9 14.21,4 12,4
+                          C7.59,4 4,7.59 4,12
+                          H1l4,4l4-4H5
+                          C5,8.69 8.69,5 12,5
+                          c1.66,0 3.14,0.69 4.22,1.78
+                          L13,13h7V6l-2.35,2.35z"/>
+</vector>

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Budget Tracker</string>
+    <string name="app_name">Budget Buddy</string>
 
     <!-- General UI -->
     <string name="cancel">Cancel</string>
@@ -15,54 +15,45 @@
     <!-- Hints -->
     <string name="account_hint">From Account</string>
     <string name="category_hint">Category</string>
-    <string name="to_account_hint">To Account</string>
 
     <!-- Calculator -->
     <string name="calculator_ac">AC</string>
     <string name="calculator_back">Back</string>
 
     <!-- Errors and Success -->
-    <string name="error_same_account">Cannot transfer to the same account.</string>
-    <string name="error_select_account">Please select an account.</string>
-    <string name="error_select_to_account">Please select a destination account.</string>
-    <string name="error_select_category">Please select a category.</string>
-    <string name="error_zero_amount">Amount cannot be zero.</string>
-    <string name="success_transaction_saved">Transaction saved successfully.</string>
 
     <!-- For other activities -->
     <string name="total_budget">TOTAL BUDGET</string>
     <string name="total_spent">TOTAL SPENT</string>
-    <string name="hint_enter_amount">Enter amount</string>
     <string name="budgeted_categories">Budgeted Categories</string>
     <string name="not_budgeted">Not Budgeted</string>
-    <string name="btn_set_budget">SET BUDGET</string>
-    <string name="set_budget">Set Budget</string>
-    <string name="limit">Limit</string>
-    <string name="hint_limit">Limit amount</string>
-    <string name="hint_spent">Spent amount</string>
-    <string name="hint_category">Category name</string>
-    <string name="records">Records</string>
-    <string name="charts">Charts</string>
-    <string name="budget">Budget</string>
-    <string name="categories">Categories</string>
-    <string name="transaction_records">Transaction Records</string>
-    <string name="expense_analysis">Expense Analysis</string>
-    <string name="category_image">Category icon</string>
-    <string name="close">Close</string>
     <string name="open_nav">Open Navigation Drawer</string>
     <string name="close_nav">Close Navigation Drawer</string>
     <string name="placeholder">Placeholder</string>
-    <string name="add_record">Add Record</string>
-    <string name="dark_mode">Dark Mode</string>
-    <string name="logout">Logout</string>
+
+    <string name="tagline">Personal expense tracker with charts</string>
+
+    <!-- Welcome Screen -->
+    <string name="create_account">Create a new account</string>
+    <string name="log_in">Log in</string>
+    <string name="secure_private">Secure • Private • Easy to use</string>
+
+    <!-- Login Screen -->
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="login_button">Log In</string>
+    <string name="or_divider">OR</string>
+    <string name="no_account">Don\'t have an account? Sign Up</string>
+
+    <!-- Signup Screen -->
+    <string name="name">Name</string>
+    <string name="email">Email</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="signup_button">Sign Up</string>
+    <string name="have_account">Already have an account? Log In</string>
+
+    <!-- Common -->
+    <string name="version">v1.0.0</string>
 
     <!-- Login Activity -->
-    <string name="app_title_budget_buddy">Budget Buddy</string>
-    <string name="login_title">Log In</string>
-    <string name="username_hint">Username</string>
-    <string name="password_hint">Password</string>
-    <string name="login_button">Log In</string>
-    <string name="or_divider">  OR  </string>
-    <string name="continue_with_google">Continue with Google</string>
-    <string name="signup_redirect">Don\'t have an account? Sign Up</string>
 </resources>

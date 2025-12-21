@@ -1,67 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#D2691E</color> <!-- Warm Orange -->
-    <color name="expenseValue">#D32F2F</color>
-    <color name="primaryBlue">#2196F3</color>
-    <color name="incomeValue">#2E7D32</color>
-    <color name="textPrimary">#212121</color>
-    <color name="appBarBackground">#FFFFFF</color>
-    <color name="navBackground">#F5F5F5</color>
-    <color name="white">#FFFFFF</color>
-    <color name="black">#000000</color>
-    <color name="grayLight">#E0E0E0</color>
-    <color name="cardBackground">#1E1E1E</color>
-    <color name="text1Secondary">#757575</color>
+    <!-- ==================== PRIMARY COLORS ==================== -->
+    <color name="primary">#2F4578</color>
+    <color name="primary_light">#4A6199</color>
+    <color name="primary_dark">#1E2F51</color>
+    <color name="primary_variant">#3D5A8C</color>
+    <color name="primaryBlue">#2F4578</color>
 
+    <!-- ==================== SECONDARY COLORS ==================== -->
+    <color name="secondary">#FF8C42</color>
+    <color name="secondary_light">#FFA666</color>
+    <color name="secondary_dark">#E67A32</color>
+    <color name="secondary_variant">#FF9D5C</color>
 
-    <!-- New Warm Palette -->
-    <color name="first">#F5DEB3</color> <!-- Wheat -->
-    <color name="second">#D2691E</color> <!-- Chocolate -->
-    <color name="third">#8B4513</color> <!-- SaddleBrown -->
-    <color name="fourth">#A0522D</color> <!-- Sienna -->
-    <color name="fifth">#BC8F8F</color> <!-- RosyBrown -->
+    <!-- ==================== ACCENT COLORS ==================== -->
+    <color name="accent">#F5E6D3</color>
+    <color name="fifth">#FFA666</color>
 
-    <color name="text_main">#5D4037</color> <!-- Dark Brown -->
-    <color name="calcu_stroke">#A1887F</color> <!-- Light Brown -->
-    <color name="calcu_background">#F5F5F5</color>
-    <color name="pink_200">#F48FB1</color>
-    MaterialUI.co
-    https://materialui.co › colors › pink
+    <!-- ==================== BACKGROUND COLORS ==================== -->
+    <color name="background">#FFFFFF</color>
+    <color name="background_primary">#FFFFFF</color>
+    <color name="background_secondary">#F8F9FA</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="card_background">#FFFFFF</color>
+    <color name="navBackground">#F8F9FA</color>
 
-    <color name="tealAccent">#009688</color>
-    <color name="primaryDark">#0D47A1</color>
-    <color name="backgroundLight">#F5F5F5</color>
-    <color name="backgroundDark">#121212</color>
+    <!-- ==================== TEXT COLORS ==================== -->
+    <color name="text_primary">#000000</color>
+    <color name="text_secondary">#757575</color>
+    <color name="text_on_primary">#FFFFFF</color>
+    <color name="text_on_secondary">#FFFFFF</color>
+    <color name="text_main">#000000</color>
+    <color name="textPrimary">#000000</color>
     <color name="textSecondary">#757575</color>
 
-    <!-- Colors for calcu_add_expenseincome.xml -->
+    <!-- ==================== INCOME/EXPENSE COLORS ==================== -->
+    <color name="incomeValue">#4CAF50</color>
+    <color name="expenseValue">#F44336</color>
+    <color name="expenseRed">#F44336</color>
 
-    <!-- Primary teal-blue palette (fallback) -->
-    <color name="primary">#0288D1</color>
-    <color name="primaryVariant">#0277BD</color>
-    <color name="secondary">#26C6DA</color>
-    <color name="onPrimary">#FFFFFF</color>
-
-    <!-- Surface/background -->
-    <color name="surface">#FFFFFF</color>
-    <color name="onSurface">#212121</color>
-
-    <!-- Transparent -->
-    <color name="transparent">#00000000</color>
-    <color name="textDark">#212121</color>
-    <color name="textSubtle">#757575</color>
-
-    <!-- Income color -->
-    <color name="incomeGreen">#2E7D32</color>
-
-    <!-- Expense color -->
-    <color name="expenseRed">#C62828</color>
-
-    <!-- Optional UI colors -->
-    <color name="error">#B00020</color>
+    <!-- ==================== UI ELEMENT COLORS ==================== -->
     <color name="divider">#E0E0E0</color>
-    <color name="backgroundSoft">#F7F7F7</color>
-    <color name="accentPink">#FF5DA2</color>
-    <color name="iconGray">#9E9E9E</color>
+    <color name="statusBar">#2F4578</color>
+    <color name="error">#F44336</color>
 
+    <!-- ==================== NEUMORPHIC COLORS ==================== -->
+    <color name="neumorphic_shadow_dark">#D0D0D0</color>
+    <color name="neumorphic_highlight_light">#FFFFFF</color>
+    <color name="neumorphic_surface">#FFFFFF</color>
 
+    <!-- ==================== CALCULATOR COLORS ==================== -->
+    <color name="calcu_stroke">#BDBDBD</color>
+    <color name="calcu_button_bg">#F5F5F5</color>
+
+    <!-- ==================== GRAYS ==================== -->
+    <color name="grayLight">#A19C9B</color>
+
+    <!-- ==================== BASIC COLORS ==================== -->
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="transparent">#00000000</color>
 </resources>

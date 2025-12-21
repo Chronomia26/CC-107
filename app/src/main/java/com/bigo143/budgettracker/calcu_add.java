@@ -1,5 +1,7 @@
 package com.bigo143.budgettracker;
 
+import static com.bigo143.budgettracker.MainActivity.staticListener;
+
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
@@ -9,13 +11,18 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.GridView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
@@ -24,11 +31,13 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.bigo143.budgettracker.adapters.IconAdapter;
 import com.google.android.material.textfield.TextInputLayout;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Stack;
@@ -55,6 +64,28 @@ public class calcu_add extends AppCompatActivity {
     private final List<String> incomeCats = new ArrayList<>();
     private final List<String> expenseCats = new ArrayList<>();
 
+    public static OnTransactionSavedListener staticListener;
+    public interface OnTransactionSavedListener {
+        void onTransactionSaved();
+    }
+
+    private OnTransactionSavedListener listener;
+
+    public void setOnTransactionSavedListener(OnTransactionSavedListener listener) {
+        this.listener = listener;
+    }
+    // ✅ ADDED: For edit mode
+    private boolean isEditMode = false;
+    private int editRecordId = -1;
+    private String editRecordType = null;
+    // ✅ ADDED: For delayed setting after views are initialized
+    private String accountToSelect = null;
+    private String categoryToSelect = null;
+    private String noteToSet = null;
+    private double amountToSet = 0; // ✅ ADDED
+
+    private int selectedIconResource = R.drawable.ic_default;
+
     // ***********************************************
     //  ACTIVITIES
     // ***********************************************
@@ -70,6 +101,16 @@ public class calcu_add extends AppCompatActivity {
 
         db = new DatabaseHelper(this);
 
+        // ✅ ADDED: Check if editing existing record
+        if (getIntent().hasExtra("EDIT_MODE")) {
+            isEditMode = true;
+            editRecordId = getIntent().getIntExtra("RECORD_ID", -1);
+            editRecordType = getIntent().getStringExtra("RECORD_TYPE");
+
+            // Load existing record data
+            loadRecordForEdit();
+        }
+
         initViews();
         setupInsets();
         loadData();
@@ -80,7 +121,59 @@ public class calcu_add extends AppCompatActivity {
         setupDateTimePickers();
         addInputWatchers();
     }
+    // ✅ ADDED: Load record data for editing
+    // ✅ FIXED: Load record data for editing
+    private void loadRecordForEdit() {
+        if (editRecordId == -1) return;
 
+        // Get record details from intent
+        double amount = getIntent().getDoubleExtra("AMOUNT", 0);
+        String accountName = getIntent().getStringExtra("ACCOUNT_NAME");
+        String categoryName = getIntent().getStringExtra("CATEGORY_NAME");
+        String note = getIntent().getStringExtra("NOTE");
+        String date = getIntent().getStringExtra("DATE");
+
+        // ✅ REMOVED: Don't set expression here
+        // expression.append(String.valueOf(amount));
+
+        // Set account and category
+        if (accountName != null) {
+            accountToSelect = accountName;
+        }
+        if (categoryName != null) {
+            categoryToSelect = categoryName;
+        }
+
+        // Set note
+        if (note != null) {
+            noteToSet = note;
+        }
+
+        // ✅ ADDED: Store amount to set later
+        amountToSet = amount;
+
+        // Parse and set date/time
+        if (date != null) {
+            try {
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
+                Date parsedDate = format.parse(date);
+                if (parsedDate != null) {
+                    calendar.setTime(parsedDate);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        // Set transaction type
+        if ("income".equalsIgnoreCase(editRecordType)) {
+            currentType = TxType.INCOME;
+        } else if ("expense".equalsIgnoreCase(editRecordType)) {
+            currentType = TxType.EXPENSE;
+        } else if ("transfer_in".equalsIgnoreCase(editRecordType)) {
+            currentType = TxType.TRANSFER;
+        }
+    }
     private void initViews() {
         tvResult = findViewById(R.id.result);
         etNotes = findViewById(R.id.notes_edittext);
@@ -97,6 +190,28 @@ public class calcu_add extends AppCompatActivity {
 
         tvDatePicker = findViewById(R.id.date_picker_text);
         tvTimePicker = findViewById(R.id.time_picker_text);
+
+        // ✅ ADDED: Set note if in edit mode (delayed until after view is initialized)
+        if (isEditMode && noteToSet != null) {
+            etNotes.post(() -> etNotes.setText(noteToSet));
+        }
+
+        // ✅ ADDED: Set amount if in edit mode
+        if (isEditMode && amountToSet > 0) {
+            tvResult.post(() -> {
+                // Format the amount properly (remove .0 if whole number)
+                String amountStr;
+                if (amountToSet == (long) amountToSet) {
+                    amountStr = String.valueOf((long) amountToSet);
+                } else {
+                    amountStr = String.format("%.2f", amountToSet);
+                }
+
+                expression.setLength(0); // Clear expression
+                expression.append(amountStr);
+                tvResult.setText(amountStr);
+            });
+        }
     }
 
     private void setupInsets() {
@@ -139,14 +254,276 @@ public class calcu_add extends AppCompatActivity {
     }
 
     private void setupDropdowns() {
-        setAdapter(ddAccount, accounts);
-        setAdapter(ddCategory, expenseCats); // default type = EXPENSE
+        // Add "Add New..." at the end of each list
+        List<String> accountsWithAdd = new ArrayList<>(accounts);
+        accountsWithAdd.add("➕ Add New Account...");
+        setAdapter(ddAccount, accountsWithAdd, true);
+
+        List<String> expenseCatsWithAdd = new ArrayList<>(expenseCats);
+        expenseCatsWithAdd.add("➕ Add New Category...");
+        setAdapter(ddCategory, expenseCatsWithAdd, false);
+        // ✅ ADDED: Set pre-selected values if in edit mode
+        if (isEditMode && accountToSelect != null) {
+            ddAccount.setText(accountToSelect, false);
+        }
+        if (isEditMode && categoryToSelect != null) {
+            ddCategory.setText(categoryToSelect, false);
+        }
+
     }
 
-    private void setAdapter(AutoCompleteTextView view, List<String> list) {
-        ArrayAdapter<String> adapter =
-                new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, list);
+    private void setAdapter(AutoCompleteTextView view, List<String> list, boolean isAccountDropdown) {
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line, list) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                View v = super.getView(position, convertView, parent);
+                TextView textView = (TextView) v;
+
+                // Style the "Add New" item differently
+                if (position == getCount() - 1) {
+                    textView.setTextColor(ContextCompat.getColor(getContext(), R.color.textPrimary));
+                    textView.setTypeface(null, android.graphics.Typeface.BOLD);
+                } else {
+                    textView.setTextColor(ContextCompat.getColor(getContext(), android.R.color.black));
+                    textView.setTypeface(null, android.graphics.Typeface.NORMAL);
+                }
+
+                return v;
+            }
+        };
+
         view.setAdapter(adapter);
+
+        // Handle item selection
+        view.setOnItemClickListener((parent, v, position, id) -> {
+            String selectedItem = (String) parent.getItemAtPosition(position);
+
+            // Check if "Add New..." was clicked
+            if (selectedItem.startsWith("➕ Add New")) {
+                view.setText(""); // Clear the selection
+
+                if (isAccountDropdown) {
+                    showAddAccountDialog();
+                } else {
+                    showAddCategoryDialog();
+                }
+            }
+        });
+    }
+
+    // ***********************************************
+    //  ADD ACCOUNT DIALOG
+    // ***********************************************
+    private void showAddAccountDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_add_account, null);
+
+        EditText etAccountName = dialogView.findViewById(R.id.etAccountName);
+        EditText etInitialBalance = dialogView.findViewById(R.id.etInitialBalance);
+        Button btnSelectIcon = dialogView.findViewById(R.id.btnSelectIcon);
+
+        selectedIconResource = R.drawable.ic_default;
+
+        btnSelectIcon.setOnClickListener(v -> showIconPickerDialog(btnSelectIcon));
+
+        builder.setView(dialogView)
+                .setTitle("Add New Account")
+                .setPositiveButton("Add", null)
+                .setNegativeButton("Cancel", null);
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            String accountName = etAccountName.getText().toString().trim();
+            String balanceStr = etInitialBalance.getText().toString().trim();
+
+            if (accountName.isEmpty()) {
+                Toast.makeText(this, "Please enter account name", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (balanceStr.isEmpty()) {
+                Toast.makeText(this, "Please enter initial balance", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            double initialBalance;
+            try {
+                initialBalance = Double.parseDouble(balanceStr);
+            } catch (NumberFormatException e) {
+                Toast.makeText(this, "Invalid balance amount", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // ✅ Insert account into database
+            boolean success = db.insertCategory(loggedInUser, "account", accountName, selectedIconResource);
+
+            if (success) {
+                // ✅ IMMEDIATELY add initial balance record if balance > 0
+                if (initialBalance > 0) {
+                    int accountId = db.getCategoryIdByName(loggedInUser, accountName, "account");
+
+                    // ✅ CRITICAL FIX: Use a timestamp that's 1 minute BEFORE the current calendar time
+                    // This ensures initial balance is always BEFORE any transaction the user adds
+                    Calendar initialBalanceTime = (Calendar) calendar.clone();
+                    initialBalanceTime.add(Calendar.MINUTE, -1); // Subtract 1 minute
+
+                    String initialBalanceTimestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
+                            .format(initialBalanceTime.getTime());
+
+                    // Insert the initial balance as income
+                    db.insertRecord(loggedInUser, accountId, accountId, "income", initialBalance,
+                            initialBalanceTimestamp, "Initial Balance");
+                }
+
+                // Refresh the accounts list
+                loadData();
+                setupDropdowns();
+
+                // Auto-select the newly added account
+                ddAccount.setText(accountName, false);
+
+                Toast.makeText(this, "Account added successfully", Toast.LENGTH_SHORT).show();
+                dialog.dismiss();
+            } else {
+                Toast.makeText(this, "Failed to add account", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    // ***********************************************
+    //  ADD CATEGORY DIALOG
+    // ***********************************************
+    private void showAddCategoryDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_add_category, null);
+
+        EditText etCategoryName = dialogView.findViewById(R.id.etCategoryName);
+        RadioGroup rgType = dialogView.findViewById(R.id.rgCategoryType);
+        Button btnSelectIcon = dialogView.findViewById(R.id.btnSelectIcon);
+
+        // ✅ HIDE the radio button group
+        rgType.setVisibility(View.GONE);
+
+        // ✅ HIDE the "Category Type" label
+        TextView tvCategoryTypeLabel = dialogView.findViewById(R.id.CategoryType);
+        if (tvCategoryTypeLabel != null) {
+            tvCategoryTypeLabel.setVisibility(View.GONE);
+        }
+
+        selectedIconResource = R.drawable.ic_default;
+
+        btnSelectIcon.setOnClickListener(v -> showIconPickerDialog(btnSelectIcon));
+
+        builder.setView(dialogView)
+                .setTitle("Add New Category")
+                .setPositiveButton("Add", null)
+                .setNegativeButton("Cancel", null);
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        // Override positive button to prevent auto-dismiss on validation error
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            String categoryName = etCategoryName.getText().toString().trim();
+
+            if (categoryName.isEmpty()) {
+                Toast.makeText(this, "Please enter category name", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // ✅ Determine type directly from currentType (no need to read radio buttons)
+            String categoryType;
+            if (currentType == TxType.INCOME) {
+                categoryType = "income";
+            } else {
+                categoryType = "expense";
+            }
+
+            // Insert category into database
+            boolean success = db.insertCategory(loggedInUser, categoryType, categoryName, selectedIconResource);
+
+            if (success) {
+                // Refresh the appropriate list
+                loadData();
+
+                // Update dropdowns based on current type
+                if (currentType == TxType.INCOME) {
+                    List<String> incomeCatsWithAdd = new ArrayList<>(incomeCats);
+                    incomeCatsWithAdd.add("➕ Add New Category...");
+                    setAdapter(ddCategory, incomeCatsWithAdd, false);
+                } else if (currentType == TxType.EXPENSE) {
+                    List<String> expenseCatsWithAdd = new ArrayList<>(expenseCats);
+                    expenseCatsWithAdd.add("➕ Add New Category...");
+                    setAdapter(ddCategory, expenseCatsWithAdd, false);
+                }
+
+                // Auto-select the newly added category
+                ddCategory.setText(categoryName, false);
+
+                Toast.makeText(this, "Category added successfully", Toast.LENGTH_SHORT).show();
+                dialog.dismiss();
+            } else {
+                Toast.makeText(this, "Failed to add category", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    // ***********************************************
+    //  ICON PICKER DIALOG
+    // ***********************************************
+    private int[] availableIcons = new int[]{
+            R.drawable.ic_salary,
+            R.drawable.ic_income,
+            R.drawable.ic_wallet,
+            R.drawable.ic_bank,
+            R.drawable.ic_food,
+            R.drawable.ic_transport,
+            R.drawable.ic_expense,
+            R.drawable.ic_default,
+            R.drawable.airplane_travel,
+            R.drawable.baseball,
+            R.drawable.bachelor_hat_svgrepo_com,
+            R.drawable.basketball,
+            R.drawable.cash,
+            R.drawable.card_holder_svgrepo_com,
+            R.drawable.coins,
+            R.drawable.coffee_svgrepo_com,
+            R.drawable.coupons_svgrepo_com,
+            R.drawable.electricity,
+            R.drawable.gift_svgrepo_com,
+            R.drawable.healthcare_medical_,
+            R.drawable.house_svgrepo_com,
+            R.drawable.second_hand_housing_svgrepo_com,
+            R.drawable.ic_calendar,
+            R.drawable.ic_shopping,
+            R.drawable.medicines,
+            R.drawable.resource_package,
+            R.drawable.savings_svgrepo_com,
+            R.drawable.tips_svgrepo_com,
+            R.drawable.transportationvec,
+            R.drawable.volleyball,
+            R.drawable.wifi,
+            R.drawable.water_faucet
+    };
+
+    private void showIconPickerDialog(Button targetButton) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Select Icon");
+
+        View gridViewLayout = getLayoutInflater().inflate(R.layout.dialog_select_icon, null);
+        GridView grid = gridViewLayout.findViewById(R.id.gridIcons);
+        grid.setAdapter(new IconAdapter(this, availableIcons));
+        grid.setOnItemClickListener((parent, view, position, id) -> {
+            selectedIconResource = availableIcons[position];
+            targetButton.setText("Icon Selected");
+            Toast.makeText(this, "Icon selected", Toast.LENGTH_SHORT).show();
+        });
+
+        builder.setView(gridViewLayout);
+        builder.setPositiveButton("Done", (dialog, which) -> dialog.dismiss());
+        builder.show();
     }
 
     // ***********************************************
@@ -157,7 +534,8 @@ public class calcu_add extends AppCompatActivity {
         tvTransfer.setOnClickListener(v -> switchType(TxType.TRANSFER));
         tvExpense.setOnClickListener(v -> switchType(TxType.EXPENSE));
 
-        switchType(TxType.EXPENSE);
+        // ✅ CHANGED: Use currentType (which may be set from edit mode)
+        switchType(currentType);
     }
 
     private void switchType(TxType type) {
@@ -168,28 +546,43 @@ public class calcu_add extends AppCompatActivity {
         tvTransfer.setBackgroundColor(0);
         tvExpense.setBackgroundColor(0);
 
-        int hl = ContextCompat.getColor(this, R.color.third);
+        int hl = ContextCompat.getColor(this, R.color.accent);
 
         switch (type) {
             case INCOME:
                 tvIncome.setBackgroundColor(hl);
                 lyCategory.setHint("Select Category");
-                setAdapter(ddCategory, incomeCats);
-                setAdapter(ddAccount, accounts);
+                List<String> incomeCatsWithAdd = new ArrayList<>(incomeCats);
+                incomeCatsWithAdd.add("➕ Add New Category...");
+                setAdapter(ddCategory, incomeCatsWithAdd, false);
+
+                List<String> accountsForIncome = new ArrayList<>(accounts);
+                accountsForIncome.add("➕ Add New Account...");
+                setAdapter(ddAccount, accountsForIncome, true);
                 break;
 
             case TRANSFER:
                 tvTransfer.setBackgroundColor(hl);
                 lyCategory.setHint("To Account");
-                setAdapter(ddCategory, accounts);
-                setAdapter(ddAccount, accounts);
+                List<String> accountsForTransferTo = new ArrayList<>(accounts);
+                accountsForTransferTo.add("➕ Add New Account...");
+                setAdapter(ddCategory, accountsForTransferTo, true);
+
+                List<String> accountsForTransferFrom = new ArrayList<>(accounts);
+                accountsForTransferFrom.add("➕ Add New Account...");
+                setAdapter(ddAccount, accountsForTransferFrom, true);
                 break;
 
             case EXPENSE:
                 tvExpense.setBackgroundColor(hl);
                 lyCategory.setHint("Select Category");
-                setAdapter(ddCategory, expenseCats);
-                setAdapter(ddAccount, accounts);
+                List<String> expenseCatsWithAdd = new ArrayList<>(expenseCats);
+                expenseCatsWithAdd.add("➕ Add New Category...");
+                setAdapter(ddCategory, expenseCatsWithAdd, false);
+
+                List<String> accountsForExpense = new ArrayList<>(accounts);
+                accountsForExpense.add("➕ Add New Account...");
+                setAdapter(ddAccount, accountsForExpense, true);
                 break;
         }
     }
@@ -215,20 +608,94 @@ public class calcu_add extends AppCompatActivity {
 
         boolean ok;
 
+        // ✅ CHANGED: If edit mode, update instead of insert
+        if (isEditMode) {
+            // Update existing record
+            if (editRecordType.equalsIgnoreCase("transfer_in")) {
+                ok = db.updateTransfer(editRecordId, amount, note);
+            } else {
+                ok = db.updateRecord(editRecordId, amount, note);
+            }
+
+            if (ok) {
+                Toast.makeText(this, "Transaction Updated!", Toast.LENGTH_SHORT).show();
+                if (listener != null) listener.onTransactionSaved();
+                if (staticListener != null) staticListener.onTransactionSaved();
+                finishWithUpdate();
+            } else {
+                Toast.makeText(this, "Update failed", Toast.LENGTH_SHORT).show();
+            }
+            return;
+        }
+
+        // ✅ Original insert logic for new transactions
         switch (currentType) {
             case INCOME:
                 int incId = db.getCategoryIdByName(loggedInUser, categoryOrTarget, "income");
-                ok = db.insertRecord(loggedInUser, incId, "income", amount, timestamp, note);
+                int incomeAccId = db.getAccountIdByName(loggedInUser, fromAcc);
+                if (incId == -1 || incomeAccId == -1) {
+                    Toast.makeText(this, "Income category or account not found", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                ok = db.insertRecord(loggedInUser, incId, incomeAccId, "income", amount, timestamp, note);
                 break;
 
             case EXPENSE:
                 int expId = db.getCategoryIdByName(loggedInUser, categoryOrTarget, "expense");
-                ok = db.insertRecord(loggedInUser, expId, "expense", amount, timestamp, note);
+                int expenseAccId = db.getAccountIdByName(loggedInUser, fromAcc);
+                if (expId == -1 || expenseAccId == -1) {
+                    Toast.makeText(this, "Expense category or account not found", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                double balance = db.getAccountBalance(expenseAccId, loggedInUser);
+                if (balance < amount) {
+                    Toast.makeText(this, "Insufficient funds in " + fromAcc, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                double budgeted = db.getBudgetedAmount(loggedInUser, expId);
+                double spent = db.getTotalSpentForCategory(loggedInUser, expId);
+                if (budgeted > 0 && spent + amount > budgeted) {
+                    new AlertDialog.Builder(this)
+                            .setTitle("Budget Exceeded!")
+                            .setMessage("This transaction will exceed the budgeted amount for this category.\nDo you want to continue?")
+                            .setPositiveButton("Yes", (dialog, which) -> {
+                                boolean inserted = db.insertRecord(loggedInUser, expId, expenseAccId, "expense", amount, timestamp, note);
+                                if (inserted) {
+                                    Toast.makeText(this, "Transaction Saved!", Toast.LENGTH_SHORT).show();
+                                    if (listener != null) listener.onTransactionSaved();
+                                    if (staticListener != null) staticListener.onTransactionSaved();
+                                    finishWithUpdate();
+                                } else {
+                                    Toast.makeText(this, "Saving failed", Toast.LENGTH_SHORT).show();
+                                }
+                            })
+                            .setNegativeButton("No", null)
+                            .show();
+                    return;
+                }
+
+                ok = db.insertRecord(loggedInUser, expId, expenseAccId, "expense", amount, timestamp, note);
                 break;
 
             case TRANSFER:
                 int aFrom = db.getAccountIdByName(loggedInUser, fromAcc);
                 int aTo = db.getAccountIdByName(loggedInUser, categoryOrTarget);
+
+                if (aFrom == -1 || aTo == -1) {
+                    Toast.makeText(this, "Account not found", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                double fromBalance = db.getAccountBalance(aFrom, loggedInUser);
+
+                if (fromBalance < amount) {
+                    Toast.makeText(this, "Insufficient funds in " + fromAcc, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 ok = db.insertTransfer(loggedInUser, aFrom, aTo, amount, timestamp, note);
                 break;
 
@@ -242,7 +709,9 @@ public class calcu_add extends AppCompatActivity {
         }
 
         Toast.makeText(this, "Transaction Saved!", Toast.LENGTH_SHORT).show();
-        finish();
+        if (listener != null) listener.onTransactionSaved();
+        if (staticListener != null) staticListener.onTransactionSaved();
+        finishWithUpdate();
     }
 
     private boolean validate() {
@@ -253,13 +722,13 @@ public class calcu_add extends AppCompatActivity {
         String cat = ddCategory.getText().toString();
         String amount = tvResult.getText().toString();
 
-        if (acc.isEmpty()) {
+        if (acc.isEmpty() || acc.startsWith("➕")) {
             lyAccount.setError("Please select an account");
             return false;
         }
 
         if (currentType == TxType.TRANSFER) {
-            if (cat.isEmpty()) {
+            if (cat.isEmpty() || cat.startsWith("➕")) {
                 lyCategory.setError("Select target account");
                 return false;
             }
@@ -268,7 +737,7 @@ public class calcu_add extends AppCompatActivity {
                 return false;
             }
         } else {
-            if (cat.isEmpty()) {
+            if (cat.isEmpty() || cat.startsWith("➕")) {
                 lyCategory.setError("Please select category");
                 return false;
             }
@@ -382,7 +851,6 @@ public class calcu_add extends AppCompatActivity {
 
     private boolean isOp(char c) { return c=='+'||c=='-'||c=='*'||c=='/'; }
 
-    // Expression evaluator (same but formatted)
     public double evaluate(String exp) {
         char[] arr = exp.toCharArray();
         Stack<Double> vals = new Stack<>();
@@ -448,5 +916,10 @@ public class calcu_add extends AppCompatActivity {
             public void onTextChanged(CharSequence s,int a,int b,int c){ r.run(); }
             public void afterTextChanged(Editable s){}
         };
+    }
+
+    private void finishWithUpdate() {
+        setResult(RESULT_OK);
+        finish();
     }
 }

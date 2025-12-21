@@ -4,105 +4,141 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/gradient_background"
-    android:padding="8dp">
+    android:background="@color/background_primary"
+    android:padding="12dp">
 
-    <!-- Summary Row -->
-    <LinearLayout
-        android:id="@+id/summaryRow"
+    <!-- Summary Card with Elevation -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/summaryCard"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="4dp"
+        app:cardBackgroundColor="@color/surface"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:weightSum="3"
-        android:gravity="center"
-        android:padding="8dp">
+        android:layout_margin="4dp">
 
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:weightSum="3"
             android:gravity="center"
-            android:orientation="vertical">
+            android:padding="16dp">
 
-            <TextView
-                android:text="INCOME"
-                android:layout_width="wrap_content"
+            <!-- Income Section -->
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:textStyle="bold"
-                android:textSize="12sp" />
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/tvIncome"
-                android:layout_width="wrap_content"
+                <TextView
+                    android:text="INCOME"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:textSize="11sp"
+                    android:textColor="@color/textSecondary"
+                    android:letterSpacing="0.05" />
+
+                <TextView
+                    android:id="@+id/tvIncome"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="₱0.00"
+                    android:textColor="@color/incomeValue"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:layout_marginTop="4dp"/>
+            </LinearLayout>
+
+            <!-- Vertical Divider -->
+            <View
+                android:layout_width="1dp"
+                android:layout_height="40dp"
+                android:background="@color/divider"
+                android:layout_marginHorizontal="8dp"/>
+
+            <!-- Total Section -->
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="₱0.00"
-                android:textColor="@color/incomeValue"
-                android:textSize="16sp"
-                android:textStyle="bold"/>
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="TOTAL"
+                    android:textStyle="bold"
+                    android:textSize="11sp"
+                    android:textColor="@color/textSecondary"
+                    android:letterSpacing="0.05" />
+
+                <TextView
+                    android:id="@+id/tvTotal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="₱0.00"
+                    android:textColor="@color/primaryBlue"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:layout_marginTop="4dp"/>
+            </LinearLayout>
+
+            <!-- Vertical Divider -->
+            <View
+                android:layout_width="1dp"
+                android:layout_height="40dp"
+                android:background="@color/divider"
+                android:layout_marginHorizontal="8dp"/>
+
+            <!-- Expense Section -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="EXPENSE"
+                    android:textStyle="bold"
+                    android:textSize="11sp"
+                    android:textColor="@color/textSecondary"
+                    android:letterSpacing="0.05" />
+
+                <TextView
+                    android:id="@+id/tvExpense"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="₱0.00"
+                    android:textColor="@color/expenseRed"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:layout_marginTop="4dp"/>
+            </LinearLayout>
+
         </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="TOTAL"
-                android:textStyle="bold"
-                android:textSize="12sp" />
-
-            <TextView
-                android:id="@+id/tvTotal"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="₱0.00"
-                android:textColor="@color/primaryBlue"
-                android:textSize="16sp"
-                android:textStyle="bold"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="EXPENSE"
-                android:textStyle="bold"
-                android:textSize="12sp" />
-
-            <TextView
-                android:id="@+id/tvExpense"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="₱0.00"
-                android:textColor="@color/expenseRed"
-                android:textSize="16sp"
-                android:textStyle="bold"/>
-        </LinearLayout>
-
-    </LinearLayout>
-
-    <!-- Recycler -->
+    <!-- RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerRecords"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintTop_toBottomOf="@id/summaryRow"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:clipToPadding="false"
+        android:paddingTop="8dp"
         android:paddingBottom="100dp"
-        android:clipToPadding="false"/>
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/summaryCard" />
 </androidx.constraintlayout.widget.ConstraintLayout>

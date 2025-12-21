@@ -1,25 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Night colors -->
-    <color name="primary">#0288D1</color>
-    <color name="primaryVariant">#0277BD</color>
-    <color name="secondary">#26C6DA</color>
-    <color name="onPrimary">#121212</color>
+    <!-- ==================== PRIMARY COLORS (Lighter for dark mode) ==================== -->
+    <color name="primary">#5A7FC7</color>
+    <color name="primary_light">#6A8FD7</color>
+    <color name="primary_dark">#4A6FA5</color>
+    <color name="primary_variant">#4A6FA5</color>
+    <color name="primaryBlue">#5A7FC7</color>
 
-    <color name="surface">#121212</color>
-    <color name="onSurface">#E0E0E0</color>
+    <!-- ==================== SECONDARY COLORS (Lighter for dark mode) ==================== -->
+    <color name="secondary">#FFB366</color>
+    <color name="secondary_light">#FFC280</color>
+    <color name="secondary_dark">#FF9F45</color>
+    <color name="secondary_variant">#FFB366</color>
 
-    <color name="incomeValue">#81C784</color>
-    <color name="expenseValue">#EF9A9A</color>
-    <color name="navBackground">#121212</color>
-    <color name="cardBackground">#1E1E1E</color>
+    <!-- ==================== ACCENT COLORS ==================== -->
+    <color name="accent">#E6D7C3</color>
+    <color name="fifth">#FFB366</color>
 
-    <color name="textPrimary">#EAEFF1</color>
-    <color name="textSecondary">#90A4AE</color>
-    <color name="first">#EAEFF1</color>
-    <color name="fourth">#EAEFF1</color>
-    <color name="fifth">#004D40</color>
+    <!-- ==================== BACKGROUND COLORS (Dark) ==================== -->
+    <color name="background">#1E1E1E</color>
+    <color name="background_primary">#1E1E1E</color>
+    <color name="background_secondary">#2D2D2D</color>
+    <color name="surface">#2D2D2D</color>
+    <color name="card_background">#2D2D2D</color>
+    <color name="navBackground">#2D2D2D</color>
 
-    <color name="calcu_stroke">#37474F</color>
+    <!-- ==================== TEXT COLORS (Light for dark bg) ==================== -->
+    <color name="text_primary">#E5E5E5</color>
+    <color name="text_secondary">#B0B0B0</color>
+    <color name="text_on_primary">#FFFFFF</color>
+    <color name="text_on_secondary">#000000</color>
+    <color name="text_main">#E5E5E5</color>
+    <color name="textPrimary">#E5E5E5</color>
+    <color name="textSecondary">#B0B0B0</color>
+
+    <!-- ==================== INCOME/EXPENSE COLORS (Same) ==================== -->
+    <color name="incomeValue">#4CAF50</color>
+    <color name="expenseValue">#F44336</color>
+    <color name="expenseRed">#F44336</color>
+
+    <!-- ==================== UI ELEMENT COLORS ==================== -->
+    <color name="divider">#424242</color>
+    <color name="statusBar">#1E1E1E</color>
+    <color name="error">#F44336</color>
+
+    <!-- ==================== NEUMORPHIC COLORS (Dark) ==================== -->
+    <color name="neumorphic_shadow_dark">#000000</color>
+    <color name="neumorphic_highlight_light">#3A3A3A</color>
+    <color name="neumorphic_surface">#2D2D2D</color>
+
+    <!-- ==================== CALCULATOR COLORS ==================== -->
+    <color name="calcu_stroke">#424242</color>
+    <color name="calcu_button_bg">#3A3A3A</color>
+
+    <!-- ==================== GRAYS ==================== -->
+    <color name="grayLight">#6A6A6A</color>
+
+    <!-- ==================== BASIC COLORS ==================== -->
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
     <color name="transparent">#00000000</color>
 </resources>
